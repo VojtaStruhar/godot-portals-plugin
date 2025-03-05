@@ -1,0 +1,16 @@
+[gd_scene load_steps=4 format=3 uid="uid://0vmntyr615js"]
+
+[ext_resource type="Material" uid="uid://7to3kb1tisdd" path="res://assets/prototyping/M_prototype_orange.tres" id="1_6fk8e"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_8bheg"]
+material = ExtResource("1_6fk8e")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_p3b8s"]
+
+[node name="PropCube" type="MeshInstance3D"]
+mesh = SubResource("BoxMesh_8bheg")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("BoxShape3D_p3b8s")

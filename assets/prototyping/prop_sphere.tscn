@@ -1,0 +1,16 @@
+[gd_scene load_steps=4 format=3 uid="uid://dxvxy65pv5hoe"]
+
+[ext_resource type="Material" uid="uid://dyx4l6ea0am6f" path="res://assets/prototyping/M_prototype_green.tres" id="1_bpstc"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_xdm36"]
+material = ExtResource("1_bpstc")
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_lykri"]
+
+[node name="PropSphere" type="MeshInstance3D"]
+mesh = SubResource("SphereMesh_xdm36")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("SphereShape3D_lykri")

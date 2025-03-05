@@ -1,9 +1,23 @@
-[gd_scene load_steps=15 format=3 uid="uid://5vo86e4fice3"]
+[gd_scene load_steps=17 format=4 uid="uid://5vo86e4fice3"]
 
 [ext_resource type="Material" uid="uid://dgjiw8udooecr" path="res://assets/prototyping/M_prototype_dark.tres" id="1_uy66w"]
 [ext_resource type="Script" uid="uid://cw1r4c1d7beyv" path="res://addons/portals/scripts/portal_3d.gd" id="2_k2msj"]
 [ext_resource type="Script" uid="uid://d2crarvkhd45r" path="res://scripts/player.gd" id="3_lff3k"]
-[ext_resource type="Shader" uid="uid://bhdb2skdxehes" path="res://addons/portals/materials/portal_shader.gdshader" id="4_hllyk"]
+[ext_resource type="PackedScene" uid="uid://0vmntyr615js" path="res://assets/prototyping/prop_cube.tscn" id="4_8bheg"]
+[ext_resource type="PackedScene" uid="uid://dxvxy65pv5hoe" path="res://assets/prototyping/prop_sphere.tscn" id="5_p3b8s"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_lff3k"]
+sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
+ground_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
+
+[sub_resource type="Sky" id="Sky_hllyk"]
+sky_material = SubResource("ProceduralSkyMaterial_lff3k")
+
+[sub_resource type="Environment" id="Environment_8bheg"]
+background_mode = 2
+sky = SubResource("Sky_hllyk")
+tonemap_mode = 3
+glow_enabled = true
 
 [sub_resource type="BoxMesh" id="BoxMesh_k2msj"]
 size = Vector3(20, 1, 20)
@@ -18,31 +32,32 @@ height = 1.75
 radius = 0.4
 height = 1.75
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_hllyk"]
-viewport_path = NodePath("Portal_B/Portal_A_SubViewport")
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_8bheg"]
-render_priority = 0
-shader = ExtResource("4_hllyk")
-shader_parameter/albedo = SubResource("ViewportTexture_hllyk")
-
 [sub_resource type="PlaneMesh" id="PlaneMesh_p3b8s"]
 size = Vector2(2, 2.5)
 orientation = 2
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_8bheg"]
-viewport_path = NodePath("Portal_A/Portal_B_SubViewport")
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_lff3k"]
+data = PackedVector3Array(-1.25, -1.375, -0.125, -1.25, -1.375, 0.125, -1, -1.375, -0.125, 1, 1.125, 0.125, 1.25, 1.375, 0.125, 1, -1.375, 0.125, -1.25, -1.375, 0.125, -1.25, -1.375, -0.125, -1.25, 1.375, -0.125, -1, -1.375, -0.125, -1.25, -1.375, 0.125, -1, -1.375, 0.125, -1, -1.375, 0.125, -1.25, -1.375, 0.125, -1, 1.125, 0.125, -1, 1.125, -0.125, -1.25, 1.375, -0.125, -1, -1.375, -0.125, -1, 1.125, -0.125, 1.25, 1.375, -0.125, -1.25, 1.375, -0.125, -1.25, 1.375, -0.125, -1.25, 1.375, 0.125, -1.25, -1.375, 0.125, -1.25, 1.375, 0.125, -1, 1.125, 0.125, -1.25, -1.375, 0.125, -1.25, 1.375, -0.125, 1.25, 1.375, 0.125, -1.25, 1.375, 0.125, -1, 1.125, 0.125, -1.25, 1.375, 0.125, 1, 1.125, 0.125, 1.25, -1.375, -0.125, 1, -1.375, -0.125, 1.25, -1.375, 0.125, -1, -1.375, -0.125, -1.25, 1.375, -0.125, -1.25, -1.375, -0.125, 1, -1.375, -0.125, 1.25, -1.375, -0.125, 1, 1.125, -0.125, 1.25, -1.375, 0.125, 1, -1.375, -0.125, 1, -1.375, 0.125, 1.25, -1.375, 0.125, 1.25, 1.375, 0.125, 1.25, -1.375, -0.125, 1, -1.375, 0.125, 1.25, 1.375, 0.125, 1.25, -1.375, 0.125, 1, 1.125, -0.125, 1.25, 1.375, -0.125, -1, 1.125, -0.125, 1.25, 1.375, -0.125, 1.25, 1.375, 0.125, -1.25, 1.375, -0.125, 1.25, 1.375, -0.125, 1, 1.125, -0.125, 1.25, -1.375, -0.125, 1.25, 1.375, 0.125, 1.25, 1.375, -0.125, 1.25, -1.375, -0.125, 1, 1.125, 0.125, -1.25, 1.375, 0.125, 1.25, 1.375, 0.125, -1, 1.125, 0.125, -1, -1.375, -0.125, -1, -1.375, 0.125, -1, -1.375, -0.125, -1, 1.125, 0.125, -1, 1.125, -0.125, 1, 1.125, -0.125, 1, -1.375, 0.125, 1, -1.375, -0.125, 1, 1.125, 0.125, 1, 1.125, -0.125, -1, 1.125, -0.125, 1, -1.375, 0.125, 1, 1.125, -0.125, 1, 1.125, 0.125, -1, 1.125, -0.125, -1, 1.125, 0.125, 1, 1.125, 0.125)
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_hc4gn"]
-render_priority = 0
-shader = ExtResource("4_hllyk")
-shader_parameter/albedo = SubResource("ViewportTexture_8bheg")
+[sub_resource type="ArrayMesh" id="ArrayMesh_hllyk"]
+_surfaces = [{
+"aabb": AABB(-1.25, -1.375, -0.125, 2.5, 2.75, 0.25),
+"attribute_data": PackedByteArray("AACAPwAAAAAAAAAAAAAAAAAAgD/NzMw9zczMPYwuuj0AAAAAAAAAAM3MzD0AAIA/AACAPwAAgD8AAIA/AAAAAAAAAAAAAAAAAACAP83MzD0AAAAAAAAAAAAAAADNzMw9ZmZmPwAAgD8AAIA/AACAP2ZmZj+MLro9ZmZmPy+6aD8AAIA/AACAP2ZmZj8AAAAAZmZmPy+6aD8AAAAAAACAPwAAgD8AAIA/AAAAAAAAAAAAAAAAAACAPwAAgD8AAIA/AACAPwAAAABmZmY/jC66PQAAgD8AAIA/AACAPwAAgD8AAAAAAAAAAAAAAAAAAIA/ZmZmP4wuuj0AAIA/AAAAAM3MzD2MLro9AACAPwAAgD8AAIA/ZmZmPwAAAAAAAIA/ZmZmPwAAAAAAAIA/AACAPwAAgD8AAAAAzczMPQAAAAAAAAAAAAAAAM3MzD0vumg/AAAAAAAAgD8AAIA/ZmZmPwAAAABmZmY/AACAPwAAAAAAAAAAAAAAAAAAgD8AAIA/zczMPQAAgD8AAAAAAAAAAAAAAAAAAIA/zczMPS+6aD8AAAAAAACAP2ZmZj8vumg/AACAPwAAAAAAAAAAAAAAAAAAgD8AAIA/AAAAAAAAgD/NzMw9L7poPwAAAAAAAAAAAAAAAAAAAAAAAAAAAACAPwAAgD8AAIA/zczMPYwuuj0AAIA/AAAAAAAAAAAAAAAAAAAAAAAAID8AAIA/AADAPgAAgD8AACA/AACAPwAAwD4AAAAAAAAgPwAAAAAAAMA+AAAAAAAAID8AAIA/AADAPgAAgD8AACA/AADAPgAAAAAAACA/AAAAAAAAID8AAIA/AACAPwAAwD4AAAAAAAAgPwAAAAAAAMA+AAAgPwAAgD8AAMA+AACAPwAAwD4AAAAA"),
+"format": 34359738391,
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 84,
+"vertex_data": PackedByteArray("AACgvwAAsL8AAAC+AACgvwAAsL8AAAA+AACAvwAAsL8AAAC+AACAPwAAkD8AAAA+AACgPwAAsD8AAAA+AACAPwAAsL8AAAA+AACgvwAAsL8AAAA+AACgvwAAsL8AAAC+AACgvwAAsD8AAAC+AACAvwAAsL8AAAC+AACgvwAAsL8AAAA+AACAvwAAsL8AAAA+AACAvwAAsL8AAAA+AACgvwAAsL8AAAA+AACAvwAAkD8AAAA+AACAvwAAkD8AAAC+AACgvwAAsD8AAAC+AACAvwAAsL8AAAC+AACAvwAAkD8AAAC+AACgPwAAsD8AAAC+AACgvwAAsD8AAAC+AACgvwAAsD8AAAC+AACgvwAAsD8AAAA+AACgvwAAsL8AAAA+AACgvwAAsD8AAAA+AACAvwAAkD8AAAA+AACgvwAAsL8AAAA+AACgvwAAsD8AAAC+AACgPwAAsD8AAAA+AACgvwAAsD8AAAA+AACAvwAAkD8AAAA+AACgvwAAsD8AAAA+AACAPwAAkD8AAAA+AACgPwAAsL8AAAC+AACAPwAAsL8AAAC+AACgPwAAsL8AAAA+AACAvwAAsL8AAAC+AACgvwAAsD8AAAC+AACgvwAAsL8AAAC+AACAPwAAsL8AAAC+AACgPwAAsL8AAAC+AACAPwAAkD8AAAC+AACgPwAAsL8AAAA+AACAPwAAsL8AAAC+AACAPwAAsL8AAAA+AACgPwAAsL8AAAA+AACgPwAAsD8AAAA+AACgPwAAsL8AAAC+AACAPwAAsL8AAAA+AACgPwAAsD8AAAA+AACgPwAAsL8AAAA+AACAPwAAkD8AAAC+AACgPwAAsD8AAAC+AACAvwAAkD8AAAC+AACgPwAAsD8AAAC+AACgPwAAsD8AAAA+AACgvwAAsD8AAAC+AACgPwAAsD8AAAC+AACAPwAAkD8AAAC+AACgPwAAsL8AAAC+AACgPwAAsD8AAAA+AACgPwAAsD8AAAC+AACgPwAAsL8AAAC+AACAPwAAkD8AAAA+AACgvwAAsD8AAAA+AACgPwAAsD8AAAA+AACAvwAAkD8AAAA+AACAvwAAsL8AAAC+AACAvwAAsL8AAAA+AACAvwAAsL8AAAC+AACAvwAAkD8AAAA+AACAvwAAkD8AAAC+AACAPwAAkD8AAAC+AACAPwAAsL8AAAA+AACAPwAAsL8AAAC+AACAPwAAkD8AAAA+AACAPwAAkD8AAAC+AACAvwAAkD8AAAC+AACAPwAAsL8AAAA+AACAPwAAkD8AAAC+AACAPwAAkD8AAAA+AACAvwAAkD8AAAC+AACAvwAAkD8AAAA+AACAPwAAkD8AAAA+/38AAP//AAD/fwAA//8AAP9/AAD//wAA/3//fwAA/z//f/9/AAD/P/9//38AAP8/AAD/f/9//n8AAP9//3/+fwAA/3//f/5//38AAP//AAD/fwAA//8AAP9/AAD//wAA/3//fwAA/z//f/9/AAD/P/9//38AAP8//////wAA/z//////AAD/P/////8AAP8//////wAA/z//////AAD/P/////8AAP8/AAD/f/9//n8AAP9//3/+fwAA/3//f/5//3//fwAA/z//f/9/AAD/P/9//38AAP8//3//////AAD/f/////8AAP9//////wAA/3//fwAA/z//f/9/AAD/P/9//38AAP8//38AAP//AAD/fwAA//8AAP9/AAD//wAA/////wAA/z//////AAD/P/////8AAP8//////wAA/z//////AAD/P/////8AAP8//38AAP//AAD/fwAA//8AAP9/AAD//wAA////f/9//n////9//3/+f////3//f/5//3//fwAA/z//f/9/AAD/P/9//38AAP8//////wAA/z//////AAD/P/////8AAP8//3//////AAD/f/////8AAP9//////wAA/////wAA/z//////AAD/P/////8AAP8/////f/9//n////9//3/+f////3//f/5//3//fwAA/z//f/9/AAD/P/9//38AAP8/////f/9/AID///9//38AgP///3//fwCA////f/9/AID///9//38AgP///3//fwCAAAD/f/9/AIAAAP9//38AgAAA/3//fwCA/38AAP//////fwAA//////9/AAD/////AAD/f/9/AIAAAP9//38AgAAA/3//fwCA/38AAP//////fwAA//////9/AAD/////")
+}]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_8wh7v"]
 size = Vector2(2, 2.5)
 orientation = 2
 
 [node name="Level_Basics" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_8bheg")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
@@ -72,44 +87,60 @@ mesh = SubResource("CapsuleMesh_lff3k")
 [node name="PlayerCamera" type="Camera3D" parent="Player"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
 
-[node name="Portal_A" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal", "player_camera", "portal_mesh", "portal_camera", "portal_viewport")]
+[node name="Portal_A" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal", "player_camera", "portal_mesh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1.25, 0)
 script = ExtResource("2_k2msj")
 exit_portal = NodePath("../Portal_B")
 player_camera = NodePath("../Player/PlayerCamera")
 portal_mesh = NodePath("PortalMeshInstance")
-portal_camera = NodePath("../Portal_B/Portal_A_SubViewport/Portal_A_Camera3D")
-portal_viewport = NodePath("../Portal_B/Portal_A_SubViewport")
 metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
 
 [node name="PortalMeshInstance" type="MeshInstance3D" parent="Portal_A"]
-material_override = SubResource("ShaderMaterial_8bheg")
 mesh = SubResource("PlaneMesh_p3b8s")
 metadata/_edit_lock_ = true
 
-[node name="Portal_B_SubViewport" type="SubViewport" parent="Portal_A"]
-size = Vector2i(1920, 1080)
+[node name="PortalFrame" type="StaticBody3D" parent="Portal_A"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, -1.25, 0)
 
-[node name="Portal_B_Camera3D" type="Camera3D" parent="Portal_A/Portal_B_SubViewport"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1.25, 0)
+[node name="PortalFrameCollision" type="CollisionShape3D" parent="Portal_A/PortalFrame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.375, 0)
+visible = false
+shape = SubResource("ConcavePolygonShape3D_lff3k")
 
-[node name="Portal_B" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal", "player_camera", "portal_mesh", "portal_camera", "portal_viewport")]
+[node name="PortalFrameMesh" type="MeshInstance3D" parent="Portal_A/PortalFrame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.375, 0)
+material_override = ExtResource("1_uy66w")
+mesh = SubResource("ArrayMesh_hllyk")
+skeleton = NodePath("../../..")
+
+[node name="Portal_B" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal", "player_camera", "portal_mesh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 1.25, 0)
 script = ExtResource("2_k2msj")
 exit_portal = NodePath("../Portal_A")
 player_camera = NodePath("../Player/PlayerCamera")
 portal_mesh = NodePath("PortalMeshInstance")
-portal_camera = NodePath("../Portal_A/Portal_B_SubViewport/Portal_B_Camera3D")
-portal_viewport = NodePath("../Portal_A/Portal_B_SubViewport")
 metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
 
 [node name="PortalMeshInstance" type="MeshInstance3D" parent="Portal_B"]
-material_override = SubResource("ShaderMaterial_hc4gn")
 mesh = SubResource("PlaneMesh_8wh7v")
 metadata/_edit_lock_ = true
 
-[node name="Portal_A_SubViewport" type="SubViewport" parent="Portal_B"]
-size = Vector2i(1920, 1080)
+[node name="PortalFrame" type="StaticBody3D" parent="Portal_B"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, -1.25, 0)
 
-[node name="Portal_A_Camera3D" type="Camera3D" parent="Portal_B/Portal_A_SubViewport"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 1.25, 0)
+[node name="PortalFrameCollision" type="CollisionShape3D" parent="Portal_B/PortalFrame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.375, 0)
+visible = false
+shape = SubResource("ConcavePolygonShape3D_lff3k")
+
+[node name="PortalFrameMesh" type="MeshInstance3D" parent="Portal_B/PortalFrame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.375, 0)
+material_override = ExtResource("1_uy66w")
+mesh = SubResource("ArrayMesh_hllyk")
+skeleton = NodePath("../../..")
+
+[node name="PropCube" parent="." instance=ExtResource("4_8bheg")]
+transform = Transform3D(0.965926, 0, -0.258819, 0, 1, 0, 0.258819, 0, 0.965926, -3.5, 0.5, 2.5)
+
+[node name="PropSphere" parent="." instance=ExtResource("5_p3b8s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.75, 0.5, 3.25)
