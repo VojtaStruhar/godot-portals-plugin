@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://5vo86e4fice3"]
+[gd_scene load_steps=7 format=3 uid="uid://5vo86e4fice3"]
 
 [ext_resource type="Material" uid="uid://dgjiw8udooecr" path="res://assets/prototyping/M_prototype_dark.tres" id="1_uy66w"]
 [ext_resource type="Script" uid="uid://cw1r4c1d7beyv" path="res://addons/portals/scripts/portal_3d.gd" id="2_k2msj"]
@@ -10,6 +10,10 @@ size = Vector3(20, 1, 20)
 points = PackedVector3Array(-10, -0.5, -10, -10, 0.5, -10, 10, -0.5, -10, -10, -0.5, 10, -10, 0.5, 10, 10, 0.5, -10, 10, -0.5, 10, 10, 0.5, 10)
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_k2msj"]
+size = Vector2(2, 2.5)
+orientation = 2
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_lff3k"]
 size = Vector2(2, 2.5)
 orientation = 2
 
@@ -29,12 +33,40 @@ shape = SubResource("ConvexPolygonShape3D_uy66w")
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(0.986578, -0.0595752, 0.152034, 0, 0.931069, 0.364842, -0.16329, -0.359946, 0.918573, 1.36027, 2.64156, 5.54051)
 
-[node name="Portal3D" type="Node3D" parent="." node_paths=PackedStringArray("portal_mesh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 0)
+[node name="Portal_A" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal", "portal_mesh", "portal_camera", "portal_viewport")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1.25, 0)
 script = ExtResource("2_k2msj")
+exit_portal = NodePath("../Portal_B")
 portal_mesh = NodePath("PortalMeshInstance")
+portal_camera = NodePath("../Portal_B/Portal_A_SubViewport/Portal_A_Camera3D")
+portal_viewport = NodePath("../Portal_B/Portal_A_SubViewport")
 metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
 
-[node name="PortalMeshInstance" type="MeshInstance3D" parent="Portal3D"]
+[node name="PortalMeshInstance" type="MeshInstance3D" parent="Portal_A"]
 mesh = SubResource("PlaneMesh_k2msj")
 metadata/_edit_lock_ = true
+
+[node name="Portal_B_SubViewport" type="SubViewport" parent="Portal_A"]
+size = Vector2i(1920, 1080)
+
+[node name="Portal_B_Camera3D" type="Camera3D" parent="Portal_A/Portal_B_SubViewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1.25, 0)
+
+[node name="Portal_B" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal", "portal_mesh", "portal_camera", "portal_viewport")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1.25, 0)
+script = ExtResource("2_k2msj")
+exit_portal = NodePath("../Portal_A")
+portal_mesh = NodePath("PortalMeshInstance")
+portal_camera = NodePath("../Portal_A/Portal_B_SubViewport/Portal_B_Camera3D")
+portal_viewport = NodePath("../Portal_A/Portal_B_SubViewport")
+metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
+
+[node name="PortalMeshInstance" type="MeshInstance3D" parent="Portal_B"]
+mesh = SubResource("PlaneMesh_lff3k")
+metadata/_edit_lock_ = true
+
+[node name="Portal_A_SubViewport" type="SubViewport" parent="Portal_B"]
+size = Vector2i(1920, 1080)
+
+[node name="Portal_A_Camera3D" type="Camera3D" parent="Portal_B/Portal_A_SubViewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1.25, 0)

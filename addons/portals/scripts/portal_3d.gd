@@ -10,14 +10,25 @@ class_name Portal3D extends Node3D
 @export var portal_size: Vector2 = Vector2(2.0, 2.5):
 	set = _on_portal_size_changed
 
-@export var exit_portal: Portal3D
+@export var exit_portal: Portal3D:
+	set = _on_exit_portal_set
 
-@export_tool_button("Debug Button", "Popup")
+# TODO: Make this optional
+@export_tool_button("Pair Portals?", "MeshInstance2D")
+var _tb_pair_portals: Callable = func(): exit_portal.exit_portal = self
+
+
+
+@export_group("Internals")
+
+@export var portal_mesh: MeshInstance3D
+
+## Camera that looks through the exit portal. If exit portal is null, the camera doesn't exist either.
+@export var portal_camera: Camera3D
+@export 
+var portal_viewport: SubViewport
+@export_tool_button("Debug Button", "Popup") 
 var _tb_debug_action: Callable = _debug_action
-
-@export_group("Debug stuff")
-@export
-var portal_mesh: MeshInstance3D
 
 func _debug_action() -> void:
 	print("Number of children: " + str(get_child_count(true)))
@@ -37,10 +48,39 @@ func _editor_ready() -> void:
 		portal_mesh.owner = self.owner  # Owner should be the scene root.
 		self.lock_node(portal_mesh)
 
+
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	pass
 
+func _on_exit_portal_set(new_exit_portal: Portal3D) -> void:
+	if portal_camera:
+		print_debug("Freeing existing portal camera")
+		portal_camera.queue_free()
+		portal_camera = null
+	if portal_viewport:
+		print_debug("Freeing existing subviewport")
+		portal_viewport.queue_free()
+		portal_viewport = null
+	
+	exit_portal = new_exit_portal
+	
+	if exit_portal != null:
+		portal_viewport = SubViewport.new()
+		portal_viewport.name = self.name + "_SubViewport"
+		portal_viewport.size = Vector2(
+			ProjectSettings.get_setting("display/window/size/viewport_width"),
+			ProjectSettings.get_setting("display/window/size/viewport_height")
+		)
+		exit_portal.add_child(portal_viewport, true)
+		portal_viewport.owner = self.owner
+		
+		portal_camera = Camera3D.new()
+		portal_camera.name = self.name + "_Camera3D"
+		portal_viewport.add_child(portal_camera, true)
+		portal_camera.owner = self.owner
+		portal_camera.global_position = exit_portal.global_position
+		
 
 func _on_portal_size_changed(new_size: Vector2) -> void:
 	portal_size = new_size
