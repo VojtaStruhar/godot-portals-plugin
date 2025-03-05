@@ -1,12 +1,17 @@
-[gd_scene load_steps=4 format=3 uid="uid://5vo86e4fice3"]
+[gd_scene load_steps=6 format=3 uid="uid://5vo86e4fice3"]
 
 [ext_resource type="Material" uid="uid://dgjiw8udooecr" path="res://assets/prototyping/M_prototype_dark.tres" id="1_uy66w"]
+[ext_resource type="Script" uid="uid://cw1r4c1d7beyv" path="res://addons/portals/scripts/portal_3d.gd" id="2_k2msj"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_k2msj"]
 size = Vector3(20, 1, 20)
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_uy66w"]
 points = PackedVector3Array(-10, -0.5, -10, -10, 0.5, -10, 10, -0.5, -10, -10, -0.5, 10, -10, 0.5, 10, 10, 0.5, -10, 10, -0.5, 10, 10, 0.5, 10)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_k2msj"]
+size = Vector2(2, 2.5)
+orientation = 2
 
 [node name="Level_Basics" type="Node3D"]
 
@@ -20,3 +25,16 @@ visible = false
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ground/StaticBody3D"]
 shape = SubResource("ConvexPolygonShape3D_uy66w")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(0.986578, -0.0595752, 0.152034, 0, 0.931069, 0.364842, -0.16329, -0.359946, 0.918573, 1.36027, 2.64156, 5.54051)
+
+[node name="Portal3D" type="Node3D" parent="." node_paths=PackedStringArray("portal_mesh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 0)
+script = ExtResource("2_k2msj")
+portal_mesh = NodePath("PortalMeshInstance")
+metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
+
+[node name="PortalMeshInstance" type="MeshInstance3D" parent="Portal3D"]
+mesh = SubResource("PlaneMesh_k2msj")
+metadata/_edit_lock_ = true
