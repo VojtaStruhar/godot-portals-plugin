@@ -122,7 +122,6 @@ func _ready() -> void:
 	_setup_cameras()
 	
 	var mat: ShaderMaterial = ShaderMaterial.new()
-	print("Portal shader: ", PORTAL_SHADER)
 	mat.shader = PORTAL_SHADER
 	mat.set_shader_parameter("albedo", portal_viewport.get_texture())
 	portal_mesh.material_override = mat
@@ -139,31 +138,20 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
-
+	
+	# NOTE: Camera transformations
 	if portal_camera != null && player_camera != null && exit_portal != null:
-		var player_to_home = portal_mesh.global_transform.affine_inverse() * player_camera.global_transform
-		var flipped = player_to_home.rotated(Vector3.UP, PI)
-		var relative_to_target = exit_portal.portal_mesh.global_transform * flipped
-		
-		portal_camera.global_transform = relative_to_target
+		portal_camera.global_transform = self.to_exit_transform(player_camera.global_transform)
 		portal_camera.near = _calculate_near_plane()
 	
 	if is_teleport:
 		for body in watchlist_bodies.keys():
-			body = body as Node3D
 			var last_fw_angle: float = watchlist_bodies.get(body)
 			var current_fw_angle: float = forward_angle(body)
 			
 			if last_fw_angle < 0 and current_fw_angle >= 0:
-				print("Teleport %s" % body.name)
 				var teleportable: Node3D = body.get_node(body.get_meta("teleport_root"))
-				
-				# TODO: Refactor this
-				var player_to_home = portal_mesh.global_transform.affine_inverse() * teleportable.global_transform
-				var flipped = player_to_home.rotated(Vector3.UP, PI)
-				var relative_to_target = exit_portal.portal_mesh.global_transform * flipped
-				
-				teleportable.global_transform = relative_to_target
+				teleportable.global_transform = self.to_exit_transform(teleportable.global_transform)
 				
 			watchlist_bodies.set(body, current_fw_angle)
 
@@ -221,8 +209,6 @@ func _setup_cameras() -> void:
 		portal_camera.global_position = exit_portal.global_position
 
 
-
-
 func _on_teleport_area_entered(area: Area3D) -> void:
 	print("[%s] teleport_area_entered: %s" % [name, area.name])
 	# TODO
@@ -232,30 +218,45 @@ func _on_teleport_area_exited(area: Area3D) -> void:
 	# TODO
 
 func _on_teleport_body_entered(body: Node3D) -> void:
-	print("[%s] teleport_body_entered: %s" % [name, body.name])
 	if body.has_meta("teleport_root"):
 		watchlist_bodies.set(body, forward_angle(body))
 
 func _on_teleport_body_exited(body: Node3D) -> void:
-	print("[%s] teleport_body_exited: %s" % [name, body.name])
 	watchlist_bodies.erase(body)
 
 
 # ------------------- UTILS ---------------------------
 
+## [b]Crucial[/b] piece of a portal - transforming where objects should appear 
+## on the other side. Used for both cameras and teleports.
+func to_exit_transform(g_transform: Transform3D) -> Transform3D:
+	var relative_to_portal: Transform3D = portal_mesh.global_transform.affine_inverse() * g_transform
+	var flipped: Transform3D = relative_to_portal.rotated(Vector3.UP, PI)
+	var relative_to_target = exit_portal.portal_mesh.global_transform * flipped
+	return relative_to_target
+
+## Calculates the dot product of portal's forward vector with the global 
+## position of [param node]. Used for detecting teleports.
+## [br]
+## The result is negative when the node is in front of the portal.
 func forward_angle(node: Node3D) -> float:
 	var portal_front: Vector3 = -self.basis.z.normalized()
 	var node_relative: Vector3 = to_local(node.global_position)
 	return portal_front.dot(node_relative)
 
+## Helper function meant to be used in editor. Adds [param node] as a child to 
+## [param parent]. Forces a readable name and sets the child's owner to the same
+## as parent's.
 func add_child_in_editor(parent: Node, node: Node) -> void:
 	parent.add_child(node, true)
 	# self.owner should be the editor scene root. Just pass that
 	node.owner = self.owner
 
+## Editor helper function. Locks node in 3D editor view.
 static func lock_node(node: Node3D) -> void:
 	node.set_meta("_edit_lock_", true)
 
+## Fetches window size from [ProjectSettings].
 static func get_settings_window_size() -> Vector2:
 	return Vector2(
 		ProjectSettings.get_setting("display/window/size/viewport_width"),
