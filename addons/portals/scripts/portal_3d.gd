@@ -16,19 +16,35 @@ class_name Portal3D extends Node3D
 @export var exit_portal: Portal3D
 
 # TODO: Make this optional, only display when the other's portal exit_portal is null.
-@export_tool_button("Pair Portals?", "MeshInstance2D")
-var _tb_pair_portals: Callable = func(): exit_portal.exit_portal = self
+@export_tool_button("Pair Portals?", "SliderJoint3D")
+var _tb_pair_portals: Callable = _editor_pair_portals
 
 @export var player_camera: Camera3D
 
+@export var is_teleport: bool = false:
+	set(v):
+		is_teleport = v
+		if Engine.is_editor_hint(): _editor_setup_teleport()
+
+@export_flags_3d_physics var teleport_collision_mask: int = 0
+
+
+## These thing don't need to be exported. I just want to see them in editor.
 @export_group("Internals")
 
 @export var portal_mesh: MeshInstance3D
+@export var teleport_area: Area3D
+@export var teleport_collision: CollisionShape3D
 
 ## Camera that looks through the exit portal. If exit portal is null, the camera doesn't exist either.
 @export var portal_camera: Camera3D
-@export 
-var portal_viewport: SubViewport
+@export var portal_viewport: SubViewport
+
+## These physics bodies are being watched by the portal. The value in dictionary
+## is their dot product from last frame. As soon as the dot product changes signs,
+## the body crossed the portal and should be teleported.
+var watchlist_bodies: Dictionary[Node3D, float] = {}
+
 @export_tool_button("Debug Button", "Popup") 
 var _tb_debug_action: Callable = _debug_action
 
@@ -42,20 +58,45 @@ const PORTAL_SHADER = preload("uid://bhdb2skdxehes")
 
 ## _ready(), but only in editor.
 func _editor_ready() -> void:
-	print(name + ": _editor_ready")
 	if portal_mesh == null:
 		portal_mesh = MeshInstance3D.new()
 		portal_mesh.name = "PortalMeshInstance"
+		portal_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		var p = PlaneMesh.new()
 		p.orientation = PlaneMesh.FACE_Z
 		p.size = portal_size
 		portal_mesh.mesh = p
 		
-		add_child(portal_mesh, true)
-		portal_mesh.owner = self.owner  # Owner should be the scene root.
-		
+		add_child_in_editor(self, portal_mesh)
 		self.lock_node(portal_mesh)
 
+func _editor_pair_portals():
+	if exit_portal == null:
+		push_error("[%s] _editor_pair_portals called, but 'exit_portal' is null" % name)
+		return
+	
+	exit_portal.exit_portal = self
+
+func _editor_setup_teleport():
+	print("[%s] _editor_setup_teleport" % name)
+	if is_teleport == false:
+		teleport_area.queue_free()
+		teleport_area = null
+		teleport_collision = null
+		return
+	
+	teleport_area = Area3D.new()
+	add_child_in_editor(self, teleport_area)
+	
+	teleport_collision = CollisionShape3D.new()
+	var box = BoxShape3D.new()
+	box.size.x = portal_size.x
+	box.size.y = portal_size.y
+	teleport_collision.shape = box
+	
+	add_child_in_editor(teleport_area, teleport_collision)
+	
+	
 
 func _on_portal_size_changed(new_size: Vector2) -> void:
 	portal_size = new_size
@@ -85,7 +126,15 @@ func _ready() -> void:
 	mat.shader = PORTAL_SHADER
 	mat.set_shader_parameter("albedo", portal_viewport.get_texture())
 	portal_mesh.material_override = mat
-
+	
+	# Configure teleport for action
+	if is_teleport:
+		assert(teleport_area)
+		teleport_area.area_entered.connect(self._on_teleport_area_entered)
+		teleport_area.area_exited.connect(self._on_teleport_area_exited)
+		teleport_area.body_entered.connect(self._on_teleport_body_entered)
+		teleport_area.body_exited.connect(self._on_teleport_body_exited)
+		teleport_area.collision_mask = teleport_collision_mask
 
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint():
@@ -98,7 +147,25 @@ func _process(delta: float) -> void:
 		
 		portal_camera.global_transform = relative_to_target
 		portal_camera.near = _calculate_near_plane()
-
+	
+	if is_teleport:
+		for body in watchlist_bodies.keys():
+			body = body as Node3D
+			var last_fw_angle: float = watchlist_bodies.get(body)
+			var current_fw_angle: float = forward_angle(body)
+			
+			if last_fw_angle < 0 and current_fw_angle >= 0:
+				print("Teleport %s" % body.name)
+				var teleportable: Node3D = body.get_node(body.get_meta("teleport_root"))
+				
+				# TODO: Refactor this
+				var player_to_home = portal_mesh.global_transform.affine_inverse() * teleportable.global_transform
+				var flipped = player_to_home.rotated(Vector3.UP, PI)
+				var relative_to_target = exit_portal.portal_mesh.global_transform * flipped
+				
+				teleportable.global_transform = relative_to_target
+				
+			watchlist_bodies.set(body, current_fw_angle)
 
 func _calculate_near_plane() -> float:
 	var _mesh_aabb: AABB = exit_portal.portal_mesh.get_aabb()
@@ -137,12 +204,8 @@ func _setup_cameras() -> void:
 	if exit_portal != null:
 		portal_viewport = SubViewport.new()
 		portal_viewport.name = self.name + "_SubViewport"
-		portal_viewport.size = Vector2(
-			ProjectSettings.get_setting("display/window/size/viewport_width"),
-			ProjectSettings.get_setting("display/window/size/viewport_height")
-		)
+		portal_viewport.size = self.get_settings_window_size()
 		exit_portal.add_child(portal_viewport, true)
-		portal_viewport.owner = self.owner
 		
 		# Disable tonemapping on portal cameras
 		var adjusted_env: Environment = player_camera.environment.duplicate() \
@@ -155,11 +218,46 @@ func _setup_cameras() -> void:
 		portal_camera.name = self.name + "_Camera3D"
 		portal_camera.environment = adjusted_env
 		portal_viewport.add_child(portal_camera, true)
-		portal_camera.owner = self.owner
 		portal_camera.global_position = exit_portal.global_position
-		
+
+
+
+
+func _on_teleport_area_entered(area: Area3D) -> void:
+	print("[%s] teleport_area_entered: %s" % [name, area.name])
+	# TODO
+
+func _on_teleport_area_exited(area: Area3D) -> void:
+	print("[%s] teleport_area_exited: %s" % [name, area.name])
+	# TODO
+
+func _on_teleport_body_entered(body: Node3D) -> void:
+	print("[%s] teleport_body_entered: %s" % [name, body.name])
+	if body.has_meta("teleport_root"):
+		watchlist_bodies.set(body, forward_angle(body))
+
+func _on_teleport_body_exited(body: Node3D) -> void:
+	print("[%s] teleport_body_exited: %s" % [name, body.name])
+	watchlist_bodies.erase(body)
+
 
 # ------------------- UTILS ---------------------------
 
+func forward_angle(node: Node3D) -> float:
+	var portal_front: Vector3 = -self.basis.z.normalized()
+	var node_relative: Vector3 = to_local(node.global_position)
+	return portal_front.dot(node_relative)
+
+func add_child_in_editor(parent: Node, node: Node) -> void:
+	parent.add_child(node, true)
+	# self.owner should be the editor scene root. Just pass that
+	node.owner = self.owner
+
 static func lock_node(node: Node3D) -> void:
 	node.set_meta("_edit_lock_", true)
+
+static func get_settings_window_size() -> Vector2:
+	return Vector2(
+		ProjectSettings.get_setting("display/window/size/viewport_width"),
+		ProjectSettings.get_setting("display/window/size/viewport_height")
+	)

@@ -24,3 +24,8 @@ window/size/viewport_height=1080
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/portals/plugin.cfg")
+
+[layer_names]
+
+3d_physics/layer_1="World"
+3d_physics/layer_8="Teleports"
