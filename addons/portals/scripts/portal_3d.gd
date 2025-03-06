@@ -24,7 +24,7 @@ var _tb_pair_portals: Callable = _editor_pair_portals
 @export var is_teleport: bool = false:
 	set(v):
 		is_teleport = v
-		if Engine.is_editor_hint() and is_node_ready(): _editor_setup_teleport()
+		if caused_by_user_interaction(): _editor_setup_teleport()
 
 @export_flags_3d_physics var teleport_collision_mask: int = 0
 
@@ -257,10 +257,19 @@ func add_child_in_editor(parent: Node, node: Node) -> void:
 	# self.owner should be the editor scene root. Just pass that
 	node.owner = self.owner
 
+## Used to conditionally run property setters.
+## [br]
+## Setters fire both on editor set and when the scene starts up (the engine is
+## assigning exported members). This should prevent the second case.
+func caused_by_user_interaction() -> bool:
+	return Engine.is_editor_hint() and is_node_ready()
+
 ## Editor helper function. Locks node in 3D editor view.
 static func lock_node(node: Node3D) -> void:
 	node.set_meta("_edit_lock_", true)
 
+
+## Editor helper function. Groups nodes in 3D editor view.
 static func group_node(node: Node) -> void:
 	node.set_meta("_edit_group_", true)
 
