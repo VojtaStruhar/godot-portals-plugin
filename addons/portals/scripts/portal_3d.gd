@@ -156,11 +156,8 @@ func _process(delta: float) -> void:
 			var current_fw_angle: float = forward_angle(body)
 			
 			if last_fw_angle > 0 and current_fw_angle <= 0:
-				print("Teleport: %f -> %f" % [last_fw_angle, current_fw_angle])
 				var teleportable: Node3D = body.get_node(body.get_meta("teleport_root"))
 				teleportable.global_transform = self.to_exit_transform(teleportable.global_transform)
-			else:
-				print("Watch... %f -> %f" % [last_fw_angle, current_fw_angle])
 				
 			watchlist_bodies.set(body, current_fw_angle)
 
@@ -228,13 +225,10 @@ func _on_teleport_area_exited(area: Area3D) -> void:
 	# TODO
 
 func _on_teleport_body_entered(body: Node3D) -> void:
-	print("[%s] Enter: %s" % [name, body.name])
 	if body.has_meta("teleport_root"):
-		print("Watching!")
 		watchlist_bodies.set(body, forward_angle(body))
 
 func _on_teleport_body_exited(body: Node3D) -> void:
-	print("[%s] Exit: %s" % [name, body.name])
 	watchlist_bodies.erase(body)
 
 
