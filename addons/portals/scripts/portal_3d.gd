@@ -52,7 +52,9 @@ var _tb_debug_action: Callable = _debug_action
 
 func _debug_action() -> void:
 	print("Number of children: " + str(get_child_count(true)))
-	print("Node metadata: ", get_meta_list())
+	print("Node metadata: ")
+	for meta in get_meta_list():
+		print("  - " + meta + ": " + str(get_meta(meta)))
 	
 
 # ------------ IN-EDITOR CONFIGURATION STUFF --------------
@@ -151,15 +153,21 @@ func _process(delta: float) -> void:
 		portal_camera.near = _calculate_near_plane()
 	
 	if is_teleport:
-		for body in watchlist_bodies.keys():
-			var last_fw_angle: float = watchlist_bodies.get(body)
-			var current_fw_angle: float = forward_angle(body)
+		_process_teleports()
+
+func _process_teleports() -> void:
+	for body in watchlist_bodies.keys():
+		body = body as Node3D
+		var last_fw_angle: float = watchlist_bodies.get(body)
+		var current_fw_angle: float = forward_angle(body)
+		
+		if last_fw_angle > 0 and current_fw_angle <= 0:
+			# NOTE: BODIES don't have to specify teleport_root, they are usually the roots. 
+			var teleportable_path = body.get_meta("teleport_root", ".")
+			var teleportable: Node3D = body.get_node(teleportable_path)
+			teleportable.global_transform = self.to_exit_transform(teleportable.global_transform)
 			
-			if last_fw_angle > 0 and current_fw_angle <= 0:
-				var teleportable: Node3D = body.get_node(body.get_meta("teleport_root"))
-				teleportable.global_transform = self.to_exit_transform(teleportable.global_transform)
-				
-			watchlist_bodies.set(body, current_fw_angle)
+		watchlist_bodies.set(body, current_fw_angle)
 
 func _calculate_near_plane() -> float:
 	var _mesh_aabb: AABB = exit_portal.portal_mesh.get_aabb()
@@ -225,8 +233,8 @@ func _on_teleport_area_exited(area: Area3D) -> void:
 	# TODO
 
 func _on_teleport_body_entered(body: Node3D) -> void:
-	if body.has_meta("teleport_root"):
-		watchlist_bodies.set(body, forward_angle(body))
+	#if body.has_meta("teleport_root"):
+	watchlist_bodies.set(body, forward_angle(body))
 
 func _on_teleport_body_exited(body: Node3D) -> void:
 	watchlist_bodies.erase(body)
