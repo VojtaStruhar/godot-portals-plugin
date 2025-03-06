@@ -8,7 +8,9 @@ class_name Portal3D extends Node3D
 ## provides API to interact with the portal system.
 
 @export var portal_size: Vector2 = Vector2(2.0, 2.5):
-	set = _on_portal_size_changed
+	set(v):
+		portal_size = v
+		if caused_by_user_interaction(): _on_portal_size_changed()
 
 ## The width of the frame portal. Adjusts the near clip distance of the camera looking through THIS portal.
 @export var portal_frame_width: float = 0.4
@@ -101,14 +103,13 @@ func _editor_setup_teleport():
 	
 	
 
-func _on_portal_size_changed(new_size: Vector2) -> void:
-	portal_size = new_size
+func _on_portal_size_changed() -> void:
 	if portal_mesh == null:
-		push_error("Portal should never be null. Setting size to '" + str(new_size) + "' failed.")
+		push_error("Portal should never be null. Setting size to '" + str(portal_size) + "' failed.")
 		return
 	
 	var p = portal_mesh.mesh as PlaneMesh
-	p.size = new_size
+	p.size = portal_size
 
 # ------------- GAMEPLAY RUNTIME STUFF ----------------
 
@@ -117,10 +118,11 @@ func _ready() -> void:
 		_editor_ready.call_deferred()
 		return
 	
-	if player_camera:
+	if player_camera == null:
 		# FIXME: This WILL fail if the root does a SubViewportContainer thing. Maybe.
 		# It's probably best to assign this manually.
 		player_camera = get_viewport().get_camera_3d()
+		assert(player_camera != null, "Player camera is missing!")
 	
 	_setup_cameras()
 	
@@ -153,9 +155,12 @@ func _process(delta: float) -> void:
 			var last_fw_angle: float = watchlist_bodies.get(body)
 			var current_fw_angle: float = forward_angle(body)
 			
-			if last_fw_angle < 0 and current_fw_angle >= 0:
+			if last_fw_angle > 0 and current_fw_angle <= 0:
+				print("Teleport: %f -> %f" % [last_fw_angle, current_fw_angle])
 				var teleportable: Node3D = body.get_node(body.get_meta("teleport_root"))
 				teleportable.global_transform = self.to_exit_transform(teleportable.global_transform)
+			else:
+				print("Watch... %f -> %f" % [last_fw_angle, current_fw_angle])
 				
 			watchlist_bodies.set(body, current_fw_angle)
 
@@ -223,10 +228,13 @@ func _on_teleport_area_exited(area: Area3D) -> void:
 	# TODO
 
 func _on_teleport_body_entered(body: Node3D) -> void:
+	print("[%s] Enter: %s" % [name, body.name])
 	if body.has_meta("teleport_root"):
+		print("Watching!")
 		watchlist_bodies.set(body, forward_angle(body))
 
 func _on_teleport_body_exited(body: Node3D) -> void:
+	print("[%s] Exit: %s" % [name, body.name])
 	watchlist_bodies.erase(body)
 
 
@@ -245,8 +253,8 @@ func to_exit_transform(g_transform: Transform3D) -> Transform3D:
 ## [br]
 ## The result is negative when the node is in front of the portal.
 func forward_angle(node: Node3D) -> float:
-	var portal_front: Vector3 = -self.basis.z.normalized()
-	var node_relative: Vector3 = to_local(node.global_position)
+	var portal_front: Vector3 = self.global_transform.basis.z.normalized()
+	var node_relative: Vector3 = (node.global_transform.origin - global_transform.origin).normalized()
 	return portal_front.dot(node_relative)
 
 ## Helper function meant to be used in editor. Adds [param node] as a child to 
