@@ -1,7 +1,7 @@
 extends CharacterBody3D
 
 
-@onready var camera: Camera3D = $PlayerCamera
+@onready var camera: Camera3D = $Freecam3D
 
 const SPEED = 5.0
 const JUMP_VELOCITY = 4.5
