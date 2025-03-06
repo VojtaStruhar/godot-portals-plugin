@@ -50,14 +50,14 @@ _surfaces = [{
 "vertex_data": PackedByteArray("AACgvwAAsL8AAAC+AACgvwAAsL8AAAA+AACAvwAAsL8AAAC+AACAPwAAkD8AAAA+AACgPwAAsD8AAAA+AACAPwAAsL8AAAA+AACgvwAAsL8AAAA+AACgvwAAsL8AAAC+AACgvwAAsD8AAAC+AACAvwAAsL8AAAC+AACgvwAAsL8AAAA+AACAvwAAsL8AAAA+AACAvwAAsL8AAAA+AACgvwAAsL8AAAA+AACAvwAAkD8AAAA+AACAvwAAkD8AAAC+AACgvwAAsD8AAAC+AACAvwAAsL8AAAC+AACAvwAAkD8AAAC+AACgPwAAsD8AAAC+AACgvwAAsD8AAAC+AACgvwAAsD8AAAC+AACgvwAAsD8AAAA+AACgvwAAsL8AAAA+AACgvwAAsD8AAAA+AACAvwAAkD8AAAA+AACgvwAAsL8AAAA+AACgvwAAsD8AAAC+AACgPwAAsD8AAAA+AACgvwAAsD8AAAA+AACAvwAAkD8AAAA+AACgvwAAsD8AAAA+AACAPwAAkD8AAAA+AACgPwAAsL8AAAC+AACAPwAAsL8AAAC+AACgPwAAsL8AAAA+AACAvwAAsL8AAAC+AACgvwAAsD8AAAC+AACgvwAAsL8AAAC+AACAPwAAsL8AAAC+AACgPwAAsL8AAAC+AACAPwAAkD8AAAC+AACgPwAAsL8AAAA+AACAPwAAsL8AAAC+AACAPwAAsL8AAAA+AACgPwAAsL8AAAA+AACgPwAAsD8AAAA+AACgPwAAsL8AAAC+AACAPwAAsL8AAAA+AACgPwAAsD8AAAA+AACgPwAAsL8AAAA+AACAPwAAkD8AAAC+AACgPwAAsD8AAAC+AACAvwAAkD8AAAC+AACgPwAAsD8AAAC+AACgPwAAsD8AAAA+AACgvwAAsD8AAAC+AACgPwAAsD8AAAC+AACAPwAAkD8AAAC+AACgPwAAsL8AAAC+AACgPwAAsD8AAAA+AACgPwAAsD8AAAC+AACgPwAAsL8AAAC+AACAPwAAkD8AAAA+AACgvwAAsD8AAAA+AACgPwAAsD8AAAA+AACAvwAAkD8AAAA+AACAvwAAsL8AAAC+AACAvwAAsL8AAAA+AACAvwAAsL8AAAC+AACAvwAAkD8AAAA+AACAvwAAkD8AAAC+AACAPwAAkD8AAAC+AACAPwAAsL8AAAA+AACAPwAAsL8AAAC+AACAPwAAkD8AAAA+AACAPwAAkD8AAAC+AACAvwAAkD8AAAC+AACAPwAAsL8AAAA+AACAPwAAkD8AAAC+AACAPwAAkD8AAAA+AACAvwAAkD8AAAC+AACAvwAAkD8AAAA+AACAPwAAkD8AAAA+/38AAP//AAD/fwAA//8AAP9/AAD//wAA/3//fwAA/z//f/9/AAD/P/9//38AAP8/AAD/f/9//n8AAP9//3/+fwAA/3//f/5//38AAP//AAD/fwAA//8AAP9/AAD//wAA/3//fwAA/z//f/9/AAD/P/9//38AAP8//////wAA/z//////AAD/P/////8AAP8//////wAA/z//////AAD/P/////8AAP8/AAD/f/9//n8AAP9//3/+fwAA/3//f/5//3//fwAA/z//f/9/AAD/P/9//38AAP8//3//////AAD/f/////8AAP9//////wAA/3//fwAA/z//f/9/AAD/P/9//38AAP8//38AAP//AAD/fwAA//8AAP9/AAD//wAA/////wAA/z//////AAD/P/////8AAP8//////wAA/z//////AAD/P/////8AAP8//38AAP//AAD/fwAA//8AAP9/AAD//wAA////f/9//n////9//3/+f////3//f/5//3//fwAA/z//f/9/AAD/P/9//38AAP8//////wAA/z//////AAD/P/////8AAP8//3//////AAD/f/////8AAP9//////wAA/////wAA/z//////AAD/P/////8AAP8/////f/9//n////9//3/+f////3//f/5//3//fwAA/z//f/9/AAD/P/9//38AAP8/////f/9/AID///9//38AgP///3//fwCA////f/9/AID///9//38AgP///3//fwCAAAD/f/9/AIAAAP9//38AgAAA/3//fwCA/38AAP//////fwAA//////9/AAD/////AAD/f/9/AIAAAP9//38AgAAA/3//fwCA/38AAP//////fwAA//////9/AAD/////")
 }]
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_p3b8s"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_8bheg"]
 size = Vector3(2, 2.5, 1)
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_8wh7v"]
 size = Vector2(2, 2.5)
 orientation = 2
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_8bheg"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_p3b8s"]
 size = Vector3(2, 2.5, 1)
 
 [node name="Level_Basics" type="Node3D"]
@@ -103,17 +103,16 @@ player_camera = NodePath("../Player/PlayerCamera")
 is_teleport = true
 teleport_collision_mask = 128
 portal_mesh = NodePath("PortalMeshInstance")
-teleport_area = NodePath("Area3D")
-teleport_collision = NodePath("Area3D/CollisionShape3D")
+teleport_area = NodePath("TeleportArea")
+teleport_collision = NodePath("TeleportArea/CollisionShape3D")
 metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
+metadata/_edit_group_ = true
 
 [node name="PortalMeshInstance" type="MeshInstance3D" parent="Portal_A"]
 mesh = SubResource("PlaneMesh_p3b8s")
-metadata/_edit_lock_ = true
 
 [node name="PortalFrame" type="StaticBody3D" parent="Portal_A"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.25, 0)
-metadata/_edit_group_ = true
 
 [node name="PortalFrameCollision" type="CollisionShape3D" parent="Portal_A/PortalFrame"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.375, 0)
@@ -126,10 +125,10 @@ material_override = ExtResource("1_uy66w")
 mesh = SubResource("ArrayMesh_hllyk")
 skeleton = NodePath("../../..")
 
-[node name="Area3D" type="Area3D" parent="Portal_A"]
+[node name="TeleportArea" type="Area3D" parent="Portal_A"]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Portal_A/Area3D"]
-shape = SubResource("BoxShape3D_p3b8s")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Portal_A/TeleportArea"]
+shape = SubResource("BoxShape3D_8bheg")
 
 [node name="Portal_B" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal", "player_camera", "portal_mesh", "teleport_area", "teleport_collision")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 1.25, 0)
@@ -139,17 +138,16 @@ player_camera = NodePath("../Player/PlayerCamera")
 is_teleport = true
 teleport_collision_mask = 128
 portal_mesh = NodePath("PortalMeshInstance")
-teleport_area = NodePath("Area3D")
-teleport_collision = NodePath("Area3D/CollisionShape3D")
+teleport_area = NodePath("TeleportArea")
+teleport_collision = NodePath("TeleportArea/CollisionShape3D")
 metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
+metadata/_edit_group_ = true
 
 [node name="PortalMeshInstance" type="MeshInstance3D" parent="Portal_B"]
 mesh = SubResource("PlaneMesh_8wh7v")
-metadata/_edit_lock_ = true
 
 [node name="PortalFrame" type="StaticBody3D" parent="Portal_B"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.25, 0)
-metadata/_edit_group_ = true
 
 [node name="PortalFrameCollision" type="CollisionShape3D" parent="Portal_B/PortalFrame"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.375, 0)
@@ -162,10 +160,10 @@ material_override = ExtResource("1_uy66w")
 mesh = SubResource("ArrayMesh_hllyk")
 skeleton = NodePath("../../..")
 
-[node name="Area3D" type="Area3D" parent="Portal_B"]
+[node name="TeleportArea" type="Area3D" parent="Portal_B"]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Portal_B/Area3D"]
-shape = SubResource("BoxShape3D_8bheg")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Portal_B/TeleportArea"]
+shape = SubResource("BoxShape3D_p3b8s")
 
 [node name="PropCube" parent="." instance=ExtResource("4_8bheg")]
 transform = Transform3D(0.965926, 0, -0.258819, 0, 1, 0, 0.258819, 0, 0.965926, -3.5, 0.5, 2.5)

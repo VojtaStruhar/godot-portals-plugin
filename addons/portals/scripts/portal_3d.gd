@@ -24,7 +24,7 @@ var _tb_pair_portals: Callable = _editor_pair_portals
 @export var is_teleport: bool = false:
 	set(v):
 		is_teleport = v
-		if Engine.is_editor_hint(): _editor_setup_teleport()
+		if Engine.is_editor_hint() and is_node_ready(): _editor_setup_teleport()
 
 @export_flags_3d_physics var teleport_collision_mask: int = 0
 
@@ -50,6 +50,7 @@ var _tb_debug_action: Callable = _debug_action
 
 func _debug_action() -> void:
 	print("Number of children: " + str(get_child_count(true)))
+	print("Node metadata: ", get_meta_list())
 	
 
 # ------------ IN-EDITOR CONFIGURATION STUFF --------------
@@ -68,7 +69,8 @@ func _editor_ready() -> void:
 		portal_mesh.mesh = p
 		
 		add_child_in_editor(self, portal_mesh)
-		self.lock_node(portal_mesh)
+	
+	self.group_node(self)
 
 func _editor_pair_portals():
 	if exit_portal == null:
@@ -86,6 +88,7 @@ func _editor_setup_teleport():
 		return
 	
 	teleport_area = Area3D.new()
+	teleport_area.name = "TeleportArea"
 	add_child_in_editor(self, teleport_area)
 	
 	teleport_collision = CollisionShape3D.new()
@@ -121,6 +124,7 @@ func _ready() -> void:
 	
 	_setup_cameras()
 	
+	assert(portal_viewport != null, "[%s] Portal should have a viewport!" % name)
 	var mat: ShaderMaterial = ShaderMaterial.new()
 	mat.shader = PORTAL_SHADER
 	mat.set_shader_parameter("albedo", portal_viewport.get_texture())
@@ -207,7 +211,8 @@ func _setup_cameras() -> void:
 		portal_camera.environment = adjusted_env
 		portal_viewport.add_child(portal_camera, true)
 		portal_camera.global_position = exit_portal.global_position
-
+	else:
+		push_warning("[%s] No exit_portal!" % name)
 
 func _on_teleport_area_entered(area: Area3D) -> void:
 	print("[%s] teleport_area_entered: %s" % [name, area.name])
@@ -255,6 +260,9 @@ func add_child_in_editor(parent: Node, node: Node) -> void:
 ## Editor helper function. Locks node in 3D editor view.
 static func lock_node(node: Node3D) -> void:
 	node.set_meta("_edit_lock_", true)
+
+static func group_node(node: Node) -> void:
+	node.set_meta("_edit_group_", true)
 
 ## Fetches window size from [ProjectSettings].
 static func get_settings_window_size() -> Vector2:
