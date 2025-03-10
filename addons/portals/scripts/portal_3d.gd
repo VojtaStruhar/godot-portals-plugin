@@ -37,6 +37,10 @@ var _tb_pair_portals: Callable = _editor_pair_portals
 		is_teleport = v
 		if caused_by_user_interaction(): _editor_setup_teleport()
 
+## If the player is going towards the portal, they will be teleported when this
+## far from the plane.
+@export_range(0, 1, 0.01) var teleport_tolerance: float = 0.2
+
 @export_flags_3d_physics var teleport_collision_mask: int = 0
 
 
@@ -175,7 +179,10 @@ func _process_teleports() -> void:
 		var last_fw_angle: float = watchlist_bodies.get(body)
 		var current_fw_angle: float = forward_angle(body)
 		
-		if last_fw_angle > 0 and current_fw_angle <= 0:
+		var going_towards_portal: bool = (current_fw_angle - last_fw_angle) < 0
+		
+		if going_towards_portal and abs(current_fw_angle) < teleport_tolerance:
+			print("--- TELEPORT ---")
 			# NOTE: BODIES don't have to specify teleport_root, they are usually the roots. 
 			var teleportable_path = body.get_meta("teleport_root", ".")
 			var teleportable: Node3D = body.get_node(teleportable_path)
