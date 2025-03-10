@@ -76,9 +76,11 @@ func _editor_ready() -> void:
 		portal_mesh = MeshInstance3D.new()
 		portal_mesh.name = self.name + "_Mesh"
 		portal_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		var p = PlaneMesh.new()
-		p.orientation = PlaneMesh.FACE_Z
-		p.size = portal_size
+		portal_mesh.layers = portal_render_layer
+		
+		var p := BoxMesh.new()
+		p.size = Vector3(portal_size.x, portal_size.y, 0.1)
+		
 		portal_mesh.mesh = p
 		
 		var mat: ShaderMaterial = ShaderMaterial.new()
@@ -122,8 +124,8 @@ func _on_portal_size_changed() -> void:
 		push_error("Portal should never be null. Setting size to '" + str(portal_size) + "' failed.")
 		return
 	
-	var p = portal_mesh.mesh as PlaneMesh
-	p.size = portal_size
+	var p: BoxMesh = portal_mesh.mesh
+	p.size = Vector3(portal_size.x, portal_size.y, p.size.z)
 
 # ------------- GAMEPLAY RUNTIME STUFF ----------------
 
@@ -131,6 +133,8 @@ func _ready() -> void:
 	if Engine.is_editor_hint():
 		_editor_ready.call_deferred()
 		return
+	
+	print("[%s] front: %v" % [name, portal_front()])
 	
 	if player_camera == null:
 		# FIXME: This WILL fail if the root does a SubViewportContainer thing. Maybe.
@@ -153,6 +157,9 @@ func _ready() -> void:
 		teleport_area.body_entered.connect(self._on_teleport_body_entered)
 		teleport_area.body_exited.connect(self._on_teleport_body_exited)
 		teleport_area.collision_mask = teleport_collision_mask
+		
+		
+		
 
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint():
@@ -166,22 +173,39 @@ func _process_cameras() -> void:
 		portal_camera.global_transform = self.to_exit_transform(player_camera.global_transform)
 		portal_camera.near = _calculate_near_plane()
 	
+	# This is supposed to protect from near-plane clipping
+	# https://github.com/SebLague/Portals/blob/master/Assets/Scripts/Core/Portal.cs#L199
+	var half_h = player_camera.near * tan(deg_to_rad(player_camera.fov * 0.5))
+	var vp = get_viewport()
+	var half_w = half_h * (vp.size.x / vp.size.y)
+	var dst_to_near_clip_plane_corner = Vector3(half_w, half_h, player_camera.near).length()
+	# Apply the calculated thickness
+	var box: BoxMesh = portal_mesh.mesh
+	box.size.z = dst_to_near_clip_plane_corner
+	# Move the box mesh a lil bit???
+	var cam_in_front_of_portal = forward_angle(player_camera) > 0
+	var mult = 0.5 if cam_in_front_of_portal else -0.5
+	portal_mesh.position.z = dst_to_near_clip_plane_corner * mult
+	
 	if is_teleport:
 		_process_teleports()
-
+	
 func _process_teleports() -> void:
 	for body in watchlist_bodies.keys():
 		body = body as Node3D
 		var last_fw_angle: float = watchlist_bodies.get(body)
 		var current_fw_angle: float = forward_angle(body)
 		
-		if last_fw_angle > 0 and current_fw_angle <= 0:
+		if signf(last_fw_angle) != signf(current_fw_angle):
+			print("[%s] TELEPORT" % name)
 			# NOTE: BODIES don't have to specify teleport_root, they are usually the roots. 
 			var teleportable_path = body.get_meta("teleport_root", ".")
 			var teleportable: Node3D = body.get_node(teleportable_path)
 			teleportable.global_transform = self.to_exit_transform(teleportable.global_transform)
 			
-		watchlist_bodies.set(body, current_fw_angle)
+			watchlist_bodies.erase(body)
+		else:
+			watchlist_bodies.set(body, current_fw_angle)
 
 func _calculate_near_plane() -> float:
 	var _mesh_aabb: AABB = exit_portal.portal_mesh.get_aabb()
@@ -262,9 +286,9 @@ func _on_teleport_body_exited(body: Node3D) -> void:
 ## [b]Crucial[/b] piece of a portal - transforming where objects should appear 
 ## on the other side. Used for both cameras and teleports.
 func to_exit_transform(g_transform: Transform3D) -> Transform3D:
-	var relative_to_portal: Transform3D = portal_mesh.global_transform.affine_inverse() * g_transform
+	var relative_to_portal: Transform3D = self.global_transform.affine_inverse() * g_transform
 	var flipped: Transform3D = relative_to_portal.rotated(Vector3.UP, PI)
-	var relative_to_target = exit_portal.portal_mesh.global_transform * flipped
+	var relative_to_target = exit_portal.global_transform * flipped
 	return relative_to_target
 
 ## Calculates the dot product of portal's forward vector with the global 
@@ -275,6 +299,10 @@ func forward_angle(node: Node3D) -> float:
 	var portal_front: Vector3 = self.global_transform.basis.z.normalized()
 	var node_relative: Vector3 = (node.global_transform.origin - global_transform.origin).normalized()
 	return portal_front.dot(node_relative)
+
+
+func portal_front() -> Vector3:
+	return self.global_transform.basis.z.normalized()
 
 ## Helper function meant to be used in editor. Adds [param node] as a child to 
 ## [param parent]. Forces a readable name and sets the child's owner to the same

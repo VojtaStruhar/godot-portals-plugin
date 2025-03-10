@@ -1,5 +1,5 @@
 shader_type spatial;
-render_mode unshaded;
+render_mode unshaded, cull_disabled;
 
 uniform sampler2D albedo: hint_default_black, source_color;
 
@@ -14,6 +14,10 @@ void vertex() {
     pixel_distance = distance(world_position, camera_position);
 }
 
+float brightness(vec3 c) {
+	return (0.2126*c.r + 0.7152*c.g + 0.0722*c.b);
+}
+
 void fragment() {
     // The portal color is simply the screen-space color of the exit camera render target.
     // This is because the exit camera views the exit portal from the perspective of the player watching
@@ -23,5 +27,5 @@ void fragment() {
     // Fade-out color
     // float t = smoothstep(fade_out_distance_min, fade_out_distance_max, pixel_distance);
     // ALBEDO = mix(portal_color, fade_out_color.rgb, t);
-	ALBEDO = portal_color;
+	ALBEDO = vec3(brightness(portal_color));
 }
