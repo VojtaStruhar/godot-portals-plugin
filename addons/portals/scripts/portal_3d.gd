@@ -23,6 +23,16 @@ var _tb_pair_portals: Callable = _editor_pair_portals
 
 @export var player_camera: Camera3D
 
+
+@export var portals_see_portals: bool = false
+
+@export_flags_3d_render var portal_render_layer: int = 1 << 7:
+	set(v):
+		portal_render_layer = v
+		if caused_by_user_interaction():
+			portal_mesh.layers = v
+			secondary_mesh.layers = v
+
 @export var is_teleport: bool = false:
 	set(v):
 		is_teleport = v
@@ -235,6 +245,9 @@ func _setup_cameras() -> void:
 		portal_camera = Camera3D.new()
 		portal_camera.name = self.name + "_Camera3D"
 		portal_camera.environment = adjusted_env
+		if portals_see_portals == false:
+			portal_camera.cull_mask = portal_camera.cull_mask ^ portal_render_layer
+			
 		portal_viewport.add_child(portal_camera, true)
 		portal_camera.global_position = exit_portal.global_position
 	else:
