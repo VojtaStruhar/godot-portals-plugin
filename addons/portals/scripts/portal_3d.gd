@@ -15,6 +15,9 @@ class_name Portal3D extends Node3D
 ## The width of the frame portal. Adjusts the near clip distance of the camera looking through THIS portal.
 @export var portal_frame_width: float = 0.4
 
+@export_flags_3d_render var portal_mesh_render_mask: int = 2
+@export_flags_3d_render var portal_camera_render_mask: int = 0xFFFFFFFF ^ 2
+
 @export var exit_portal: Portal3D
 
 # TODO: Make this optional, only display when the other's portal exit_portal is null.
@@ -120,6 +123,8 @@ func _ready() -> void:
 		_editor_ready.call_deferred()
 		return
 	
+	portal_mesh.layers = portal_mesh_render_mask
+	
 	if player_camera == null:
 		# FIXME: This WILL fail if the root does a SubViewportContainer thing. Maybe.
 		# It's probably best to assign this manually.
@@ -219,6 +224,7 @@ func _setup_cameras() -> void:
 		portal_camera = Camera3D.new()
 		portal_camera.name = self.name + "_Camera3D"
 		portal_camera.environment = adjusted_env
+		portal_camera.cull_mask = portal_camera_render_mask
 		portal_viewport.add_child(portal_camera, true)
 		portal_camera.global_position = exit_portal.global_position
 	else:
