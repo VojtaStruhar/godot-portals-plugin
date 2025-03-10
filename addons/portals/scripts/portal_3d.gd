@@ -173,15 +173,16 @@ func _physics_process(delta: float) -> void:
 
 func _process_teleports(delta: float) -> void:
 	var teleport_occured: bool = false
+	
 	for key in watchlist_bodies.keys():
 		var body: Node3D = key as Node3D
 		var last_global_position: Vector3 = watchlist_bodies.get(body)
+		
 		var gpos_change: Vector3 = body.global_position - last_global_position
 		var predicted_global_position: Vector3 = body.global_position + gpos_change
 		
-		if forward_angle(body.global_position) > 0 and forward_angle(predicted_global_position) <= 0:
+		if signf(forward_angle(body.global_position)) != signf(forward_angle(predicted_global_position)):
 			print("TELEPORT")
-			print(" - position delta: " + str(gpos_change) + " (magnitude: " + str(gpos_change.length()) + ")")
 			
 			teleport_occured = true
 			

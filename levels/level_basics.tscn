@@ -107,7 +107,6 @@ mesh = SubResource("CapsuleMesh_lff3k")
 
 [node name="PlayerCamera" type="Camera3D" parent="Player"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
-near = 0.001
 
 [node name="PortalFrame_A" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 0)
