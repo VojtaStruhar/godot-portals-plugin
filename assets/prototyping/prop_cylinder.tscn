@@ -1,0 +1,16 @@
+[gd_scene load_steps=4 format=3 uid="uid://c5hkhu8upxsf7"]
+
+[ext_resource type="Material" uid="uid://brj2jayoo0l0d" path="res://assets/prototyping/M_prototype_blue.tres" id="1_we5en"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_8wh7v"]
+material = ExtResource("1_we5en")
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_hc4gn"]
+
+[node name="PropCylinder" type="MeshInstance3D"]
+mesh = SubResource("CylinderMesh_8wh7v")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("CylinderShape3D_hc4gn")

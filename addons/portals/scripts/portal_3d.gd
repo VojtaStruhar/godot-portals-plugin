@@ -102,8 +102,7 @@ func _editor_setup_teleport():
 	teleport_collision.shape = box
 	
 	add_child_in_editor(teleport_area, teleport_collision)
-	
-	
+
 
 func _on_portal_size_changed() -> void:
 	if portal_mesh == null:
