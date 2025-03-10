@@ -29,3 +29,7 @@ enabled=PackedStringArray("res://addons/portals/plugin.cfg")
 
 3d_physics/layer_1="World"
 3d_physics/layer_8="Teleports"
+
+[rendering]
+
+anti_aliasing/quality/screen_space_aa=1

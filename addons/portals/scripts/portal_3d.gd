@@ -133,6 +133,14 @@ func _ready() -> void:
 	mat.set_shader_parameter("albedo", portal_viewport.get_texture())
 	portal_mesh.material_override = mat
 	
+	# NOTE: Just trying out double plane portals
+	var second_portal = MeshInstance3D.new()
+	second_portal.mesh = portal_mesh.mesh
+	second_portal.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	second_portal.material_override = mat
+	add_child(second_portal, true)
+	second_portal.position.z = -0.1
+	
 	# Configure teleport for action
 	if is_teleport:
 		assert(teleport_area)
