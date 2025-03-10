@@ -13,7 +13,7 @@ class_name Portal3D extends Node3D
 		if caused_by_user_interaction(): _on_portal_size_changed()
 
 ## The width of the frame portal. Adjusts the near clip distance of the camera looking through THIS portal.
-@export var portal_frame_width: float = 0.4
+@export_range(0.0, 10.0, 0.01) var portal_frame_width: float = 0.0
 
 @export var exit_portal: Portal3D
 
@@ -187,10 +187,10 @@ func _calculate_near_plane() -> float:
 	# Calculate the distance along the exit camera forward vector at which each of the portal corners projects
 	var camera_forward:Vector3 = -portal_camera.global_transform.basis.z.normalized()
 
-	var d_1:float = (corner_1 - exit_portal.global_position).dot(camera_forward)
-	var d_2:float = (corner_2 - exit_portal.global_position).dot(camera_forward)
-	var d_3:float = (corner_3 - exit_portal.global_position).dot(camera_forward)
-	var d_4:float = (corner_4 - exit_portal.global_position).dot(camera_forward)
+	var d_1:float = (corner_1 - portal_camera.global_position).dot(camera_forward)
+	var d_2:float = (corner_2 - portal_camera.global_position).dot(camera_forward)
+	var d_3:float = (corner_3 - portal_camera.global_position).dot(camera_forward)
+	var d_4:float = (corner_4 - portal_camera.global_position).dot(camera_forward)
 	
 	# The near clip distance is the shortest distance which still contains all the corners
 	return max(0.01, min(d_1, d_2, d_3, d_4) - exit_portal.portal_frame_width)
@@ -260,7 +260,7 @@ func to_exit_transform(g_transform: Transform3D) -> Transform3D:
 ## Calculates the dot product of portal's forward vector with the global 
 ## position of [param node]. Used for detecting teleports.
 ## [br]
-## The result is negative when the node is in front of the portal.
+## The result is positive when the node is in front of the portal.
 func forward_angle(node: Node3D) -> float:
 	var portal_front: Vector3 = self.global_transform.basis.z.normalized()
 	var node_relative: Vector3 = (node.global_transform.origin - global_transform.origin).normalized()
