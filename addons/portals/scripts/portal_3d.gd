@@ -35,6 +35,13 @@ var _tb_pair_portals: Callable = _editor_pair_portals
 @export_group("Internals")
 
 @export var portal_mesh: MeshInstance3D
+@export var secondary_mesh: MeshInstance3D
+@export_range(0.01, 1, 0.01) var secondary_mesh_offset: float = 0.1:
+	set(v):
+		secondary_mesh_offset = v
+		if caused_by_user_interaction():
+			secondary_mesh.position.z = -secondary_mesh_offset
+
 @export var teleport_area: Area3D
 @export var teleport_collision: CollisionShape3D
 
@@ -65,15 +72,26 @@ const PORTAL_SHADER = preload("uid://bhdb2skdxehes")
 func _editor_ready() -> void:
 	if portal_mesh == null:
 		portal_mesh = MeshInstance3D.new()
-		portal_mesh.name = "PortalMeshInstance"
+		portal_mesh.name = self.name + "_Mesh"
 		portal_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		var p = PlaneMesh.new()
 		p.orientation = PlaneMesh.FACE_Z
 		p.size = portal_size
 		portal_mesh.mesh = p
 		
+		var mat: ShaderMaterial = ShaderMaterial.new()
+		mat.shader = PORTAL_SHADER
+		portal_mesh.material_override = mat
+		
 		add_child_in_editor(self, portal_mesh)
-	
+		
+	if secondary_mesh == null:
+		# NOTE: Just trying out double plane portals
+		secondary_mesh = portal_mesh.duplicate()
+		secondary_mesh.name = portal_mesh.name + "_Secondary"
+		add_child_in_editor(self, secondary_mesh)
+		secondary_mesh.position.z = -secondary_mesh_offset
+		
 	self.group_node(self)
 
 func _editor_pair_portals():
@@ -128,18 +146,9 @@ func _ready() -> void:
 	_setup_cameras()
 	
 	assert(portal_viewport != null, "[%s] Portal should have a viewport!" % name)
-	var mat: ShaderMaterial = ShaderMaterial.new()
-	mat.shader = PORTAL_SHADER
-	mat.set_shader_parameter("albedo", portal_viewport.get_texture())
-	portal_mesh.material_override = mat
 	
-	# NOTE: Just trying out double plane portals
-	var second_portal = MeshInstance3D.new()
-	second_portal.mesh = portal_mesh.mesh
-	second_portal.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	second_portal.material_override = mat
-	add_child(second_portal, true)
-	second_portal.position.z = -0.1
+	portal_mesh.material_override.set_shader_parameter("albedo", portal_viewport.get_texture())
+	secondary_mesh.material_override.set_shader_parameter("albedo", portal_viewport.get_texture())
 	
 	# Configure teleport for action
 	if is_teleport:
