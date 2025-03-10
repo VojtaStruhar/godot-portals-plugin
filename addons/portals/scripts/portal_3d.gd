@@ -51,10 +51,8 @@ var _tb_pair_portals: Callable = _editor_pair_portals
 @export var portal_camera: Camera3D
 @export var portal_viewport: SubViewport
 
-## These physics bodies are being watched by the portal. The value in dictionary
-## is their dot product from last frame. As soon as the dot product changes signs,
-## the body crossed the portal and should be teleported.
-var watchlist_bodies: Dictionary[Node3D, float] = {}
+## Physics bodies watched by the portal and their global positions from last frame.
+var watchlist_bodies: Dictionary[Node3D, Vector3] = {}
 
 @export_tool_button("Debug Button", "Popup") 
 var _tb_debug_action: Callable = _debug_action
@@ -165,23 +163,35 @@ func _process_cameras() -> void:
 	if portal_camera != null && player_camera != null && exit_portal != null:
 		portal_camera.global_transform = self.to_exit_transform(player_camera.global_transform)
 		portal_camera.near = _calculate_near_plane()
+
+func _physics_process(delta: float) -> void:
+	if Engine.is_editor_hint():
+		return
 	
 	if is_teleport:
-		_process_teleports()
+		_process_teleports(delta)
 
-func _process_teleports() -> void:
-	for body in watchlist_bodies.keys():
-		body = body as Node3D
-		var last_fw_angle: float = watchlist_bodies.get(body)
-		var current_fw_angle: float = forward_angle(body)
+func _process_teleports(delta: float) -> void:
+	for key in watchlist_bodies.keys():
+		var body: Node3D = key as Node3D
+		var last_global_position: Vector3 = watchlist_bodies.get(body)
+		var gpos_change: Vector3 = body.global_position - last_global_position
+		var predicted_global_position: Vector3 = body.global_position + gpos_change
 		
-		if last_fw_angle > 0 and current_fw_angle <= 0:
+		if forward_angle(body.global_position) > 0 and forward_angle(predicted_global_position) <= 0:
+			print("TELEPORT")
+			print(" - position delta: " + str(gpos_change) + " (magnitude: " + str(gpos_change.length()) + ")")
+			
 			# NOTE: BODIES don't have to specify teleport_root, they are usually the roots. 
+			# CRITICAL: Move this into detection. Watch the teleportable root rather than the body.
 			var teleportable_path = body.get_meta("teleport_root", ".")
 			var teleportable: Node3D = body.get_node(teleportable_path)
-			teleportable.global_transform = self.to_exit_transform(teleportable.global_transform)
 			
-		watchlist_bodies.set(body, current_fw_angle)
+			var predicted_transform = body.global_transform.translated(gpos_change)
+			teleportable.global_transform = self.to_exit_transform(predicted_transform)
+			_process_cameras()
+			
+		watchlist_bodies.set(body, body.global_position)
 
 func _calculate_near_plane() -> float:
 	var _mesh_aabb: AABB = exit_portal.portal_mesh.get_aabb()
@@ -251,7 +261,7 @@ func _on_teleport_area_exited(area: Area3D) -> void:
 
 func _on_teleport_body_entered(body: Node3D) -> void:
 	#if body.has_meta("teleport_root"):
-	watchlist_bodies.set(body, forward_angle(body))
+	watchlist_bodies.set(body, body.global_position)
 
 func _on_teleport_body_exited(body: Node3D) -> void:
 	watchlist_bodies.erase(body)
@@ -267,13 +277,14 @@ func to_exit_transform(g_transform: Transform3D) -> Transform3D:
 	var relative_to_target = exit_portal.portal_mesh.global_transform * flipped
 	return relative_to_target
 
-## Calculates the dot product of portal's forward vector with the global 
-## position of [param node]. Used for detecting teleports.
-## [br]
+## Calculates the dot product of portal's forward vector with a global 
+## position [param g_pos]. Used for detecting teleports. Usually suppplied with 
+## [code]node.global_position[/code]
+## [br][br]
 ## The result is positive when the node is in front of the portal.
-func forward_angle(node: Node3D) -> float:
+func forward_angle(g_pos: Vector3) -> float:
 	var portal_front: Vector3 = self.global_transform.basis.z.normalized()
-	var node_relative: Vector3 = (node.global_transform.origin - global_transform.origin).normalized()
+	var node_relative: Vector3 = (g_pos - self.global_position).normalized()
 	return portal_front.dot(node_relative)
 
 ## Helper function meant to be used in editor. Adds [param node] as a child to 
