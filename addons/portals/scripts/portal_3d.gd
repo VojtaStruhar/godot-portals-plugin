@@ -172,6 +172,7 @@ func _physics_process(delta: float) -> void:
 		_process_teleports(delta)
 
 func _process_teleports(delta: float) -> void:
+	var teleport_occured: bool = false
 	for key in watchlist_bodies.keys():
 		var body: Node3D = key as Node3D
 		var last_global_position: Vector3 = watchlist_bodies.get(body)
@@ -182,6 +183,8 @@ func _process_teleports(delta: float) -> void:
 			print("TELEPORT")
 			print(" - position delta: " + str(gpos_change) + " (magnitude: " + str(gpos_change.length()) + ")")
 			
+			teleport_occured = true
+			
 			# NOTE: BODIES don't have to specify teleport_root, they are usually the roots. 
 			# CRITICAL: Move this into detection. Watch the teleportable root rather than the body.
 			var teleportable_path = body.get_meta("teleport_root", ".")
@@ -189,9 +192,12 @@ func _process_teleports(delta: float) -> void:
 			
 			var predicted_transform = body.global_transform.translated(gpos_change)
 			teleportable.global_transform = self.to_exit_transform(predicted_transform)
-			_process_cameras()
 			
 		watchlist_bodies.set(body, body.global_position)
+	
+	if teleport_occured:
+		_process_cameras()
+		RenderingServer.force_draw()
 
 func _calculate_near_plane() -> float:
 	var _mesh_aabb: AABB = exit_portal.portal_mesh.get_aabb()
