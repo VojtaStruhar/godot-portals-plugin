@@ -198,12 +198,12 @@ func _process_teleports() -> void:
 		watchlist_bodies.set(body, current_fw_angle)
 
 func _calculate_near_plane() -> float:
-	var _mesh_aabb: AABB = exit_portal.portal_mesh.get_aabb()
+	var _aabb: AABB = exit_portal.portal_mesh.get_aabb()
 	
-	var corner_1:Vector3 = exit_portal.to_global(Vector3(_mesh_aabb.position.x, _mesh_aabb.position.y, 0))
-	var corner_2:Vector3 = exit_portal.to_global(Vector3(_mesh_aabb.position.x + _mesh_aabb.size.x, _mesh_aabb.position.y, 0))
-	var corner_3:Vector3 = exit_portal.to_global(Vector3(_mesh_aabb.position.x + _mesh_aabb.size.x, _mesh_aabb.position.y + _mesh_aabb.size.y, 0))
-	var corner_4:Vector3 = exit_portal.to_global(Vector3(_mesh_aabb.position.x, _mesh_aabb.position.y + _mesh_aabb.size.y, 0))
+	var corner_1:Vector3 = exit_portal.to_global(Vector3(_aabb.position.x, _aabb.position.y, 0))
+	var corner_2:Vector3 = exit_portal.to_global(Vector3(_aabb.position.x + _aabb.size.x, _aabb.position.y, 0))
+	var corner_3:Vector3 = exit_portal.to_global(Vector3(_aabb.position.x + _aabb.size.x, _aabb.position.y + _aabb.size.y, 0))
+	var corner_4:Vector3 = exit_portal.to_global(Vector3(_aabb.position.x, _aabb.position.y + _aabb.size.y, 0))
 
 	# Calculate the distance along the exit camera forward vector at which each of the portal corners projects
 	var camera_forward:Vector3 = -portal_camera.global_transform.basis.z.normalized()
