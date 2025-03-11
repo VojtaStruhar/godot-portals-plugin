@@ -169,6 +169,9 @@ func _ready() -> void:
 		teleport_area.body_entered.connect(self._on_teleport_body_entered)
 		teleport_area.body_exited.connect(self._on_teleport_body_exited)
 		teleport_area.collision_mask = teleport_collision_mask
+	
+	get_viewport().size_changed.connect(_on_window_resize)
+
 
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint():
@@ -272,6 +275,8 @@ func _on_teleport_body_entered(body: Node3D) -> void:
 func _on_teleport_body_exited(body: Node3D) -> void:
 	watchlist_bodies.erase(body)
 
+func _on_window_resize() -> void:
+	portal_viewport.size = get_viewport().size
 
 # ------------------- UTILS ---------------------------
 
