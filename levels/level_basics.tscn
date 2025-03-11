@@ -140,15 +140,16 @@ secondary_mesh = NodePath("Portal3D_Mesh_Secondary")
 teleport_area = NodePath("TeleportArea")
 teleport_collision = NodePath("TeleportArea/CollisionShape3D")
 metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
-metadata/_edit_group_ = true
 
 [node name="Portal3D_Mesh" type="MeshInstance3D" parent="PortalFrame_A/Portal3D_A"]
+layers = 128
 material_override = SubResource("ShaderMaterial_lbpks")
 cast_shadow = 0
 mesh = SubResource("PlaneMesh_eavfu")
 
 [node name="Portal3D_Mesh_Secondary" type="MeshInstance3D" parent="PortalFrame_A/Portal3D_A"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.1)
+layers = 128
 material_override = SubResource("ShaderMaterial_lbpks")
 cast_shadow = 0
 mesh = SubResource("PlaneMesh_eavfu")
@@ -187,12 +188,14 @@ metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
 metadata/_edit_group_ = true
 
 [node name="Portal3D_Mesh" type="MeshInstance3D" parent="PortalFrame_B/Portal3D_B"]
+layers = 128
 material_override = SubResource("ShaderMaterial_im07u")
 cast_shadow = 0
 mesh = SubResource("PlaneMesh_fneyn")
 
 [node name="Portal3D_Mesh_Secondary" type="MeshInstance3D" parent="PortalFrame_B/Portal3D_B"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.1)
+layers = 128
 material_override = SubResource("ShaderMaterial_im07u")
 cast_shadow = 0
 mesh = SubResource("PlaneMesh_fneyn")
@@ -207,6 +210,12 @@ transform = Transform3D(0.965926, 0, -0.258819, 0, 1, 0, 0.258819, 0, 0.965926, 
 
 [node name="PropSphere" parent="." instance=ExtResource("5_p3b8s")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.75, 0.5, 3.25)
+
+[node name="OmniLight3D" type="OmniLight3D" parent="PropSphere"]
+layers = 128
+light_color = Color(0.389529, 0.77876, 0.457841, 1)
+light_energy = 4.793
+omni_range = 3.08045
 
 [node name="PropTorus" parent="." instance=ExtResource("6_p3b8s")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.25, -2.73127)

@@ -31,6 +31,7 @@ var _tb_pair_portals: Callable = _editor_pair_portals
 		portal_render_layer = v
 		if caused_by_user_interaction():
 			portal_mesh.layers = v
+			secondary_mesh.layers = v
 
 @export var is_teleport: bool = false:
 	set(v):
@@ -83,6 +84,7 @@ func _editor_ready() -> void:
 		portal_mesh = MeshInstance3D.new()
 		portal_mesh.name = self.name + "_Mesh"
 		portal_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		
 		var p = PlaneMesh.new()
 		p.orientation = PlaneMesh.FACE_Z
 		p.size = portal_size
