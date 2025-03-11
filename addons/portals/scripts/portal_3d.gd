@@ -15,7 +15,10 @@ class_name Portal3D extends Node3D
 ## The width of the frame portal. Adjusts the near clip distance of the camera looking through THIS portal.
 @export_range(0.0, 10.0, 0.01) var portal_frame_width: float = 0.0
 
-@export var exit_portal: Portal3D
+@export var exit_portal: Portal3D:
+	set(v):
+		exit_portal = v
+		update_configuration_warnings()
 
 # TODO: Make this optional, only display when the other's portal exit_portal is null.
 @export_tool_button("Pair Portals?", "SliderJoint3D")
@@ -84,6 +87,7 @@ func _editor_ready() -> void:
 		portal_mesh = MeshInstance3D.new()
 		portal_mesh.name = self.name + "_Mesh"
 		portal_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		portal_mesh.layers = portal_render_layer
 		
 		var p = PlaneMesh.new()
 		p.orientation = PlaneMesh.FACE_Z
@@ -327,3 +331,13 @@ static func get_settings_window_size() -> Vector2:
 		ProjectSettings.get_setting("display/window/size/viewport_width"),
 		ProjectSettings.get_setting("display/window/size/viewport_height")
 	)
+
+# ---------- GODOT ENGINE INTEGRATIONS --------------
+
+func _get_configuration_warnings() -> PackedStringArray:
+	var warnings: Array[String] = []
+	
+	if exit_portal == null:
+		warnings.append("Exit portal is null")
+	
+	return PackedStringArray(warnings)
