@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=3 uid="uid://ciuwt2yj4hcu2"]
+
+[ext_resource type="Material" uid="uid://1nvrnylcajfg" path="res://assets/prototyping/M_prototype_red.tres" id="1_y7nvy"]
+
+[sub_resource type="PrismMesh" id="PrismMesh_im07u"]
+material = ExtResource("1_y7nvy")
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_bgf0e"]
+points = PackedVector3Array(0, 0.5, 0.5, 0.5, -0.5, 0.5, 0, 0.5, -0.5, -0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, -0.5)
+
+[node name="PropPrism" type="MeshInstance3D"]
+mesh = SubResource("PrismMesh_im07u")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("ConvexPolygonShape3D_bgf0e")
