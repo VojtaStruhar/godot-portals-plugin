@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://b02i17c2x41fe"
+path="res://.godot/imported/portal_compute.glsl-a77b26824f7beb1d9e3bc07be35fa6f8.res"
+
+[deps]
+
+source_file="res://addons/portals/scripts/portal_compute.glsl"
+dest_files=["res://.godot/imported/portal_compute.glsl-a77b26824f7beb1d9e3bc07be35fa6f8.res"]
+
+[params]
+
