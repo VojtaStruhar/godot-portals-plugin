@@ -7,13 +7,7 @@ class_name Portal3D extends Node3D
 ## is to manage the portal setup in editor. During gameplay, it moves portal cameras around and
 ## provides API to interact with the portal system.
 
-@export var portal_size: Vector2 = Vector2(2.0, 2.5):
-	set(v):
-		portal_size = v
-		if caused_by_user_interaction(): _on_portal_size_changed()
-
-## The width of the frame portal. Adjusts the near clip distance of the camera looking through THIS portal.
-@export_range(0.0, 10.0, 0.01) var portal_frame_width: float = 0.0
+@export var config: Portal3DConfig = Portal3DConfig.new()
 
 @export var exit_portal: Portal3D
 
