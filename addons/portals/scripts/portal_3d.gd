@@ -26,7 +26,6 @@ var _tb_pair_portals: Callable = _editor_pair_portals
 
 @export var player_camera: Camera3D
 
-
 @export var portals_see_portals: bool = false
 
 @export_flags_3d_render var portal_render_layer: int = 1 << 7:
@@ -62,6 +61,10 @@ var _tb_pair_portals: Callable = _editor_pair_portals
 @export var portal_camera: Camera3D
 @export var portal_viewport: SubViewport
 
+## When teleporting, the portal checks if the teleported object is less than [b]this[/b] near.
+## Prevents false negatives when multiple portals are on top of each other.
+@export var _teleport_tolerance: float = 0.2
+
 ## These physics bodies are being watched by the portal. The value in dictionary
 ## is their dot product from last frame. As soon as the dot product changes signs,
 ## the body crossed the portal and should be teleported.
@@ -69,6 +72,9 @@ var watchlist_bodies: Dictionary[Node3D, float] = {}
 
 @export_tool_button("Debug Button", "Popup") 
 var _tb_debug_action: Callable = _debug_action
+
+@export_tool_button("Rerun Setup", "History")
+var _tb_rerun_setup: Callable = _editor_rerun_setup
 
 func _debug_action() -> void:
 	print("Number of children: " + str(get_child_count(true)))
@@ -81,8 +87,24 @@ func _debug_action() -> void:
 
 const PORTAL_SHADER = preload("uid://bhdb2skdxehes")
 
+func _editor_rerun_setup():
+	assert(Engine.is_editor_hint())
+	
+	if portal_mesh:
+		print("[%s] Recreating portal meshes" % name)
+		portal_mesh.name += "__DELETING"
+		portal_mesh.queue_free()
+		portal_mesh = null
+	if secondary_mesh:
+		secondary_mesh.name += "__DELETING"
+		secondary_mesh.queue_free()
+		secondary_mesh = null
+	
+	_editor_ready()
+
 ## _ready(), but only in editor.
 func _editor_ready() -> void:
+	
 	if portal_mesh == null:
 		portal_mesh = MeshInstance3D.new()
 		portal_mesh.name = self.name + "_Mesh"
@@ -198,11 +220,12 @@ func _process_teleports() -> void:
 		var last_fw_angle: float = watchlist_bodies.get(body)
 		var current_fw_angle: float = forward_angle(body)
 		
-		if last_fw_angle > 0 and current_fw_angle <= 0:
+		if last_fw_angle > 0 and current_fw_angle <= 0 and abs(current_fw_angle) < _teleport_tolerance:
 			# NOTE: BODIES don't have to specify teleport_root, they are usually the roots. 
 			var teleportable_path = body.get_meta("teleport_root", ".")
 			var teleportable: Node3D = body.get_node(teleportable_path)
 			teleportable.global_transform = self.to_exit_transform(teleportable.global_transform)
+			print("[%s] TELEPORTED: %s" % [name, teleportable.name])
 			
 		watchlist_bodies.set(body, current_fw_angle)
 
