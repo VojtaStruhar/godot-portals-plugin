@@ -222,7 +222,7 @@ func _process_teleports() -> void:
 		var last_fw_angle: float = watchlist_bodies.get(body)
 		var current_fw_angle: float = forward_angle(body)
 		
-		if last_fw_angle > 0 and current_fw_angle <= 0 and abs(current_fw_angle) < _teleport_tolerance:
+		if sign(last_fw_angle) != sign(current_fw_angle) and abs(current_fw_angle) < _teleport_tolerance:
 			# NOTE: BODIES don't have to specify teleport_root, they are usually the roots. 
 			var teleportable_path = body.get_meta("teleport_root", ".")
 			var teleportable: Node3D = body.get_node(teleportable_path)
