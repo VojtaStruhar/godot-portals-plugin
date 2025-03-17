@@ -322,9 +322,8 @@ func _on_window_resize() -> void:
 ## [b]Crucial[/b] piece of a portal - transforming where objects should appear 
 ## on the other side. Used for both cameras and teleports.
 func to_exit_transform(g_transform: Transform3D) -> Transform3D:
-	var relative_to_portal: Transform3D = portal_mesh.global_transform.affine_inverse() * g_transform
+	var relative_to_portal: Transform3D = global_transform.affine_inverse() * g_transform
 	var flipped: Transform3D = relative_to_portal.rotated(Vector3.UP, PI)
-	# CRITICAL: This produces a SLIGHT offset now (visible on lines on the ground)
 	var relative_to_target = exit_portal.global_transform * flipped
 	return relative_to_target
 
