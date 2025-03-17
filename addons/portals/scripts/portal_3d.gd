@@ -227,8 +227,10 @@ func _process_teleports() -> void:
 			var teleportable_path = body.get_meta("teleport_root", ".")
 			var teleportable: Node3D = body.get_node(teleportable_path)
 			teleportable.global_transform = self.to_exit_transform(teleportable.global_transform)
-			
-		watchlist_bodies.set(body, current_fw_angle)
+			print("[%s] TELEPORT" % name)
+			watchlist_bodies.erase(body)
+		else:
+			watchlist_bodies.set(body, current_fw_angle)
 
 func _calculate_near_plane() -> float:
 	# Adjustment for cube portals. This AABB is basically a plane.
