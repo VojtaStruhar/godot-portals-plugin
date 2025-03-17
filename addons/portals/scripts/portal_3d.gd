@@ -258,7 +258,7 @@ func _process_teleports() -> void:
 		body = body as Node3D  # Conversion just for type hints
 		var last_fw_angle: float = _watchlist_teleportables.get(body)
 		var current_fw_angle: float = forward_angle(body)
-		print(body.name, " ", current_fw_angle)
+		
 		var should_teleport: bool = false
 		match teleport_direction:
 			TeleportDirection.FRONT:
@@ -275,6 +275,10 @@ func _process_teleports() -> void:
 			var teleportable_path = body.get_meta("teleport_root", ".")
 			var teleportable: Node3D = body.get_node(teleportable_path)
 			teleportable.global_transform = self.to_exit_transform(teleportable.global_transform)
+			
+			if teleportable is RigidBody3D:
+				teleportable.linear_velocity = real_to_exit_direction(teleportable.linear_velocity)
+			
 			print("[%s] TELEPORT" % name)
 			_watchlist_teleportables.erase(body)
 			
@@ -380,6 +384,21 @@ func to_exit_transform(g_transform: Transform3D) -> Transform3D:
 	var flipped: Transform3D = relative_to_portal.rotated(Vector3.UP, PI)
 	var relative_to_target = exit_portal.global_transform * flipped
 	return relative_to_target
+
+func real_to_exit_direction(real:Vector3) -> Vector3:
+	# Convert from global to local space at the entrance (this) portal
+	var local:Vector3 = global_transform.basis.inverse() * real
+	# Compensate for any scale the entrance portal may have
+	var unscaled:Vector3 = local * global_transform.basis.get_scale()
+	# Flip it (the portal always flips the view 180 degrees)
+	var flipped:Vector3 = unscaled.rotated(Vector3.UP, PI)
+	# Apply any scale the exit portal may have (and apply custom exit scale)
+	var exit_scale_vector:Vector3 = exit_portal.global_transform.basis.get_scale()
+	var exit_scale = Vector3.ONE;
+	var scaled_at_exit:Vector3 = flipped / exit_scale_vector * exit_scale
+	# Convert from local space at the exit portal to global space
+	var local_at_exit:Vector3 = exit_portal.global_transform.basis * scaled_at_exit
+	return local_at_exit
 
 ## Calculates the dot product of portal's forward vector with the global 
 ## position of [param node]. Used for detecting teleports.
