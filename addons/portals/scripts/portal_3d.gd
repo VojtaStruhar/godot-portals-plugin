@@ -33,7 +33,6 @@ var _tb_pair_portals: Callable = _editor_pair_portals
 		portal_render_layer = v
 		if caused_by_user_interaction():
 			portal_mesh.layers = v
-			secondary_mesh.layers = v
 
 @export var is_teleport: bool = false:
 	set(v):
@@ -46,13 +45,12 @@ var _tb_pair_portals: Callable = _editor_pair_portals
 ## These thing don't need to be exported. I just want to see them in editor.
 @export_group("Internals")
 
-@export var portal_mesh: MeshInstance3D
-@export var secondary_mesh: MeshInstance3D
-@export_range(0.01, 1, 0.01) var secondary_mesh_offset: float = 0.1:
+@export var portal_thickness: float = 0.1:
 	set(v):
-		secondary_mesh_offset = v
-		if caused_by_user_interaction():
-			secondary_mesh.position.z = -secondary_mesh_offset
+		portal_thickness = v
+		if caused_by_user_interaction(): _on_portal_size_changed()
+
+@export var portal_mesh: MeshInstance3D
 
 @export var teleport_area: Area3D
 @export var teleport_collision: CollisionShape3D
@@ -83,7 +81,7 @@ func _debug_action() -> void:
 		print("  - " + meta + ": " + str(get_meta(meta)))
 	
 
-# ------------ IN-EDITOR CONFIGURATION STUFF --------------
+#region Editor Configuration Stuff
 
 const PORTAL_SHADER = preload("uid://bhdb2skdxehes")
 
@@ -95,15 +93,15 @@ func _editor_rerun_setup():
 		portal_mesh.name += "__DELETING"
 		portal_mesh.queue_free()
 		portal_mesh = null
-	if secondary_mesh:
-		secondary_mesh.name += "__DELETING"
-		secondary_mesh.queue_free()
-		secondary_mesh = null
 	
 	_editor_ready()
 
 ## _ready(), but only in editor.
 func _editor_ready() -> void:
+	add_to_group("portals", true)
+	
+	process_priority = 100
+	process_physics_priority = 100
 	
 	if portal_mesh == null:
 		portal_mesh = MeshInstance3D.new()
@@ -111,9 +109,8 @@ func _editor_ready() -> void:
 		portal_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		portal_mesh.layers = portal_render_layer
 		
-		var p = PlaneMesh.new()
-		p.orientation = PlaneMesh.FACE_Z
-		p.size = portal_size
+		var p := BoxMesh.new()
+		p.size = Vector3(portal_size.x, portal_size.y, portal_thickness)
 		portal_mesh.mesh = p
 		
 		var mat: ShaderMaterial = ShaderMaterial.new()
@@ -121,14 +118,7 @@ func _editor_ready() -> void:
 		portal_mesh.material_override = mat
 		
 		add_child_in_editor(self, portal_mesh)
-		
-	if secondary_mesh == null:
-		# NOTE: Just trying out double plane portals
-		secondary_mesh = portal_mesh.duplicate()
-		secondary_mesh.name = portal_mesh.name + "_Secondary"
-		add_child_in_editor(self, secondary_mesh)
-		secondary_mesh.position.z = -secondary_mesh_offset
-		
+	
 	self.group_node(self)
 
 func _editor_pair_portals():
@@ -160,23 +150,25 @@ func _editor_setup_teleport():
 
 
 func _on_portal_size_changed() -> void:
-	if portal_mesh == null:
-		push_error("Portal should never be null. Setting size to '" + str(portal_size) + "' failed.")
-		return
+	assert(portal_mesh != null, "Portal should never be null. Setting size to '" + str(portal_size) + "' failed.")
 	
-	var p = portal_mesh.mesh as PlaneMesh
-	p.size = portal_size
+	var p: BoxMesh = portal_mesh.mesh
+	p.size = Vector3(portal_size.x, portal_size.y, portal_thickness)
 
-# ------------- GAMEPLAY RUNTIME STUFF ----------------
+#endregion
+
+#region GAMEPLAY RUNTIME STUFF
 
 func _ready() -> void:
 	if Engine.is_editor_hint():
+		# TODO: Is the deferred necessary here??
 		_editor_ready.call_deferred()
 		return
 	
 	if player_camera == null:
 		# FIXME: This WILL fail if the root does a SubViewportContainer thing. Maybe.
 		# It's probably best to assign this manually.
+		push_warning("Inferring player camera from parent viewport.")
 		player_camera = get_viewport().get_camera_3d()
 		assert(player_camera != null, "Player camera is missing!")
 	
@@ -185,7 +177,6 @@ func _ready() -> void:
 	assert(portal_viewport != null, "[%s] Portal should have a viewport!" % name)
 	
 	portal_mesh.material_override.set_shader_parameter("albedo", portal_viewport.get_texture())
-	secondary_mesh.material_override.set_shader_parameter("albedo", portal_viewport.get_texture())
 	
 	# Configure teleport for action
 	if is_teleport:
@@ -210,6 +201,17 @@ func _process_cameras() -> void:
 	if portal_camera != null && player_camera != null && exit_portal != null:
 		portal_camera.global_transform = self.to_exit_transform(player_camera.global_transform)
 		portal_camera.near = _calculate_near_plane()
+		
+		# Prevent flickering
+		var half_height: float = player_camera.near * tan(deg_to_rad(player_camera.fov * 0.5))
+		var half_width: float = half_height * portal_viewport.size.x / float(portal_viewport.size.y)
+		var near_diagonal: float = Vector3(half_width, half_height, player_camera.near).length()
+		# TODO: This doesn't change much. Update it directly?
+		portal_thickness = near_diagonal
+		_on_portal_size_changed()
+		var player_in_front_of_portal: bool = forward_angle(player_camera) > 0
+		portal_mesh.position = Vector3.FORWARD * near_diagonal * (0.5 if player_in_front_of_portal else -0.5)
+		
 	
 	if is_teleport:
 		_process_teleports()
@@ -220,17 +222,23 @@ func _process_teleports() -> void:
 		var last_fw_angle: float = watchlist_bodies.get(body)
 		var current_fw_angle: float = forward_angle(body)
 		
-		if last_fw_angle > 0 and current_fw_angle <= 0 and abs(current_fw_angle) < _teleport_tolerance:
+		if sign(last_fw_angle) != sign(current_fw_angle) and abs(current_fw_angle) < _teleport_tolerance:
 			# NOTE: BODIES don't have to specify teleport_root, they are usually the roots. 
 			var teleportable_path = body.get_meta("teleport_root", ".")
 			var teleportable: Node3D = body.get_node(teleportable_path)
 			teleportable.global_transform = self.to_exit_transform(teleportable.global_transform)
-			print("[%s] TELEPORTED: %s" % [name, teleportable.name])
-			
-		watchlist_bodies.set(body, current_fw_angle)
+			print("[%s] TELEPORT" % name)
+			watchlist_bodies.erase(body)
+		else:
+			watchlist_bodies.set(body, current_fw_angle)
 
 func _calculate_near_plane() -> float:
-	var _aabb: AABB = exit_portal.portal_mesh.get_aabb()
+	# Adjustment for cube portals. This AABB is basically a plane.
+	# TODO: May or may not be a little broken now that portal mesh moves a little
+	var _aabb: AABB = AABB(
+		Vector3(-exit_portal.portal_size.x / 2, -exit_portal.portal_size.y / 2, 0),
+		Vector3(exit_portal.portal_size.x, exit_portal.portal_size.y, 0)
+	)
 	
 	var corner_1:Vector3 = exit_portal.to_global(Vector3(_aabb.position.x, _aabb.position.y, 0))
 	var corner_2:Vector3 = exit_portal.to_global(Vector3(_aabb.position.x + _aabb.size.x, _aabb.position.y, 0))
@@ -287,6 +295,10 @@ func _setup_cameras() -> void:
 	else:
 		push_warning("[%s] No exit_portal!" % name)
 
+#endregion
+
+#region Event handlers
+
 func _on_teleport_area_entered(area: Area3D) -> void:
 	print("[%s] teleport_area_entered: %s" % [name, area.name])
 	# TODO
@@ -305,14 +317,16 @@ func _on_teleport_body_exited(body: Node3D) -> void:
 func _on_window_resize() -> void:
 	portal_viewport.size = get_viewport().size
 
-# ------------------- UTILS ---------------------------
+#endregion
+
+#region UTILS
 
 ## [b]Crucial[/b] piece of a portal - transforming where objects should appear 
 ## on the other side. Used for both cameras and teleports.
 func to_exit_transform(g_transform: Transform3D) -> Transform3D:
-	var relative_to_portal: Transform3D = portal_mesh.global_transform.affine_inverse() * g_transform
+	var relative_to_portal: Transform3D = global_transform.affine_inverse() * g_transform
 	var flipped: Transform3D = relative_to_portal.rotated(Vector3.UP, PI)
-	var relative_to_target = exit_portal.portal_mesh.global_transform * flipped
+	var relative_to_target = exit_portal.global_transform * flipped
 	return relative_to_target
 
 ## Calculates the dot product of portal's forward vector with the global 
@@ -354,6 +368,8 @@ static func get_settings_window_size() -> Vector2:
 		ProjectSettings.get_setting("display/window/size/viewport_width"),
 		ProjectSettings.get_setting("display/window/size/viewport_height")
 	)
+
+#endregion
 
 # ---------- GODOT ENGINE INTEGRATIONS --------------
 

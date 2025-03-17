@@ -138,6 +138,8 @@ shadow_enabled = true
 environment = SubResource("Environment_8bheg")
 
 [node name="Player" type="CharacterBody3D" parent="."]
+process_priority = 100
+process_physics_priority = 100
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8881, 0.875832, -1.34142)
 collision_layer = 129
 script = ExtResource("8_eqmv0")
