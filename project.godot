@@ -38,6 +38,10 @@ toggle_portals={
 3d_physics/layer_1="World"
 3d_physics/layer_8="Teleports"
 
+[physics]
+
+3d/physics_engine="Jolt Physics"
+
 [rendering]
 
 anti_aliasing/quality/screen_space_aa=1
