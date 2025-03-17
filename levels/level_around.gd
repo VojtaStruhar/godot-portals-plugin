@@ -1,11 +1,9 @@
 extends Node3D
 
+@onready var portal_activator_a: Area3D = $PortalActivator_A
+@onready var player: CharacterBody3D = $Player
 
-# Called when the node enters the scene tree for the first time.
+
 func _ready() -> void:
-	pass # Replace with function body.
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
+	# Initial portal setup. No events are triggered at this point, so do it manually.
+	portal_activator_a._on_body_exited(player)

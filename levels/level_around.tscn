@@ -1,4 +1,4 @@
-[gd_scene load_steps=41 format=4 uid="uid://cceqtevdskikh"]
+[gd_scene load_steps=42 format=4 uid="uid://cceqtevdskikh"]
 
 [ext_resource type="Script" uid="uid://dh2f564q4c8g1" path="res://levels/level_around.gd" id="1_u0pli"]
 [ext_resource type="Material" uid="uid://dgjiw8udooecr" path="res://assets/prototyping/M_prototype_dark.tres" id="2_0dr2q"]
@@ -124,6 +124,39 @@ size = Vector3(2.99, 4, 0.1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_tt16h"]
 size = Vector3(0.25, 2.5, 10)
+
+[sub_resource type="GDScript" id="GDScript_0dr2q"]
+resource_name = "portal_updater"
+script/source = "extends Node
+
+@onready var portal_activator_a: Area3D = $\"../PortalActivator_A\"
+@onready var portal_activator_b: Area3D = $\"../PortalActivator_B\"
+@onready var portal_activator_c: Area3D = $\"../PortalActivator_C\"
+
+
+func _on_portal_ab_on_teleport_receive(body_or_area: Node3D) -> void:
+	portal_activator_a._on_body_exited(body_or_area)
+
+
+func _on_portal_ba_on_teleport_receive(body_or_area: Node3D) -> void:
+	portal_activator_b._on_body_exited(body_or_area)
+
+
+func _on_portal_bc_on_teleport_receive(body_or_area: Node3D) -> void:
+	portal_activator_b._on_body_exited(body_or_area)
+
+
+func _on_portal_cb_on_teleport_receive(body_or_area: Node3D) -> void:
+	portal_activator_c._on_body_exited(body_or_area)
+
+
+func _on_portal_ca_on_teleport_receive(body_or_area: Node3D) -> void:
+	portal_activator_c._on_body_exited(body_or_area)
+
+
+func _on_portal_ac_on_teleport_receive(body_or_area: Node3D) -> void:
+	portal_activator_a._on_body_exited(body_or_area)
+"
 
 [node name="Level_Around" type="Node3D"]
 script = ExtResource("1_u0pli")
@@ -328,6 +361,7 @@ portal_size = Vector2(2.99, 4)
 exit_portal = NodePath("../Portal_BA")
 player_camera = NodePath("../Player/PlayerCamera")
 is_teleport = true
+teleport_direction = 0
 teleport_collision_mask = 128
 portal_mesh = NodePath("Portal_AB_Mesh")
 teleport_area = NodePath("TeleportArea")
@@ -355,6 +389,7 @@ portal_size = Vector2(2.99, 4)
 exit_portal = NodePath("../Portal_AB")
 player_camera = NodePath("../Player/PlayerCamera")
 is_teleport = true
+teleport_direction = 0
 teleport_collision_mask = 128
 portal_mesh = NodePath("Portal_BA_Mesh")
 teleport_area = NodePath("TeleportArea")
@@ -382,6 +417,7 @@ portal_size = Vector2(2.99, 4)
 exit_portal = NodePath("../Portal_CB")
 player_camera = NodePath("../Player/PlayerCamera")
 is_teleport = true
+teleport_direction = 0
 teleport_collision_mask = 128
 portal_mesh = NodePath("Portal_BC_Mesh")
 teleport_area = NodePath("TeleportArea")
@@ -409,6 +445,7 @@ portal_size = Vector2(2.99, 4)
 exit_portal = NodePath("../Portal_BC")
 player_camera = NodePath("../Player/PlayerCamera")
 is_teleport = true
+teleport_direction = 0
 teleport_collision_mask = 128
 portal_mesh = NodePath("Portal_CB_Mesh")
 teleport_area = NodePath("TeleportArea")
@@ -436,6 +473,7 @@ portal_size = Vector2(2.99, 4)
 exit_portal = NodePath("../Portal_AC")
 player_camera = NodePath("../Player/PlayerCamera")
 is_teleport = true
+teleport_direction = 0
 teleport_collision_mask = 128
 portal_mesh = NodePath("Portal_CA_Mesh")
 teleport_area = NodePath("TeleportArea")
@@ -463,6 +501,7 @@ portal_size = Vector2(2.99, 4)
 exit_portal = NodePath("../Portal_CA")
 player_camera = NodePath("../Player/PlayerCamera")
 is_teleport = true
+teleport_direction = 0
 teleport_collision_mask = 128
 portal_mesh = NodePath("Portal_AC_Mesh")
 teleport_area = NodePath("TeleportArea")
@@ -513,6 +552,15 @@ portal_right = NodePath("../Portal_CA")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, -2)
 shape = SubResource("BoxShape3D_tt16h")
 
+[node name="PortalUpdater" type="Node" parent="."]
+script = SubResource("GDScript_0dr2q")
+
+[connection signal="on_teleport_receive" from="Portal_AB" to="PortalUpdater" method="_on_portal_ab_on_teleport_receive"]
+[connection signal="on_teleport_receive" from="Portal_BA" to="PortalUpdater" method="_on_portal_ba_on_teleport_receive"]
+[connection signal="on_teleport_receive" from="Portal_BC" to="PortalUpdater" method="_on_portal_bc_on_teleport_receive"]
+[connection signal="on_teleport_receive" from="Portal_CB" to="PortalUpdater" method="_on_portal_cb_on_teleport_receive"]
+[connection signal="on_teleport_receive" from="Portal_CA" to="PortalUpdater" method="_on_portal_ca_on_teleport_receive"]
+[connection signal="on_teleport_receive" from="Portal_AC" to="PortalUpdater" method="_on_portal_ac_on_teleport_receive"]
 [connection signal="area_exited" from="PortalActivator_A" to="PortalActivator_A" method="_on_area_exited"]
 [connection signal="body_exited" from="PortalActivator_A" to="PortalActivator_A" method="_on_body_exited"]
 [connection signal="area_exited" from="PortalActivator_B" to="PortalActivator_B" method="_on_area_exited"]

@@ -7,6 +7,13 @@ class_name Portal3D extends Node3D
 ## is to manage the portal setup in editor. During gameplay, it moves portal cameras around and
 ## provides API to interact with the portal system.
 
+## Emitted when this portal triggers a teleport.
+signal on_teleport(body_or_area: Node3D)
+
+## Emitted when this portal [i]receives[/i] a teleported node. Whoever had [b]thi[/b] portal as
+## its [member exit_portal] triggered a teleport!
+signal on_teleport_receive(body_or_area: Node3D)
+
 @export var portal_size: Vector2 = Vector2(2.0, 2.5):
 	set(v):
 		portal_size = v
@@ -38,6 +45,18 @@ var _tb_pair_portals: Callable = _editor_pair_portals
 	set(v):
 		is_teleport = v
 		if caused_by_user_interaction(): _editor_setup_teleport()
+
+
+enum TeleportDirection {
+	## Corresponds to portal's FORWARD direction
+	FRONT, 
+	BACK, 
+	FRONT_AND_BACK 
+}
+## If the portal is also a teleport, it will only teleport things coming from
+## this direction.
+@export var teleport_direction: TeleportDirection = TeleportDirection.FRONT_AND_BACK
+
 
 @export_flags_3d_physics var teleport_collision_mask: int = 0
 
@@ -236,17 +255,31 @@ func _process_cameras() -> void:
 
 func _process_teleports() -> void:
 	for body in watchlist_bodies.keys():
-		body = body as Node3D
+		body = body as Node3D  # Conversion just for type hints
 		var last_fw_angle: float = watchlist_bodies.get(body)
 		var current_fw_angle: float = forward_angle(body)
 		
-		if sign(last_fw_angle) != sign(current_fw_angle) and abs(current_fw_angle) < _teleport_tolerance:
+		var should_teleport: bool = false
+		match teleport_direction:
+			TeleportDirection.FRONT:
+				should_teleport = last_fw_angle > 0 and current_fw_angle <= 0
+			TeleportDirection.BACK:
+				should_teleport = last_fw_angle < 0 and current_fw_angle >= 0
+			TeleportDirection.FRONT_AND_BACK:
+				should_teleport = sign(last_fw_angle) != sign(current_fw_angle)
+			_:
+				assert(false, "This match statement should be exhaustive")
+		
+		if should_teleport and abs(current_fw_angle) < _teleport_tolerance:
 			# NOTE: BODIES don't have to specify teleport_root, they are usually the roots. 
 			var teleportable_path = body.get_meta("teleport_root", ".")
 			var teleportable: Node3D = body.get_node(teleportable_path)
 			teleportable.global_transform = self.to_exit_transform(teleportable.global_transform)
 			print("[%s] TELEPORT" % name)
 			watchlist_bodies.erase(body)
+			
+			on_teleport.emit(teleportable)
+			exit_portal.on_teleport_receive.emit(teleportable)
 		else:
 			watchlist_bodies.set(body, current_fw_angle)
 
