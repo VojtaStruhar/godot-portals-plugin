@@ -427,6 +427,9 @@ static func get_settings_window_size() -> Vector2:
 func _get_configuration_warnings() -> PackedStringArray:
 	var warnings: Array[String] = []
 	
+	if scale != Vector3.ONE:
+		warnings.append("Portal has scaling. Please set portal scaling to (1, 1, 1) and use 'portal_size' for sizing.")
+	
 	if exit_portal == null:
 		warnings.append("Exit portal is null")
 	
