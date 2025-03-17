@@ -79,7 +79,25 @@ func _debug_action() -> void:
 	print("Node metadata: ")
 	for meta in get_meta_list():
 		print("  - " + meta + ": " + str(get_meta(meta)))
+
+#region Public API
+func activate() -> void:
+	portal_viewport.disable_3d = false
+	portal_mesh.show()
 	
+	if is_teleport:
+		teleport_area.monitoring = true
+
+func deactivate() -> void:
+	portal_viewport.disable_3d = true
+	portal_mesh.hide()
+	
+	if is_teleport:
+		teleport_area.monitoring = false
+
+
+#endregion
+
 
 #region Editor Configuration Stuff
 
