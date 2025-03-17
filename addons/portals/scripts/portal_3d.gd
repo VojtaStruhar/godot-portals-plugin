@@ -57,6 +57,11 @@ enum TeleportDirection {
 ## this direction.
 @export var teleport_direction: TeleportDirection = TeleportDirection.FRONT_AND_BACK
 
+## When a [RigidBody3D] goes through the portal, give its new normalized velocity a 
+## little boost. Makes stuff flying out of portals more fun. [br][br]
+## Recommended values: 1 to 3
+@export_range(0, 5, 0.1, "or_greater")
+var rb_velocity_boost: float = 0
 
 @export_flags_3d_physics var teleport_collision_mask: int = 0
 
@@ -277,7 +282,8 @@ func _process_teleports() -> void:
 			teleportable.global_transform = self.to_exit_transform(teleportable.global_transform)
 			
 			if teleportable is RigidBody3D:
-				teleportable.linear_velocity = real_to_exit_direction(teleportable.linear_velocity)
+				teleportable.linear_velocity = to_exit_direction(teleportable.linear_velocity)
+				teleportable.apply_central_impulse(teleportable.linear_velocity.normalized() * rb_velocity_boost)
 			
 			_watchlist_teleportables.erase(body)
 			
@@ -335,6 +341,7 @@ func _setup_cameras() -> void:
 		var adjusted_env: Environment = player_camera.environment.duplicate() \
 			if player_camera.environment \
 			else player_camera.get_world_3d().environment.duplicate()
+		
 		adjusted_env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 		adjusted_env.tonemap_exposure = 1
 		
@@ -384,20 +391,12 @@ func to_exit_transform(g_transform: Transform3D) -> Transform3D:
 	var relative_to_target = exit_portal.global_transform * flipped
 	return relative_to_target
 
-func real_to_exit_direction(real:Vector3) -> Vector3:
-	# Convert from global to local space at the entrance (this) portal
-	var local:Vector3 = global_transform.basis.inverse() * real
-	# Compensate for any scale the entrance portal may have
-	var unscaled:Vector3 = local * global_transform.basis.get_scale()
-	# Flip it (the portal always flips the view 180 degrees)
-	var flipped:Vector3 = unscaled.rotated(Vector3.UP, PI)
-	# Apply any scale the exit portal may have (and apply custom exit scale)
-	var exit_scale_vector:Vector3 = exit_portal.global_transform.basis.get_scale()
-	var exit_scale = Vector3.ONE;
-	var scaled_at_exit:Vector3 = flipped / exit_scale_vector * exit_scale
-	# Convert from local space at the exit portal to global space
-	var local_at_exit:Vector3 = exit_portal.global_transform.basis * scaled_at_exit
-	return local_at_exit
+## Similar to [method to_exit_transform], but this one only transforms a vector.
+func to_exit_direction(real:Vector3) -> Vector3:
+	var relative_to_portal: Vector3 = global_transform.basis.inverse() * real
+	var flipped:Vector3 = relative_to_portal.rotated(Vector3.UP, PI)
+	var relative_to_target: Vector3 = exit_portal.global_transform.basis * flipped
+	return relative_to_target
 
 ## Calculates the dot product of portal's forward vector with the global 
 ## position of [param node]. Used for detecting teleports.
@@ -446,7 +445,7 @@ static func get_settings_window_size() -> Vector2:
 func _get_configuration_warnings() -> PackedStringArray:
 	var warnings: Array[String] = []
 	
-	if scale != Vector3.ONE:
+	if not scale.is_equal_approx(Vector3.ONE):
 		warnings.append("Portal has scaling. Please set portal scaling to (1, 1, 1) and use 'portal_size' for sizing.")
 	
 	if exit_portal == null:
