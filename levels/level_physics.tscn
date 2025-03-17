@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=4 uid="uid://dllqiht0np5i8"]
+[gd_scene load_steps=28 format=4 uid="uid://dllqiht0np5i8"]
 
 [ext_resource type="Material" uid="uid://dgjiw8udooecr" path="res://assets/prototyping/M_prototype_dark.tres" id="1_xh7pd"]
 [ext_resource type="Script" uid="uid://d2crarvkhd45r" path="res://scripts/player.gd" id="2_l6px6"]
@@ -9,6 +9,7 @@
 [ext_resource type="Shader" uid="uid://bhdb2skdxehes" path="res://addons/portals/materials/portal_shader.gdshader" id="7_cpthp"]
 [ext_resource type="Material" uid="uid://brj2jayoo0l0d" path="res://assets/prototyping/M_prototype_blue.tres" id="8_flk5l"]
 [ext_resource type="Material" uid="uid://1nvrnylcajfg" path="res://assets/prototyping/M_prototype_red.tres" id="9_ejw2f"]
+[ext_resource type="PackedScene" uid="uid://bb1b3cg0khq5k" path="res://scripts/poor_mans_crosshair.tscn" id="10_ejw2f"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_xh7pd"]
 sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
@@ -88,6 +89,9 @@ size = Vector3(2.5, 2.5, 0.1)
 size = Vector3(2.5, 2.5, 1)
 
 [node name="Level_Physics" type="Node3D"]
+metadata/movie_file = "level_physics.avi"
+
+[node name="PoorMansCrosshair" parent="." instance=ExtResource("10_ejw2f")]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_0cfh8")
@@ -152,6 +156,7 @@ text = "Press F"
 [node name="ObjectShooter" type="Node" parent="Player" node_paths=PackedStringArray("aiming_node")]
 script = ExtResource("3_0cfh8")
 aiming_node = NodePath("../PlayerCamera")
+fire_offset = 1.0
 fire_force = 10.0
 projectile_scene = ExtResource("5_m81n0")
 
@@ -163,7 +168,6 @@ script = ExtResource("6_qn875")
 portal_size = Vector2(2.5, 2.5)
 exit_portal = NodePath("../Portal_Red")
 is_teleport = true
-teleport_direction = 0
 teleport_collision_mask = 128
 portal_mesh = NodePath("Portal3D_Mesh")
 teleport_area = NodePath("TeleportArea")
@@ -196,7 +200,6 @@ script = ExtResource("6_qn875")
 portal_size = Vector2(2.5, 2.5)
 exit_portal = NodePath("../Portal_Blue")
 is_teleport = true
-teleport_direction = 0
 teleport_collision_mask = 128
 portal_mesh = NodePath("Portal3D2_Mesh")
 teleport_area = NodePath("TeleportArea")

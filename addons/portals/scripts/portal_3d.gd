@@ -279,7 +279,6 @@ func _process_teleports() -> void:
 			if teleportable is RigidBody3D:
 				teleportable.linear_velocity = real_to_exit_direction(teleportable.linear_velocity)
 			
-			print("[%s] TELEPORT" % name)
 			_watchlist_teleportables.erase(body)
 			
 			on_teleport.emit(teleportable)
