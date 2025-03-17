@@ -8,6 +8,10 @@
 
 config_version=5
 
+[addons]
+
+portals/default_teleport_layer=24
+
 [application]
 
 config/name="Portals Plugin"
