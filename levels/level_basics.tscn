@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=4 uid="uid://5vo86e4fice3"]
+[gd_scene load_steps=29 format=4 uid="uid://5vo86e4fice3"]
 
 [ext_resource type="Script" uid="uid://bqnap47txp42k" path="res://levels/level_basics.gd" id="1_8wh7v"]
 [ext_resource type="Material" uid="uid://dgjiw8udooecr" path="res://assets/prototyping/M_prototype_dark.tres" id="1_uy66w"]
@@ -8,6 +8,7 @@
 [ext_resource type="Shader" uid="uid://bhdb2skdxehes" path="res://addons/portals/materials/portal_shader.gdshader" id="4_8wh7v"]
 [ext_resource type="PackedScene" uid="uid://dxvxy65pv5hoe" path="res://assets/prototyping/prop_sphere.tscn" id="5_p3b8s"]
 [ext_resource type="PackedScene" uid="uid://caqayjkbvlel5" path="res://assets/prototyping/prop_torus.tscn" id="6_p3b8s"]
+[ext_resource type="Material" uid="uid://brj2jayoo0l0d" path="res://assets/prototyping/M_prototype_blue.tres" id="9_lbpks"]
 
 [sub_resource type="GDScript" id="GDScript_hc4gn"]
 resource_name = "portal_watcher"
@@ -89,7 +90,23 @@ shader = ExtResource("4_8wh7v")
 [sub_resource type="BoxMesh" id="BoxMesh_im07u"]
 size = Vector3(2, 2.5, 0.1)
 
+[sub_resource type="GDScript" id="GDScript_8wh7v"]
+resource_name = "perpetum_mobile"
+script/source = "extends Area3D
+
+@export var speed: float = 2
+
+func _physics_process(delta: float) -> void:
+	var forward = -global_basis.z
+	global_position += forward * speed * delta
+"
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_lbpks"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_eavfu"]
+
 [node name="Level_Basics" type="Node3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.81261)
 script = ExtResource("1_8wh7v")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
@@ -246,3 +263,16 @@ layers = 128
 material_override = SubResource("ShaderMaterial_eavfu")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_im07u")
+
+[node name="UnstoppableSphere" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.0808, 1.25, 5.75)
+collision_layer = 129
+script = SubResource("GDScript_8wh7v")
+speed = 1.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="UnstoppableSphere"]
+shape = SubResource("SphereShape3D_lbpks")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="UnstoppableSphere"]
+material_override = ExtResource("9_lbpks")
+mesh = SubResource("SphereMesh_eavfu")

@@ -80,12 +80,12 @@ enum TeleportDirection {
 
 ## When teleporting, the portal checks if the teleported object is less than [b]this[/b] near.
 ## Prevents false negatives when multiple portals are on top of each other.
-@export var _teleport_tolerance: float = 0.2
+@export var _teleport_tolerance: float = 0.5
 
 ## These physics bodies are being watched by the portal. The value in dictionary
 ## is their dot product from last frame. As soon as the dot product changes signs,
 ## the body crossed the portal and should be teleported.
-var watchlist_bodies: Dictionary[Node3D, float] = {}
+var _watchlist_teleportables: Dictionary[Node3D, float] = {}
 
 @export_tool_button("Debug Button", "Popup") 
 var _tb_debug_action: Callable = _debug_action
@@ -254,11 +254,11 @@ func _process_cameras() -> void:
 		_process_teleports()
 
 func _process_teleports() -> void:
-	for body in watchlist_bodies.keys():
+	for body in _watchlist_teleportables.keys():
 		body = body as Node3D  # Conversion just for type hints
-		var last_fw_angle: float = watchlist_bodies.get(body)
+		var last_fw_angle: float = _watchlist_teleportables.get(body)
 		var current_fw_angle: float = forward_angle(body)
-		
+		print(body.name, " ", current_fw_angle)
 		var should_teleport: bool = false
 		match teleport_direction:
 			TeleportDirection.FRONT:
@@ -276,12 +276,12 @@ func _process_teleports() -> void:
 			var teleportable: Node3D = body.get_node(teleportable_path)
 			teleportable.global_transform = self.to_exit_transform(teleportable.global_transform)
 			print("[%s] TELEPORT" % name)
-			watchlist_bodies.erase(body)
+			_watchlist_teleportables.erase(body)
 			
 			on_teleport.emit(teleportable)
 			exit_portal.on_teleport_receive.emit(teleportable)
 		else:
-			watchlist_bodies.set(body, current_fw_angle)
+			_watchlist_teleportables.set(body, current_fw_angle)
 
 func _calculate_near_plane() -> float:
 	# Adjustment for cube portals. This AABB is basically a plane.
@@ -352,18 +352,19 @@ func _setup_cameras() -> void:
 
 func _on_teleport_area_entered(area: Area3D) -> void:
 	print("[%s] teleport_area_entered: %s" % [name, area.name])
-	# TODO
+	_watchlist_teleportables.set(area, forward_angle(area))
+
 
 func _on_teleport_area_exited(area: Area3D) -> void:
 	print("[%s] teleport_area_exited: %s" % [name, area.name])
-	# TODO
+	_watchlist_teleportables.erase(area)
 
 func _on_teleport_body_entered(body: Node3D) -> void:
 	#if body.has_meta("teleport_root"):
-	watchlist_bodies.set(body, forward_angle(body))
+	_watchlist_teleportables.set(body, forward_angle(body))
 
 func _on_teleport_body_exited(body: Node3D) -> void:
-	watchlist_bodies.erase(body)
+	_watchlist_teleportables.erase(body)
 
 func _on_window_resize() -> void:
 	portal_viewport.size = get_viewport().size
