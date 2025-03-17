@@ -210,6 +210,8 @@ func _process_cameras() -> void:
 		portal_thickness = near_diagonal
 		_on_portal_size_changed()
 		var player_in_front_of_portal: bool = forward_angle(player_camera) > 0
+		#var player_facing_portal: bool = player_camera.global_basis.z.normalized().dot(global_position - player_camera.global_position) < 0
+		
 		portal_mesh.position = Vector3.FORWARD * near_diagonal * (0.5 if player_in_front_of_portal else -0.5)
 		
 	
@@ -227,8 +229,10 @@ func _process_teleports() -> void:
 			var teleportable_path = body.get_meta("teleport_root", ".")
 			var teleportable: Node3D = body.get_node(teleportable_path)
 			teleportable.global_transform = self.to_exit_transform(teleportable.global_transform)
-			
-		watchlist_bodies.set(body, current_fw_angle)
+			print("[%s] TELEPORT: " % name, teleportable.name)
+			watchlist_bodies.erase(body)
+		else:
+			watchlist_bodies.set(body, current_fw_angle)
 
 func _calculate_near_plane() -> float:
 	# Adjustment for cube portals. This AABB is basically a plane.
