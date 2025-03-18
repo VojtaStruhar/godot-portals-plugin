@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=4 uid="uid://dllqiht0np5i8"]
+[gd_scene load_steps=35 format=4 uid="uid://dllqiht0np5i8"]
 
 [ext_resource type="Material" uid="uid://dgjiw8udooecr" path="res://assets/prototyping/M_prototype_dark.tres" id="1_xh7pd"]
 [ext_resource type="Script" uid="uid://d2crarvkhd45r" path="res://scripts/player.gd" id="2_l6px6"]
@@ -10,6 +10,19 @@
 [ext_resource type="Material" uid="uid://brj2jayoo0l0d" path="res://assets/prototyping/M_prototype_blue.tres" id="8_flk5l"]
 [ext_resource type="Material" uid="uid://1nvrnylcajfg" path="res://assets/prototyping/M_prototype_red.tres" id="9_ejw2f"]
 [ext_resource type="PackedScene" uid="uid://bb1b3cg0khq5k" path="res://scripts/poor_mans_crosshair.tscn" id="10_ejw2f"]
+
+[sub_resource type="GDScript" id="GDScript_ejw2f"]
+resource_name = "ball_spawner"
+script/source = "extends Node3D
+
+@export var projectile_scene: PackedScene
+
+func _process(delta: float) -> void:
+	if Input.is_action_just_pressed(\"toggle_portals\"):
+		var inst = projectile_scene.instantiate()
+		add_child(inst)
+		inst.global_position = self.global_position
+"
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_xh7pd"]
 sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
@@ -110,6 +123,15 @@ size = Vector3(2, 2.5, 1)
 
 [node name="Level_Physics" type="Node3D"]
 metadata/movie_file = "level_physics.avi"
+
+[node name="BallSpawner" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.25, 3.25, -5.5)
+script = SubResource("GDScript_ejw2f")
+projectile_scene = ExtResource("5_m81n0")
+
+[node name="Label3D" type="Label3D" parent="BallSpawner"]
+billboard = 1
+text = "Press 'P' to spawn a ball here"
 
 [node name="PoorMansCrosshair" parent="." instance=ExtResource("10_ejw2f")]
 
@@ -249,13 +271,13 @@ skeleton = NodePath("../..")
 [node name="Portal_Red1" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal", "portal_mesh", "teleport_area", "teleport_collision") groups=["portals"]]
 process_priority = 100
 process_physics_priority = 100
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -4.25, 0.274811, -5.25)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -4.25, 0.372426, -5.25)
 script = ExtResource("6_qn875")
 portal_size = Vector2(2.5, 2.5)
 exit_portal = NodePath("../Portal_Red2")
 is_teleport = true
 teleport_direction = 0
-rb_velocity_boost = 2.0
+rb_velocity_boost = 1.0
 teleport_collision_mask = 128
 portal_mesh = NodePath("Portal3D_Mesh")
 teleport_area = NodePath("TeleportArea")
@@ -283,13 +305,13 @@ skeleton = NodePath("../..")
 [node name="Portal_Red2" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal", "portal_mesh", "teleport_area", "teleport_collision") groups=["portals"]]
 process_priority = 100
 process_physics_priority = 100
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 1.25, 0.25, -5.5)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 1.25, 0.347614, -5.5)
 script = ExtResource("6_qn875")
 portal_size = Vector2(2.5, 2.5)
 exit_portal = NodePath("../Portal_Red1")
 is_teleport = true
 teleport_direction = 0
-rb_velocity_boost = 2.0
+rb_velocity_boost = 1.0
 teleport_collision_mask = 128
 portal_mesh = NodePath("Portal3D_Mesh")
 teleport_area = NodePath("TeleportArea")
