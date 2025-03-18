@@ -17,7 +17,11 @@ signal on_teleport_receive(body_or_area: Node3D)
 @export var portal_size: Vector2 = Vector2(2.0, 2.5):
 	set(v):
 		portal_size = v
-		if caused_by_user_interaction(): _on_portal_size_changed()
+		if caused_by_user_interaction(): 
+			_on_portal_size_changed()
+			update_configuration_warnings()
+			if exit_portal:
+				exit_portal.update_configuration_warnings()
 
 ## The width of the frame portal. Adjusts the near clip distance of the camera looking through THIS
 ## portal.
@@ -474,5 +478,12 @@ func _get_configuration_warnings() -> PackedStringArray:
 	
 	if exit_portal == null:
 		warnings.append("Exit portal is null")
+	
+	if exit_portal != null:
+		if not portal_size.is_equal_approx(exit_portal.portal_size):
+			warnings.append(
+				"Portal size should be the same as exit portal's (it's %s and %s)" % 
+				[portal_size, exit_portal.portal_size]
+			)
 	
 	return PackedStringArray(warnings)
