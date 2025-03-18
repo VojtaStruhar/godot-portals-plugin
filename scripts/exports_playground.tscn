@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://svpdsk6g8xy2"]
+
+[ext_resource type="Script" uid="uid://c2wi3h0jt2fxb" path="res://scripts/normal_exports.gd" id="1_465jp"]
+[ext_resource type="Script" uid="uid://b6cegp28gdigl" path="res://scripts/manual_exports.gd" id="1_oe0o1"]
+
+[node name="ExportsPlayground" type="Node3D"]
+
+[node name="NormalExports" type="Node" parent="."]
+script = ExtResource("1_465jp")
+
+[node name="ManualExports" type="Node" parent="."]
+script = ExtResource("1_oe0o1")
+favorite_number = 42.0
+dir = 2
+is_debug = false
