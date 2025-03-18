@@ -264,7 +264,7 @@ func _process_cameras() -> void:
 		portal_thickness = near_diagonal
 		_on_portal_size_changed()
 		
-		var player_in_front_of_portal: bool = forward_angle(player_camera) > 0
+		var player_in_front_of_portal: bool = forward_distance(player_camera) > 0
 		portal_mesh.position = (
 			Vector3.FORWARD * near_diagonal * (0.5 if player_in_front_of_portal else -0.5)
 		)
@@ -277,7 +277,7 @@ func _process_teleports() -> void:
 	for body in _watchlist_teleportables.keys():
 		body = body as Node3D  # Conversion just for type hints
 		var last_fw_angle: float = _watchlist_teleportables.get(body)
-		var current_fw_angle: float = forward_angle(body)
+		var current_fw_angle: float = forward_distance(body)
 		
 		var should_teleport: bool = false
 		match teleport_direction:
@@ -382,7 +382,7 @@ func _setup_cameras() -> void:
 
 func _on_teleport_area_entered(area: Area3D) -> void:
 	print("[%s] teleport_area_entered: %s" % [name, area.name])
-	_watchlist_teleportables.set(area, forward_angle(area))
+	_watchlist_teleportables.set(area, forward_distance(area))
 
 
 func _on_teleport_area_exited(area: Area3D) -> void:
@@ -391,7 +391,7 @@ func _on_teleport_area_exited(area: Area3D) -> void:
 
 func _on_teleport_body_entered(body: Node3D) -> void:
 	#if body.has_meta("teleport_root"):
-	_watchlist_teleportables.set(body, forward_angle(body))
+	_watchlist_teleportables.set(body, forward_distance(body))
 
 func _on_teleport_body_exited(body: Node3D) -> void:
 	_watchlist_teleportables.erase(body)
@@ -419,13 +419,13 @@ func to_exit_direction(real:Vector3) -> Vector3:
 	return relative_to_target
 
 ## Calculates the dot product of portal's forward vector with the global 
-## position of [param node]. Used for detecting teleports.
+## position of [param node] relative to the portal. Used for detecting teleports.
 ## [br]
-## The result is positive when the node is in front of the portal.
-func forward_angle(node: Node3D) -> float:
+## The result is positive when the node is in front of the portal. The value measures how far in 
+## front (or behind) the other node is compared to the portal.
+func forward_distance(node: Node3D) -> float:
 	var portal_front: Vector3 = self.global_transform.basis.z.normalized()
-	var node_relative: Vector3 = (node.global_transform.origin - self.global_transform.origin)\
-		.normalized()
+	var node_relative: Vector3 = (node.global_transform.origin - self.global_transform.origin)
 	return portal_front.dot(node_relative)
 
 ## Helper function meant to be used in editor. Adds [param node] as a child to 
