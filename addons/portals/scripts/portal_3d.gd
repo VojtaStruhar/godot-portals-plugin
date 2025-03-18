@@ -19,7 +19,8 @@ signal on_teleport_receive(body_or_area: Node3D)
 		portal_size = v
 		if caused_by_user_interaction(): _on_portal_size_changed()
 
-## The width of the frame portal. Adjusts the near clip distance of the camera looking through THIS portal.
+## The width of the frame portal. Adjusts the near clip distance of the camera looking through THIS
+## portal.
 @export_range(0.0, 10.0, 0.01) var portal_frame_width: float = 0.0
 
 @export var exit_portal: Portal3D:
@@ -79,7 +80,8 @@ var rb_velocity_boost: float = 0
 @export var teleport_area: Area3D
 @export var teleport_collision: CollisionShape3D
 
-## Camera that looks through the exit portal. If exit portal is null, the camera doesn't exist either.
+## Camera that looks through the exit portal. If exit portal is null, the camera doesn't exist 
+## either.
 @export var portal_camera: Camera3D
 @export var portal_viewport: SubViewport
 
@@ -99,10 +101,14 @@ var _tb_debug_action: Callable = _debug_action
 var _tb_rerun_setup: Callable = _editor_rerun_setup
 
 func _debug_action() -> void:
+	print("[%s] DEBUG")
 	print("Number of children: " + str(get_child_count(true)))
 	print("Node metadata: ")
 	for meta in get_meta_list():
 		print("  - " + meta + ": " + str(get_meta(meta)))
+	print("Node properties:")
+	for prop in get_property_list():
+		if prop["usage"] & PROPERTY_USAGE_SCRIPT_VARIABLE: print("  - ", prop)
 
 #region Public API
 func activate() -> void:
@@ -192,7 +198,8 @@ func _editor_setup_teleport():
 
 
 func _on_portal_size_changed() -> void:
-	assert(portal_mesh != null, "Portal should never be null. Setting size to '" + str(portal_size) + "' failed.")
+	assert(portal_mesh != null, 
+		"Portal should never be null. Setting size to '" + str(portal_size) + "' failed.")
 	
 	var p: BoxMesh = portal_mesh.mesh
 	p.size = Vector3(portal_size.x, portal_size.y, portal_thickness)
@@ -245,14 +252,18 @@ func _process_cameras() -> void:
 		portal_camera.near = _calculate_near_plane()
 		
 		# Prevent flickering
+		var pv_size: Vector2i = portal_viewport.size
 		var half_height: float = player_camera.near * tan(deg_to_rad(player_camera.fov * 0.5))
-		var half_width: float = half_height * portal_viewport.size.x / float(portal_viewport.size.y)
+		var half_width: float = half_height * pv_size.x / float(pv_size.y)
 		var near_diagonal: float = Vector3(half_width, half_height, player_camera.near).length()
 		# TODO: This doesn't change much. Update it directly?
 		portal_thickness = near_diagonal
 		_on_portal_size_changed()
+		
 		var player_in_front_of_portal: bool = forward_angle(player_camera) > 0
-		portal_mesh.position = Vector3.FORWARD * near_diagonal * (0.5 if player_in_front_of_portal else -0.5)
+		portal_mesh.position = (
+			Vector3.FORWARD * near_diagonal * (0.5 if player_in_front_of_portal else -0.5)
+		)
 		
 	
 	if is_teleport:
@@ -283,7 +294,9 @@ func _process_teleports() -> void:
 			
 			if teleportable is RigidBody3D:
 				teleportable.linear_velocity = to_exit_direction(teleportable.linear_velocity)
-				teleportable.apply_central_impulse(teleportable.linear_velocity.normalized() * rb_velocity_boost)
+				teleportable.apply_central_impulse(
+					teleportable.linear_velocity.normalized() * rb_velocity_boost
+				)
 			
 			_watchlist_teleportables.erase(body)
 			
@@ -299,13 +312,16 @@ func _calculate_near_plane() -> float:
 		Vector3(-exit_portal.portal_size.x / 2, -exit_portal.portal_size.y / 2, 0),
 		Vector3(exit_portal.portal_size.x, exit_portal.portal_size.y, 0)
 	)
+	var _pos := _aabb.position
+	var _size := _aabb.size
 	
-	var corner_1:Vector3 = exit_portal.to_global(Vector3(_aabb.position.x, _aabb.position.y, 0))
-	var corner_2:Vector3 = exit_portal.to_global(Vector3(_aabb.position.x + _aabb.size.x, _aabb.position.y, 0))
-	var corner_3:Vector3 = exit_portal.to_global(Vector3(_aabb.position.x + _aabb.size.x, _aabb.position.y + _aabb.size.y, 0))
-	var corner_4:Vector3 = exit_portal.to_global(Vector3(_aabb.position.x, _aabb.position.y + _aabb.size.y, 0))
+	var corner_1:Vector3 = exit_portal.to_global(Vector3(_pos.x, _pos.y, 0))
+	var corner_2:Vector3 = exit_portal.to_global(Vector3(_pos.x + _size.x, _pos.y, 0))
+	var corner_3:Vector3 = exit_portal.to_global(Vector3(_pos.x + _size.x, _pos.y + _size.y, 0))
+	var corner_4:Vector3 = exit_portal.to_global(Vector3(_pos.x, _pos.y + _size.y, 0))
 
-	# Calculate the distance along the exit camera forward vector at which each of the portal corners projects
+	# Calculate the distance along the exit camera forward vector at which each of the portal 
+	# corners projects
 	var camera_forward:Vector3 = -portal_camera.global_transform.basis.z.normalized()
 
 	var d_1:float = (corner_1 - portal_camera.global_position).dot(camera_forward)
@@ -404,7 +420,8 @@ func to_exit_direction(real:Vector3) -> Vector3:
 ## The result is positive when the node is in front of the portal.
 func forward_angle(node: Node3D) -> float:
 	var portal_front: Vector3 = self.global_transform.basis.z.normalized()
-	var node_relative: Vector3 = (node.global_transform.origin - global_transform.origin).normalized()
+	var node_relative: Vector3 = (node.global_transform.origin - self.global_transform.origin)\
+		.normalized()
 	return portal_front.dot(node_relative)
 
 ## Helper function meant to be used in editor. Adds [param node] as a child to 
@@ -438,6 +455,11 @@ static func get_settings_window_size() -> Vector2:
 		ProjectSettings.get_setting("display/window/size/viewport_height")
 	)
 
+func get_aspect_ratio() -> float:
+	var vp = get_viewport()
+	assert(vp != null, "Oops, no viewport. Fall back on project window settings?")
+	return float(vp.size.x) / float(vp.size.y)
+
 #endregion
 
 # ---------- GODOT ENGINE INTEGRATIONS --------------
@@ -446,7 +468,9 @@ func _get_configuration_warnings() -> PackedStringArray:
 	var warnings: Array[String] = []
 	
 	if not scale.is_equal_approx(Vector3.ONE):
-		warnings.append("Portal has scaling. Please set portal scaling to (1, 1, 1) and use 'portal_size' for sizing.")
+		warnings.append(
+			"Portals should NOT be scaled. Set portal scaling to (1, 1, 1) and " +
+			"reload the scene. Use the 'portal_size' property for sizing.")
 	
 	if exit_portal == null:
 		warnings.append("Exit portal is null")

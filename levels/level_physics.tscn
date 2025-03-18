@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=4 uid="uid://dllqiht0np5i8"]
+[gd_scene load_steps=27 format=4 uid="uid://dllqiht0np5i8"]
 
 [ext_resource type="Material" uid="uid://dgjiw8udooecr" path="res://assets/prototyping/M_prototype_dark.tres" id="1_xh7pd"]
 [ext_resource type="Script" uid="uid://d2crarvkhd45r" path="res://scripts/player.gd" id="2_l6px6"]
@@ -8,7 +8,6 @@
 [ext_resource type="Script" uid="uid://cw1r4c1d7beyv" path="res://addons/portals/scripts/portal_3d.gd" id="6_qn875"]
 [ext_resource type="Shader" uid="uid://bhdb2skdxehes" path="res://addons/portals/materials/portal_shader.gdshader" id="7_cpthp"]
 [ext_resource type="Material" uid="uid://brj2jayoo0l0d" path="res://assets/prototyping/M_prototype_blue.tres" id="8_flk5l"]
-[ext_resource type="Material" uid="uid://1nvrnylcajfg" path="res://assets/prototyping/M_prototype_red.tres" id="9_ejw2f"]
 [ext_resource type="PackedScene" uid="uid://bb1b3cg0khq5k" path="res://scripts/poor_mans_crosshair.tscn" id="10_ejw2f"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_xh7pd"]
@@ -160,13 +159,13 @@ fire_offset = 1.0
 fire_force = 10.0
 projectile_scene = ExtResource("5_m81n0")
 
-[node name="Portal_Blue" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal", "portal_mesh", "teleport_area", "teleport_collision") groups=["portals"]]
+[node name="Portal_Blue1" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal", "portal_mesh", "teleport_area", "teleport_collision") groups=["portals"]]
 process_priority = 100
 process_physics_priority = 100
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 1.25, -0.5)
 script = ExtResource("6_qn875")
 portal_size = Vector2(2.5, 2.5)
-exit_portal = NodePath("../Portal_Red")
+exit_portal = NodePath("../Portal_Blue2")
 is_teleport = true
 rb_velocity_boost = 1.0
 teleport_collision_mask = 128
@@ -176,30 +175,30 @@ teleport_collision = NodePath("TeleportArea/CollisionShape3D")
 metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
 metadata/_edit_group_ = true
 
-[node name="Portal3D_Mesh" type="MeshInstance3D" parent="Portal_Blue"]
+[node name="Portal3D_Mesh" type="MeshInstance3D" parent="Portal_Blue1"]
 layers = 128
 material_override = SubResource("ShaderMaterial_flk5l")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_ejw2f")
 
-[node name="TeleportArea" type="Area3D" parent="Portal_Blue"]
+[node name="TeleportArea" type="Area3D" parent="Portal_Blue1"]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Portal_Blue/TeleportArea"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Portal_Blue1/TeleportArea"]
 shape = SubResource("BoxShape3D_qn875")
 
-[node name="PortalFrame2" type="MeshInstance3D" parent="Portal_Blue"]
+[node name="PortalFrame2" type="MeshInstance3D" parent="Portal_Blue1"]
 transform = Transform3D(1.01, 0, 0, 0, 1.01, 0, 0, 0, 1.01, 0, 0, 0)
 material_override = ExtResource("8_flk5l")
 mesh = SubResource("ArrayMesh_3l8fs")
 skeleton = NodePath("../..")
 
-[node name="Portal_Red" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal", "portal_mesh", "teleport_area", "teleport_collision") groups=["portals"]]
+[node name="Portal_Blue2" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal", "portal_mesh", "teleport_area", "teleport_collision") groups=["portals"]]
 process_priority = 100
 process_physics_priority = 100
 transform = Transform3D(-3.1093e-08, 0.5, -0.866025, 2.18557e-08, 0.866025, 0.5, 1, -3.38109e-09, -3.78552e-08, 3.716, 1.25, 1.75)
 script = ExtResource("6_qn875")
 portal_size = Vector2(2.5, 2.5)
-exit_portal = NodePath("../Portal_Blue")
+exit_portal = NodePath("../Portal_Blue1")
 is_teleport = true
 rb_velocity_boost = 1.0
 teleport_collision_mask = 128
@@ -209,19 +208,19 @@ teleport_collision = NodePath("TeleportArea/CollisionShape3D")
 metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
 metadata/_edit_group_ = true
 
-[node name="Portal3D2_Mesh" type="MeshInstance3D" parent="Portal_Red"]
+[node name="Portal3D2_Mesh" type="MeshInstance3D" parent="Portal_Blue2"]
 layers = 128
 material_override = SubResource("ShaderMaterial_7nky4")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_3l8fs")
 
-[node name="TeleportArea" type="Area3D" parent="Portal_Red"]
+[node name="TeleportArea" type="Area3D" parent="Portal_Blue2"]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Portal_Red/TeleportArea"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Portal_Blue2/TeleportArea"]
 shape = SubResource("BoxShape3D_8emm5")
 
-[node name="PortalFrame" type="MeshInstance3D" parent="Portal_Red"]
+[node name="PortalFrame" type="MeshInstance3D" parent="Portal_Blue2"]
 transform = Transform3D(1.01, 0, 0, 0, 1.01, 0, 0, 0, 1.01, 0, 0, 0)
-material_override = ExtResource("9_ejw2f")
+material_override = ExtResource("8_flk5l")
 mesh = SubResource("ArrayMesh_3l8fs")
 skeleton = NodePath("../..")
