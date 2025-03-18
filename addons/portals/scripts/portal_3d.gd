@@ -74,7 +74,7 @@ var rb_velocity_boost: float = 0
 ## These thing don't need to be exported. I just want to see them in editor.
 @export_group("Internals")
 
-@export var portal_thickness: float = 0.1:
+@export_range(0, 1, 0.01, "or_greater") var portal_thickness: float = 0.1:
 	set(v):
 		portal_thickness = v
 		if caused_by_user_interaction(): _on_portal_size_changed()

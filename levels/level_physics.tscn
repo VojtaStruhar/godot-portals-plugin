@@ -16,12 +16,14 @@ resource_name = "ball_spawner"
 script/source = "extends Node3D
 
 @export var projectile_scene: PackedScene
+@export_range(1, 100, 1.0, \"or_greater\") var projectile_lifetime: float = 30.0
 
 func _process(delta: float) -> void:
 	if Input.is_action_just_pressed(\"toggle_portals\"):
 		var inst = projectile_scene.instantiate()
 		add_child(inst)
 		inst.global_position = self.global_position
+		get_tree().create_timer(projectile_lifetime).timeout.connect(func(): inst.queue_free())
 "
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_xh7pd"]
@@ -108,7 +110,7 @@ shader = ExtResource("7_cpthp")
 [sub_resource type="BoxMesh" id="BoxMesh_7nky4"]
 size = Vector3(2.5, 2.5, 0.1)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_3l8fs"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_ejw2f"]
 size = Vector3(2.5, 2.5, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_8emm5"]
@@ -118,8 +120,8 @@ shader = ExtResource("7_cpthp")
 [sub_resource type="BoxMesh" id="BoxMesh_wkxyb"]
 size = Vector3(2.5, 2.5, 0.1)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_mrgyd"]
-size = Vector3(2, 2.5, 1)
+[sub_resource type="BoxShape3D" id="BoxShape3D_7nky4"]
+size = Vector3(2.5, 2.5, 1)
 
 [node name="Level_Physics" type="Node3D"]
 metadata/movie_file = "level_physics.avi"
@@ -238,7 +240,7 @@ skeleton = NodePath("../..")
 [node name="Portal_Blue2" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal", "portal_mesh", "teleport_area", "teleport_collision") groups=["portals"]]
 process_priority = 100
 process_physics_priority = 100
-transform = Transform3D(-3.1093e-08, 0.5, -0.866025, 2.18557e-08, 0.866025, 0.5, 1, -3.38109e-09, -3.78552e-08, 3.716, 1.25, 1.75)
+transform = Transform3D(-3.1093e-08, 0.5, -0.866025, 2.18557e-08, 0.866025, 0.5, 1, -3.38109e-09, -3.78552e-08, 3.70235, 1.24374, 1.74491)
 script = ExtResource("6_qn875")
 portal_size = Vector2(2.5, 2.5)
 exit_portal = NodePath("../Portal_Blue1")
@@ -291,16 +293,16 @@ material_override = SubResource("ShaderMaterial_ejw2f")
 cast_shadow = 0
 mesh = SubResource("BoxMesh_7nky4")
 
-[node name="TeleportArea" type="Area3D" parent="Portal_Red1"]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Portal_Red1/TeleportArea"]
-shape = SubResource("BoxShape3D_3l8fs")
-
 [node name="PortalFrame2" type="MeshInstance3D" parent="Portal_Red1"]
 transform = Transform3D(1.01, 0, 0, 0, 1.01, 0, 0, 0, 1.01, 0, 0, 0)
 material_override = ExtResource("9_ejw2f")
 mesh = SubResource("ArrayMesh_3l8fs")
 skeleton = NodePath("../..")
+
+[node name="TeleportArea" type="Area3D" parent="Portal_Red1"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Portal_Red1/TeleportArea"]
+shape = SubResource("BoxShape3D_ejw2f")
 
 [node name="Portal_Red2" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal", "portal_mesh", "teleport_area", "teleport_collision") groups=["portals"]]
 process_priority = 100
@@ -334,4 +336,4 @@ skeleton = NodePath("../..")
 [node name="TeleportArea" type="Area3D" parent="Portal_Red2"]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Portal_Red2/TeleportArea"]
-shape = SubResource("BoxShape3D_mrgyd")
+shape = SubResource("BoxShape3D_7nky4")
