@@ -207,7 +207,12 @@ func _on_portal_size_changed() -> void:
 	
 	var p: BoxMesh = portal_mesh.mesh
 	p.size = Vector3(portal_size.x, portal_size.y, portal_thickness)
-
+	
+	if is_teleport and teleport_collision:
+		var box: BoxShape3D = teleport_collision.shape
+		box.size.x = portal_size.x
+		box.size.y = portal_size.y
+	
 #endregion
 
 #region GAMEPLAY RUNTIME STUFF
