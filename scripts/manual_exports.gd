@@ -7,6 +7,7 @@ var favorite_number: float = 42.0
 enum Direction { IN, OUT, IN_AND_OUT }
 var dir: Direction = Direction.IN_AND_OUT
 
+## Here this only determines if [member _tb_debug] is shown as a button or not!
 var is_debug: bool = true:
 	set(v):
 		is_debug = v

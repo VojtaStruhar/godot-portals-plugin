@@ -18,6 +18,11 @@ var _tb_debug: Callable = _debug_action
 @export_subgroup("Extra properties", "teleport_")
 @export_flags_3d_physics var teleport_layer: int = 0
 
+@export_flags("Characters", "RigidBodies", "Areas") var teleport_types: int = 0:
+	set(v):
+		teleport_types = v
+		print("set teleport_types: ", v)
+
 @export_group("") # break out of the group
 
 @export var your_name: String = "Vojta"
