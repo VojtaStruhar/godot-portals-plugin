@@ -26,6 +26,7 @@ var _tb_debug: Callable = _debug_action
 @export_group("") # break out of the group
 
 @export var your_name: String = "Vojta"
+@export_color_no_alpha var fav_color: Color = Color("F7B500")
 
 var usages = [
 	PROPERTY_USAGE_NONE,

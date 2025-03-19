@@ -25,6 +25,14 @@ static func button(propname: String, button_text: String, button_icon: String = 
 static func bool_(propname: String) -> Dictionary:
 	return _base(propname, TYPE_BOOL)
 
+static func color(propname: String) -> Dictionary:
+	return _base(propname, TYPE_COLOR)
+
+static func color_no_alpha(propname: String) -> Dictionary:
+	var result := _base(propname, TYPE_COLOR)
+	result["hint"] = PROPERTY_HINT_COLOR_NO_ALPHA
+	return result
+
 ## Following two lines are equivalent: [br]
 ## [codeblock]
 ## @export var height: float
@@ -59,6 +67,13 @@ static func int_physics_3d(propname: String) -> Dictionary:
 	var result := int_(propname)
 	result["hint"] = PROPERTY_HINT_LAYERS_3D_PHYSICS
 	return result
+
+
+static func int_render_3d(propname: String) -> Dictionary:
+	var result := int_(propname)
+	result["hint"] = PROPERTY_HINT_LAYERS_3D_RENDER
+	return result
+
 
 
 static func enum_(propname: String, parent_and_enum: StringName, enum_class: Variant) -> Dictionary:
