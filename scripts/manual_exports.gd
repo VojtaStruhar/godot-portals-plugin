@@ -14,6 +14,57 @@ var is_debug: bool = true:
 
 var _tb_debug: Callable = _debug_action
 
+var is_teleport: bool = true:
+	set(v):
+		is_teleport = v
+		notify_property_list_changed()
+
+var teleport_tolerance: float = 0.1
+var teleport_layer: int = 0
+
+
+
+func _get_property_list() -> Array[Dictionary]:
+	var config: Array[Dictionary] = []
+	
+	config.append(AtExport.float_range("favorite_number", 0, 100, 1))
+	config.append(AtExport.enum_("dir", &"ManualExports.Direction", Direction))
+	config.append(AtExport.bool_("is_debug"))
+	
+	if is_debug:
+		config.append(AtExport.button("_tb_debug", "Debug Action!"))
+	
+	config.append(AtExport.bool_("is_teleport"))
+	
+	if is_teleport:
+		config.append(AtExport.group("Teleport Stuff"))
+		config.append(AtExport.float_("teleport_tolerance"))
+		config.append(AtExport.subgroup("Extra properties"))
+		config.append(AtExport.int_physics_3d("teleport_layer"))
+		
+		config.append(AtExport.group_end()) # Or you could provide a prefix to the subgroup
+		
+	config.append(AtExport.string("your_name"))
+	
+	return config
+
+func _property_can_revert(property: StringName) -> bool:
+	return property in [
+		&"favorite_number",
+		&"dir",
+		&"teleport_tolerance",
+		&"teleport_layer"
+	]
+
+func _property_get_revert(property: StringName) -> Variant:
+	return {
+		&"favorite_number": 42.0,
+		&"dir": Direction.IN_AND_OUT,
+		&"teleport_tolerance": 0.1,
+		&"teleport_layer": 0,
+	}[property]
+
+
 
 var usages = [
 	PROPERTY_USAGE_NONE,
@@ -96,51 +147,3 @@ func _debug_action() -> void:
 			print("  - ", prop)
 			print_rich("    - [i]%s[/i]" % ", ".join(usage_report))
 			
-
-
-
-func _get_property_list() -> Array[Dictionary]:
-	var config: Array[Dictionary] = []
-	
-	config.append({
-		"name": "favorite_number",
-		"type": TYPE_FLOAT,
-		"hint": PROPERTY_HINT_RANGE,
-		"hint_string": "0.0,100.0,1.0",
-		"usage": PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_SCRIPT_VARIABLE
-	})
-	config.append({
-		"name": "dir",
-		"type": TYPE_INT,
-		"class_name": &"ManualExports.Direction",
-		"hint": PROPERTY_HINT_ENUM,
-		"hint_string": ",".join(Direction.keys()),
-		"usage": PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CLASS_IS_ENUM | PROPERTY_USAGE_SCRIPT_VARIABLE
-	})
-	config.append({
-		"name": "is_debug",
-		"type": TYPE_BOOL,
-		"usage": PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_SCRIPT_VARIABLE
-	})
-	if is_debug:
-		config.append({
-			"name": "_tb_debug",
-			"type": TYPE_CALLABLE,
-			"hint": PROPERTY_HINT_TOOL_BUTTON,
-			"hint_string": "Debug Action",
-			"usage": PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_SCRIPT_VARIABLE
-		})
-	
-	return config
-
-func _property_can_revert(property: StringName) -> bool:
-	return property in [
-		&"favorite_number",
-		&"dir"
-	]
-
-func _property_get_revert(property: StringName) -> Variant:
-	return {
-		&"favorite_number": 42.0,
-		&"dir": Direction.IN_AND_OUT
-	}[property]

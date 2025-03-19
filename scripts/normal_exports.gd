@@ -2,16 +2,25 @@
 extends Node
 class_name NormalExports
 
-@export_range(0, 100, 1) var favorite_number: float = 42.0
+@export_range(0, 100, 1, "or_greater") var favorite_number: float = 42.0
 
 enum Direction { IN, OUT, IN_AND_OUT }
 @export var dir: Direction = Direction.IN_AND_OUT
 
 @export var is_debug: bool = true
 
-@export_tool_button("Debug Action")
+@export_tool_button("Debug Action", "Node")
 var _tb_debug: Callable = _debug_action
 
+@export var is_teleport: bool = true
+@export_group("Teleport stuff", "teleport_")
+@export var teleport_tolerance: float = 0.1
+@export_subgroup("Extra properties", "teleport_")
+@export_flags_3d_physics var teleport_layer: int = 0
+
+@export_group("") # break out of the group
+
+@export var your_name: String = "Vojta"
 
 var usages = [
 	PROPERTY_USAGE_NONE,
@@ -83,7 +92,7 @@ var usage_names = [
 func _debug_action() -> void:
 	print_rich("[color=green]Default exports - debug action![/color]")
 	for prop in get_property_list():
-		if prop["usage"] & PROPERTY_USAGE_SCRIPT_VARIABLE:
+		if (prop["usage"] & PROPERTY_USAGE_SCRIPT_VARIABLE > 0) and (prop["usage"] & PROPERTY_USAGE_EDITOR > 0):
 			var usage_report: Array[String] = []
 			var i = 0
 			for usage in usages:

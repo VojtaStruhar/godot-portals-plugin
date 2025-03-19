@@ -6,10 +6,16 @@
 [node name="ExportsPlayground" type="Node3D"]
 
 [node name="NormalExports" type="Node" parent="."]
+editor_description = "Demo script with normal @export annotations. I'll try to replicate its inspector with a custom _get_property_list() implementation."
 script = ExtResource("1_465jp")
+favorite_number = 100.0
+teleport_layer = 128
 
 [node name="ManualExports" type="Node" parent="."]
 script = ExtResource("1_oe0o1")
 favorite_number = 42.0
 dir = 2
-is_debug = false
+is_debug = true
+_tb_debug = Callable()
+is_teleport = false
+your_name = null
