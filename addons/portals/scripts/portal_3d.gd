@@ -14,7 +14,7 @@ signal on_teleport(body_or_area: Node3D)
 ## its [member exit_portal] triggered a teleport!
 signal on_teleport_receive(body_or_area: Node3D)
 
-@export var portal_size: Vector2 = Vector2(2.0, 2.5):
+var portal_size: Vector2 = Vector2(2.0, 2.5):
 	set(v):
 		portal_size = v
 		if caused_by_user_interaction(): 
@@ -23,77 +23,82 @@ signal on_teleport_receive(body_or_area: Node3D)
 			if exit_portal:
 				exit_portal.update_configuration_warnings()
 
-## The width of the frame portal. Adjusts the near clip distance of the camera looking through THIS
-## portal.
-@export_range(0.0, 10.0, 0.01) var portal_frame_width: float = 0.0
 
-@export var exit_portal: Portal3D:
+var exit_portal: Portal3D:
 	set(v):
 		exit_portal = v
 		update_configuration_warnings()
+		notify_property_list_changed()
 
-# TODO: Make this optional, only display when the other's portal exit_portal is null.
-@export_tool_button("Pair Portals?", "SliderJoint3D")
 var _tb_pair_portals: Callable = _editor_pair_portals
+var player_camera: Camera3D
 
-@export var player_camera: Camera3D
+## The width of the frame portal. Adjusts the near clip distance of the camera looking through 
+## THIS portal.
+var portal_frame_width: float = 0
+var portals_see_portals: bool = false
 
-@export var portals_see_portals: bool = false
-
-@export_flags_3d_render var portal_render_layer: int = 1 << 7:
+var portal_render_layer: int = 1 << 7:
 	set(v):
 		portal_render_layer = v
 		if caused_by_user_interaction():
 			portal_mesh.layers = v
 
-@export var max_viewport_width: int = ProjectSettings.get_setting("display/window/size/viewport_width")
+var max_viewport_width: int = ProjectSettings.get_setting("display/window/size/viewport_width")
 
-@export var is_teleport: bool = false:
+var is_teleport: bool:
 	set(v):
 		is_teleport = v
-		if caused_by_user_interaction(): _editor_setup_teleport()
+		if caused_by_user_interaction(): 
+			_setup_teleport()
+			notify_property_list_changed()
 
 
 enum TeleportDirection {
-	## Corresponds to portal's FORWARD direction
-	FRONT, 
+	## Corresponds to portal's FORWARD direction (-Z)
+	FRONT,
+	## Corresponds to portal's BACK direction (+Z)
 	BACK, 
+	## Teleports stuff coming from either side.
 	FRONT_AND_BACK 
 }
+
 ## If the portal is also a teleport, it will only teleport things coming from
 ## this direction.
-@export var teleport_direction: TeleportDirection = TeleportDirection.FRONT_AND_BACK
+var teleport_direction: TeleportDirection = TeleportDirection.FRONT_AND_BACK
 
 ## When a [RigidBody3D] goes through the portal, give its new normalized velocity a 
 ## little boost. Makes stuff flying out of portals more fun. [br][br]
 ## Recommended values: 1 to 3
-@export_range(0, 5, 0.1, "or_greater")
-var rb_velocity_boost: float = 0
+var rb_velocity_boost: float = 0.0
 
-@export_flags_3d_physics var teleport_collision_mask: int = 0
+var teleport_collision_mask: int = 1 << 7
 
+## When teleporting, the portal checks if the teleported object is less than [b]this[/b] near.
+## Prevents false negatives when multiple portals are on top of each other.
+var teleport_tolerance: float = 0.5
 
-## These thing don't need to be exported. I just want to see them in editor.
+#region INTERNALS
+
 @export_group("Internals")
 
-@export_range(0, 1, 0.01, "or_greater") var portal_thickness: float = 0.1:
+@export var portal_thickness: float = 0.05:
 	set(v):
 		portal_thickness = v
 		if caused_by_user_interaction(): _on_portal_size_changed()
 
-@export var portal_mesh: MeshInstance3D
+@export_storage var portal_mesh: MeshInstance3D
 
-@export var teleport_area: Area3D
-@export var teleport_collision: CollisionShape3D
+@export_storage var teleport_area: Area3D
+@export_storage var teleport_collision: CollisionShape3D
+
+@export_group("")
 
 ## Camera that looks through the exit portal. If exit portal is null, the camera doesn't exist 
 ## either.
-@export var portal_camera: Camera3D
-@export var portal_viewport: SubViewport
+var portal_camera: Camera3D = null
+var portal_viewport: SubViewport = null
 
-## When teleporting, the portal checks if the teleported object is less than [b]this[/b] near.
-## Prevents false negatives when multiple portals are on top of each other.
-@export var _teleport_tolerance: float = 0.5
 
 ## These physics bodies are being watched by the portal. The value in dictionary
 ## is their dot product from last frame. As soon as the dot product changes signs,
@@ -103,8 +108,6 @@ var _watchlist_teleportables: Dictionary[Node3D, float] = {}
 @export_tool_button("Debug Button", "Popup") 
 var _tb_debug_action: Callable = _debug_action
 
-@export_tool_button("Rerun Setup", "History")
-var _tb_rerun_setup: Callable = _editor_rerun_setup
 
 func _debug_action() -> void:
 	print("[%s] DEBUG")
@@ -134,21 +137,9 @@ func deactivate() -> void:
 
 #endregion
 
-
 #region Editor Configuration Stuff
 
 const PORTAL_SHADER = preload("uid://bhdb2skdxehes")
-
-func _editor_rerun_setup():
-	assert(Engine.is_editor_hint())
-	
-	if portal_mesh:
-		print("[%s] Recreating portal meshes" % name)
-		portal_mesh.name += "__DELETING"
-		portal_mesh.queue_free()
-		portal_mesh = null
-	
-	_editor_ready()
 
 ## _ready(), but only in editor.
 func _editor_ready() -> void:
@@ -157,23 +148,10 @@ func _editor_ready() -> void:
 	process_priority = 100
 	process_physics_priority = 100
 	
-	if portal_mesh == null:
-		portal_mesh = MeshInstance3D.new()
-		portal_mesh.name = self.name + "_Mesh"
-		portal_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		portal_mesh.layers = portal_render_layer
-		
-		var p := BoxMesh.new()
-		p.size = Vector3(portal_size.x, portal_size.y, portal_thickness)
-		portal_mesh.mesh = p
-		
-		var mat: ShaderMaterial = ShaderMaterial.new()
-		mat.shader = PORTAL_SHADER
-		portal_mesh.material_override = mat
-		
-		add_child_in_editor(self, portal_mesh)
+	_setup_mesh()
 	
 	self.group_node(self)
+
 
 func _editor_pair_portals():
 	if exit_portal == null:
@@ -181,31 +159,38 @@ func _editor_pair_portals():
 		return
 	
 	exit_portal.exit_portal = self
+	notify_property_list_changed()
 
-func _editor_setup_teleport():
-	print("[%s] _editor_setup_teleport" % name)
+func _setup_teleport():
 	if is_teleport == false:
-		teleport_area.queue_free()
-		teleport_area = null
-		teleport_collision = null
+		if teleport_area: 
+			teleport_area.queue_free()
+			teleport_area = null
+			teleport_collision = null
 		return
 	
 	teleport_area = Area3D.new()
 	teleport_area.name = "TeleportArea"
+	
 	add_child_in_editor(self, teleport_area)
 	
 	teleport_collision = CollisionShape3D.new()
+	teleport_collision.name = "Collider"
 	var box = BoxShape3D.new()
 	box.size.x = portal_size.x
 	box.size.y = portal_size.y
 	teleport_collision.shape = box
 	
 	add_child_in_editor(teleport_area, teleport_collision)
+	
+	
+
 
 
 func _on_portal_size_changed() -> void:
-	assert(portal_mesh != null, 
-		"Portal should never be null. Setting size to '" + str(portal_size) + "' failed.")
+	if portal_mesh == null:
+		printerr("Portal has no mesh!!!")
+		return
 	
 	var p: BoxMesh = portal_mesh.mesh
 	p.size = Vector3(portal_size.x, portal_size.y, portal_thickness)
@@ -221,7 +206,6 @@ func _on_portal_size_changed() -> void:
 
 func _ready() -> void:
 	if Engine.is_editor_hint():
-		# TODO: Is the deferred necessary here??
 		_editor_ready.call_deferred()
 		return
 	
@@ -236,11 +220,13 @@ func _ready() -> void:
 	
 	assert(portal_viewport != null, "[%s] Portal should have a viewport!" % name)
 	
-	portal_mesh.material_override.set_shader_parameter("albedo", portal_viewport.get_texture())
+	var mat: ShaderMaterial = ShaderMaterial.new()
+	mat.shader = PORTAL_SHADER
+	mat.set_shader_parameter("albedo", portal_viewport.get_texture())
+	portal_mesh.material_override = mat
 	
-	# Configure teleport for action
 	if is_teleport:
-		assert(teleport_area)
+		assert(teleport_area, "Teleport area should be already set up from editor")
 		teleport_area.area_entered.connect(self._on_teleport_area_entered)
 		teleport_area.area_exited.connect(self._on_teleport_area_exited)
 		teleport_area.body_entered.connect(self._on_teleport_body_entered)
@@ -298,7 +284,7 @@ func _process_teleports() -> void:
 			_:
 				assert(false, "This match statement should be exhaustive")
 		
-		if should_teleport and abs(current_fw_angle) < _teleport_tolerance:
+		if should_teleport and abs(current_fw_angle) < teleport_tolerance:
 			# NOTE: BODIES don't have to specify teleport_root, they are usually the roots. 
 			var teleportable_path = body.get_meta("teleport_root", ".")
 			var teleportable: Node3D = body.get_node(teleportable_path)
@@ -344,6 +330,20 @@ func _calculate_near_plane() -> float:
 	# The near clip distance is the shortest distance which still contains all the corners
 	return max(0.01, min(d_1, d_2, d_3, d_4) - exit_portal.portal_frame_width)
 
+func _setup_mesh() -> void:
+	if portal_mesh:
+		return
+	
+	portal_mesh = MeshInstance3D.new()
+	portal_mesh.name = self.name + "_Mesh"
+	portal_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	portal_mesh.layers = portal_render_layer
+	
+	var p := BoxMesh.new()
+	p.size = Vector3(portal_size.x, portal_size.y, portal_thickness)
+	portal_mesh.mesh = p
+	
+	add_child_in_editor(self, portal_mesh)
 
 func _setup_cameras() -> void:
 	assert(not Engine.is_editor_hint(), "This should never run in editor")
@@ -478,3 +478,66 @@ func _get_configuration_warnings() -> PackedStringArray:
 			)
 	
 	return PackedStringArray(warnings)
+
+func _get_property_list() -> Array[Dictionary]:
+	var config: Array[Dictionary] = []
+	
+	config.append(AtExport.vector2("portal_size"))
+	config.append(AtExport.node("exit_portal", "Portal3D"))
+	if exit_portal != null and exit_portal.exit_portal == null:
+		config.append(AtExport.button("_tb_pair_portals", "Pair Portals", "SliderJoint3D"))
+	
+	
+	config.append(AtExport.group("Rendering"))
+	config.append(AtExport.float_range("portal_frame_width", 0.0, 10.0, 0.01))
+	config.append(AtExport.node("player_camera", "Camera3D"))
+	config.append(AtExport.bool_("portals_see_portals"))
+	config.append(AtExport.int_render_3d("portal_render_layer")) # TODO: Rename to `portal_layer`
+	config.append(AtExport.int_range("max_viewport_width", 2, 4096, 1))
+	config.append(AtExport.group_end())
+	
+	
+	config.append(AtExport.bool_("is_teleport"))
+	
+	if is_teleport:
+		config.append(AtExport.group("Teleport"))
+		
+		config.append(
+			AtExport.enum_("teleport_direction", &"Portal3D.TeleportDirection", TeleportDirection))
+		config.append(AtExport.float_range("rb_velocity_boost", 0, 5, 0.1, ["or_greater"]))
+		config.append(AtExport.int_physics_3d("teleport_collision_mask"))
+		config.append(AtExport.float_range("teleport_tolerance", 0.0, 5.0, 0.1, ["or_greater"]))
+		config.append(AtExport.group_end())
+	
+	return config
+
+
+
+func _property_can_revert(property: StringName) -> bool:
+	return property in [
+		&"portal_size",
+		&"portal_frame_width",
+		&"player_camera",
+		&"portals_see_portals",
+		&"portal_render_layer",
+		&"max_viewport_width",
+		&"teleport_direction",
+		&"rb_velocity_boost",
+		&"teleport_collision_mask",
+		&"teleport_tolerance",
+	]
+
+func _property_get_revert(property: StringName) -> Variant:
+	match property:
+		&"portal_size": return Vector2(2, 2.5)
+		&"portal_frame_width": return 0.0
+		&"portals_see_portals": return false
+		&"portal_render_layer": return PortalSettings.get_setting("default_portal_layer")
+		&"max_viewport_width": 
+			return int(ProjectSettings.get_setting("display/window/size/viewport_width"))
+		&"teleport_direction": return TeleportDirection.FRONT_AND_BACK
+		&"rb_velocity_boost": return 0.0
+		&"teleport_collision_mask": return PortalSettings.get_setting("default_teleport_mask")
+		&"teleport_tolerance": return 0.5
+	
+	return null

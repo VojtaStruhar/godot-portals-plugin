@@ -1,23 +1,66 @@
-[gd_scene load_steps=3 format=3 uid="uid://svpdsk6g8xy2"]
+[gd_scene load_steps=8 format=3 uid="uid://svpdsk6g8xy2"]
 
 [ext_resource type="Script" uid="uid://c2wi3h0jt2fxb" path="res://scripts/normal_exports.gd" id="1_465jp"]
 [ext_resource type="Script" uid="uid://b6cegp28gdigl" path="res://scripts/manual_exports.gd" id="1_oe0o1"]
+[ext_resource type="Script" uid="uid://cw1r4c1d7beyv" path="res://addons/portals/scripts/portal_3d.gd" id="3_o8r8w"]
+[ext_resource type="Shader" uid="uid://bhdb2skdxehes" path="res://addons/portals/materials/portal_shader.gdshader" id="4_xu5oi"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vs67y"]
+render_priority = 0
+shader = ExtResource("4_xu5oi")
+
+[sub_resource type="BoxMesh" id="BoxMesh_n2bwa"]
+size = Vector3(2, 2.5, 0.1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_o8r8w"]
+size = Vector3(2, 2.5, 1)
 
 [node name="ExportsPlayground" type="Node3D"]
 
 [node name="NormalExports" type="Node" parent="." node_paths=PackedStringArray("parent")]
 editor_description = "Demo script with normal @export annotations. I'll try to replicate its inspector with a custom _get_property_list() implementation."
 script = ExtResource("1_465jp")
+size = null
 parent = NodePath("..")
 favorite_number = 100.0
 teleport_layer = 128
 
 [node name="ManualExports" type="Node" parent="."]
 script = ExtResource("1_oe0o1")
-favorite_number = 42.0
+favorite_number = 46.0
 dir = 2
 is_debug = false
 is_teleport = true
 teleport_tolerance = 0.1
 teleport_layer = 0
 your_name = null
+size = null
+
+[node name="Portal3D" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal") groups=["portals"]]
+process_priority = 100
+process_physics_priority = 100
+script = ExtResource("3_o8r8w")
+portal_size = Vector2(2, 2.5)
+exit_portal = NodePath("")
+portal_frame_width = 0.0
+portals_see_portals = false
+portal_render_layer = 128
+max_viewport_width = 1920
+is_teleport = true
+teleport_direction = 2
+rb_velocity_boost = 0.0
+teleport_collision_mask = 128
+teleport_tolerance = 0.5
+metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
+metadata/_edit_group_ = true
+
+[node name="Portal3D_Mesh" type="MeshInstance3D" parent="Portal3D"]
+layers = 128
+material_override = SubResource("ShaderMaterial_vs67y")
+cast_shadow = 0
+mesh = SubResource("BoxMesh_n2bwa")
+
+[node name="TeleportArea" type="Area3D" parent="Portal3D"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Portal3D/TeleportArea"]
+shape = SubResource("BoxShape3D_o8r8w")
