@@ -97,6 +97,13 @@ static func group(group_name: String, prefix: String = "") -> Dictionary:
 static func group_end() -> Dictionary:
 	return group("")
 
+static func node(propname: String, node_class: StringName) -> Dictionary:
+	var result = _base(propname, TYPE_OBJECT)
+	result["hint"] = PROPERTY_HINT_NODE_TYPE
+	result["class_name"] = node_class
+	result["hint_string"] = node_class
+	return result
+
 static func string(propname: String) -> Dictionary:
 	return _base(propname, TYPE_STRING)
 

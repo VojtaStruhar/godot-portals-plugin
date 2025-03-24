@@ -2,6 +2,8 @@
 extends Node
 class_name NormalExports
 
+@export var parent: Node3D
+
 @export_range(0, 100, 1, "or_greater") var favorite_number: float = 42.0
 
 enum Direction { IN, OUT, IN_AND_OUT }

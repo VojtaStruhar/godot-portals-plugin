@@ -2,6 +2,7 @@
 extends Node
 class_name ManualExports
 
+var parent: Node3D
 var favorite_number: float = 42.0
 
 enum Direction { IN, OUT, IN_AND_OUT }
@@ -28,6 +29,7 @@ var teleport_layer: int = 0
 func _get_property_list() -> Array[Dictionary]:
 	var config: Array[Dictionary] = []
 	
+	config.append(AtExport.node("parent", &"Node3D"))
 	config.append(AtExport.float_range("favorite_number", 0, 100, 1))
 	config.append(AtExport.enum_("dir", &"ManualExports.Direction", Direction))
 	config.append(AtExport.bool_("is_debug"))
@@ -51,6 +53,7 @@ func _get_property_list() -> Array[Dictionary]:
 
 func _property_can_revert(property: StringName) -> bool:
 	return property in [
+		&"parent",
 		&"favorite_number",
 		&"dir",
 		&"teleport_tolerance",
@@ -59,6 +62,7 @@ func _property_can_revert(property: StringName) -> bool:
 
 func _property_get_revert(property: StringName) -> Variant:
 	return {
+		&"parent": null,
 		&"favorite_number": 42.0,
 		&"dir": Direction.IN_AND_OUT,
 		&"teleport_tolerance": 0.1,

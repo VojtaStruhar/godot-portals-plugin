@@ -1,7 +1,8 @@
 extends EditorNode3DGizmoPlugin
 
 func _init() -> void:
-	create_material("outline", Color.DEEP_SKY_BLUE, false, true, false)
+	var exit_outline_color = PortalSettings.get_setting("gizmo_exit_outline_color")
+	create_material("outline", exit_outline_color, false, true, false)
 
 func _get_gizmo_name() -> String:
 	return "PortalExitOutlineGizmo"

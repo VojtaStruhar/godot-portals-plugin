@@ -5,9 +5,10 @@
 
 [node name="ExportsPlayground" type="Node3D"]
 
-[node name="NormalExports" type="Node" parent="."]
+[node name="NormalExports" type="Node" parent="." node_paths=PackedStringArray("parent")]
 editor_description = "Demo script with normal @export annotations. I'll try to replicate its inspector with a custom _get_property_list() implementation."
 script = ExtResource("1_465jp")
+parent = NodePath("..")
 favorite_number = 100.0
 teleport_layer = 128
 

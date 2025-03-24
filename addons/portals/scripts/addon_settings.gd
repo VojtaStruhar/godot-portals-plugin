@@ -9,10 +9,12 @@ static func init_setting(setting: String,
 						 requires_restart: bool = false) -> void:
 	setting = _qual_name(setting)
 	
+	# This would mean the setting is already overriden
 	if not ProjectSettings.has_setting(setting):
 		ProjectSettings.set_setting(setting, default_value)
-		ProjectSettings.set_initial_value(setting, default_value)
-		ProjectSettings.set_restart_if_changed(setting, requires_restart)
+	
+	ProjectSettings.set_initial_value(setting, default_value)
+	ProjectSettings.set_restart_if_changed(setting, requires_restart)
 
 
 ## See companion class [AtExport], it has some utilities which might be helpful!

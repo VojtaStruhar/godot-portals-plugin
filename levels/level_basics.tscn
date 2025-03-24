@@ -186,7 +186,7 @@ transform = Transform3D(0.965926, 0, -0.258819, 0, 1, 0, 0.258819, 0, 0.965926, 
 skeleton = NodePath("../..")
 
 [node name="PropSphere" parent="Props" instance=ExtResource("5_p3b8s")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.75, 0.5, 3.25)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.92845, 0.5, 3.7125)
 skeleton = NodePath("../..")
 
 [node name="PropTorus" parent="Props" instance=ExtResource("6_p3b8s")]
