@@ -152,7 +152,7 @@ func _editor_rerun_setup():
 
 ## _ready(), but only in editor.
 func _editor_ready() -> void:
-	add_to_group("portals", true)
+	add_to_group(PortalSettings.get_setting("portals_group_name"), true)
 	
 	process_priority = 100
 	process_physics_priority = 100
@@ -346,18 +346,9 @@ func _calculate_near_plane() -> float:
 
 
 func _setup_cameras() -> void:
-	if Engine.is_editor_hint(): 
-		push_error(name + "._setup_cameras: This should never run in editor!")
-		return
-	
-	if portal_camera:
-		print_debug("[%s] Freeing existing portal camera" % name)
-		portal_camera.queue_free()
-		portal_camera = null
-	if portal_viewport:
-		print_debug("[%s] Freeing existing subviewport" % name)
-		portal_viewport.queue_free()
-		portal_viewport = null
+	assert(not Engine.is_editor_hint(), "This should never run in editor")
+	assert(portal_camera == null)
+	assert(portal_viewport == null)
 	
 	if exit_portal != null:
 		portal_viewport = SubViewport.new()

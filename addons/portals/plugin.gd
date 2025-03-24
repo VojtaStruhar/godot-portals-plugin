@@ -19,6 +19,9 @@ func _enter_tree() -> void:
 	PortalSettings.init_setting("gizmo_exit_outline_color", Color.DEEP_SKY_BLUE, true) 
 	PortalSettings.add_info(AtExport.color_no_alpha("gizmo_exit_outline_color"))
 	
+	PortalSettings.init_setting("portals_group_name", "portals")
+	PortalSettings.add_info(AtExport.string("portals_group_name"))
+	
 	if PortalSettings.get_setting("gizmo_exit_outline_active"):
 		exit_outline_gizmo = ExitOutlinesGizmo.new()
 		add_node_3d_gizmo_plugin(exit_outline_gizmo)
