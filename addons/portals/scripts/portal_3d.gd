@@ -46,6 +46,8 @@ var _tb_pair_portals: Callable = _editor_pair_portals
 		if caused_by_user_interaction():
 			portal_mesh.layers = v
 
+@export var max_viewport_width: int = ProjectSettings.get_setting("display/window/size/viewport_width")
+
 @export var is_teleport: bool = false:
 	set(v):
 		is_teleport = v
@@ -252,7 +254,11 @@ func _process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
 	
+	if is_teleport:
+		_process_teleports()
+		
 	_process_cameras()
+	
 
 func _process_cameras() -> void:
 	# NOTE: Camera transformations
@@ -273,10 +279,7 @@ func _process_cameras() -> void:
 		portal_mesh.position = (
 			Vector3.FORWARD * near_diagonal * (0.5 if player_in_front_of_portal else -0.5)
 		)
-		
-	
-	if is_teleport:
-		_process_teleports()
+
 
 func _process_teleports() -> void:
 	for body in _watchlist_teleportables.keys():
@@ -359,8 +362,8 @@ func _setup_cameras() -> void:
 	if exit_portal != null:
 		portal_viewport = SubViewport.new()
 		portal_viewport.name = self.name + "_SubViewport"
-		portal_viewport.size = self.get_settings_window_size()
-		exit_portal.add_child(portal_viewport, true)
+		portal_viewport.size = Vector2i(max_viewport_width, max_viewport_width / get_aspect_ratio())
+		self.add_child(portal_viewport, true)
 		
 		# Disable tonemapping on portal cameras
 		var adjusted_env: Environment = player_camera.environment.duplicate() \
@@ -386,12 +389,10 @@ func _setup_cameras() -> void:
 #region Event handlers
 
 func _on_teleport_area_entered(area: Area3D) -> void:
-	print("[%s] teleport_area_entered: %s" % [name, area.name])
 	_watchlist_teleportables.set(area, forward_distance(area))
 
 
 func _on_teleport_area_exited(area: Area3D) -> void:
-	print("[%s] teleport_area_exited: %s" % [name, area.name])
 	_watchlist_teleportables.erase(area)
 
 func _on_teleport_body_entered(body: Node3D) -> void:
@@ -457,12 +458,6 @@ static func lock_node(node: Node3D) -> void:
 static func group_node(node: Node) -> void:
 	node.set_meta("_edit_group_", true)
 
-## Fetches window size from [ProjectSettings].
-static func get_settings_window_size() -> Vector2:
-	return Vector2(
-		ProjectSettings.get_setting("display/window/size/viewport_width"),
-		ProjectSettings.get_setting("display/window/size/viewport_height")
-	)
 
 func get_aspect_ratio() -> float:
 	var vp = get_viewport()
