@@ -188,6 +188,7 @@ process_physics_priority = 100
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.448394, 0.875832, 4.08334)
 collision_layer = 129
 script = ExtResource("3_lff3k")
+SPEED = 1.0
 metadata/_edit_group_ = true
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
@@ -226,7 +227,7 @@ exit_portal = NodePath("../SpherePortal")
 portal_frame_width = 0.0
 portals_see_portals = false
 portal_render_layer = 128
-max_viewport_width = 1920
+viewport_size_mode = 0
 is_teleport = true
 teleport_direction = 2
 rb_velocity_boost = 0.0
@@ -259,7 +260,7 @@ exit_portal = NodePath("../CubePortal")
 portal_frame_width = 0.0
 portals_see_portals = false
 portal_render_layer = 128
-max_viewport_width = 1920
+viewport_size_mode = 0
 is_teleport = true
 teleport_direction = 2
 rb_velocity_boost = 0.0

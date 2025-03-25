@@ -120,9 +120,9 @@ var teleport_collider: CollisionShape3D:
 	set(v): assert(false, "Proxy variable, use 'teleport_collider_path' instead")
 
 
-## Camera that looks through the exit portal. If exit portal is null, the camera doesn't exist 
-## either.
+## Camera that looks through the exit portal and renders to [member portal_viewport]
 var portal_camera: Camera3D = null
+## Viewport that supplies the albedo texture to portal mesh. Rendered by [member portal_camera]
 var portal_viewport: SubViewport = null
 
 
@@ -131,9 +131,7 @@ var portal_viewport: SubViewport = null
 ## the body crossed the portal and should be teleported.
 var _watchlist_teleportables: Dictionary[Node3D, float] = {}
 
-
 var _tb_debug_action: Callable = _debug_action
-
 
 func _debug_action() -> void:
 	print("[%s] DEBUG")
