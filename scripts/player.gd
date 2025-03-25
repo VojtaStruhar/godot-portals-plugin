@@ -18,8 +18,6 @@ func _ready() -> void:
 
 func _on_teleport(body: Node3D) -> void:
 	if body == self:
-		print("Some portal just teleported me!")
-		print("Rotation: ", global_rotation)
 		get_tree().create_tween().tween_property(self, "rotation:x", 0, 0.3)
 		get_tree().create_tween().tween_property(self, "rotation:z", 0, 0.3)
 

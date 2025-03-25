@@ -7,12 +7,34 @@ class_name Portal3D extends Node3D
 ## is to manage the portal setup in editor. During gameplay, it moves portal cameras around and
 ## provides API to interact with the portal system.
 
+#region Public API
+
 ## Emitted when this portal triggers a teleport.
 signal on_teleport(body_or_area: Node3D)
 
 ## Emitted when this portal [i]receives[/i] a teleported node. Whoever had [b]this[/b] portal as
 ## its [member exit_portal] triggered a teleport!
 signal on_teleport_receive(body_or_area: Node3D)
+
+## The portal starts rendering again, [member portal_mesh] becomes visible and teleport
+## activates (if the portal is teleporting).
+func activate() -> void:
+	portal_viewport.disable_3d = false
+	portal_mesh.show()
+	
+	if is_teleport:
+		teleport_area.monitoring = true
+
+## Disables rendering, teleportation and hides the portal mesh. Does NOT clean up the
+## internal viewport.
+func deactivate() -> void:
+	portal_viewport.disable_3d = true
+	portal_mesh.hide()
+	
+	if is_teleport:
+		teleport_area.monitoring = false
+
+#endregion
 
 var portal_size: Vector2 = Vector2(2.0, 2.5):
 	set(v):
@@ -23,7 +45,11 @@ var portal_size: Vector2 = Vector2(2.0, 2.5):
 			if exit_portal:
 				exit_portal.update_configuration_warnings()
 
-
+## The exit of this particular portal. Portal camera renders what it sees through this
+## [member exit_portal]. Teleports take you here. 
+## [br][br]
+## Two portals commonly have each other set as their exit portals, which allows you to 
+## travel back and forth. But this does not have to be the case!
 var exit_portal: Portal3D:
 	set(v):
 		exit_portal = v
@@ -32,12 +58,20 @@ var exit_portal: Portal3D:
 
 var _tb_pair_portals: Callable = _editor_pair_portals
 var _tb_sync_portal_sizes: Callable = _editor_sync_portal_sizes
+
 var player_camera: Camera3D
 
 ## The width of the frame portal. Adjusts the near clip distance of the camera looking through 
 ## THIS portal.
 var portal_frame_width: float = 0
-var portals_see_portals: bool = false
+
+## Indicates whether you can see a portal through another portal. This does [b]not[/b]
+## automatically lead to recursive portals.
+## [br]
+## Changed to constant, because with [BoxMesh] portals (current implementation) it doesn't make 
+## sense. The portals need to be see-through from behind, such as with [PlaneMesh], which also
+## restricts teleporting options.
+const portals_see_portals: bool = false
 
 var portal_render_layer: int = 1 << 7:
 	set(v):
@@ -104,19 +138,19 @@ var teleport_tolerance: float = 0.5
 @export_storage var portal_mesh_path: NodePath
 var portal_mesh: MeshInstance3D:
 	get():
-		return null if portal_mesh_path == NodePath("") else get_node(portal_mesh_path)
+		return null if not portal_mesh_path else get_node(portal_mesh_path)
 	set(v): assert(false, "Proxy variable, use 'portal_mesh_path' instead")
 	
 @export_storage var teleport_area_path: NodePath
 var teleport_area: Area3D:
 	get():
-		return null if teleport_area_path == NodePath("") else get_node(teleport_area_path)
+		return null if not teleport_area_path else get_node(teleport_area_path)
 	set(v): assert(false, "Proxy variable, use 'teleport_area_path' instead")
 
 @export_storage var teleport_collider_path: NodePath
 var teleport_collider: CollisionShape3D:
 	get():
-		return null if teleport_collider_path == NodePath("") else get_node(teleport_collider_path)
+		return null if not teleport_collider_path else get_node(teleport_collider_path)
 	set(v): assert(false, "Proxy variable, use 'teleport_collider_path' instead")
 
 
@@ -137,23 +171,6 @@ func _debug_action() -> void:
 	print("[%s] DEBUG")
 	print({"portal_mesh_path": portal_mesh_path, "portal_mesh": portal_mesh})
 
-#region Public API
-func activate() -> void:
-	portal_viewport.disable_3d = false
-	portal_mesh.show()
-	
-	if is_teleport:
-		teleport_area.monitoring = true
-
-func deactivate() -> void:
-	portal_viewport.disable_3d = true
-	portal_mesh.hide()
-	
-	if is_teleport:
-		teleport_area.monitoring = false
-
-
-#endregion
 
 #region Editor Configuration Stuff
 
@@ -399,6 +416,7 @@ func _setup_cameras() -> void:
 		portal_camera = Camera3D.new()
 		portal_camera.name = self.name + "_Camera3D"
 		portal_camera.environment = adjusted_env
+		
 		if portals_see_portals == false:
 			portal_camera.cull_mask = portal_camera.cull_mask ^ portal_render_layer
 			
@@ -546,7 +564,6 @@ func _get_property_list() -> Array[Dictionary]:
 	config.append(AtExport.group("Rendering"))
 	config.append(AtExport.float_range("portal_frame_width", 0.0, 10.0, 0.01))
 	config.append(AtExport.node("player_camera", "Camera3D"))
-	config.append(AtExport.bool_("portals_see_portals"))
 	config.append(AtExport.int_render_3d("portal_render_layer")) # TODO: Rename to `portal_layer`
 	
 	config.append(AtExport.enum_(
@@ -581,7 +598,6 @@ func _property_can_revert(property: StringName) -> bool:
 		&"portal_size",
 		&"portal_frame_width",
 		&"player_camera",
-		&"portals_see_portals",
 		&"portal_render_layer",
 		&"viewport_size_max_width_absolute",
 		&"teleport_direction",
@@ -596,8 +612,6 @@ func _property_get_revert(property: StringName) -> Variant:
 			return Vector2(2, 2.5)
 		&"portal_frame_width": 
 			return 0.0
-		&"portals_see_portals": 
-			return false
 		&"portal_render_layer": 
 			return PortalSettings.get_setting("default_portal_layer")
 		&"viewport_size_max_width_absolute": 
