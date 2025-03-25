@@ -80,19 +80,30 @@ var teleport_tolerance: float = 0.5
 
 #region INTERNALS
 
-@export_group("Internals")
-
-@export var portal_thickness: float = 0.05:
+@export_storage var portal_thickness: float = 0.05:
 	set(v):
 		portal_thickness = v
 		if caused_by_user_interaction(): _on_portal_size_changed()
 
-@export var portal_mesh: MeshInstance3D
+@export_storage var portal_mesh_path: NodePath
+var portal_mesh: MeshInstance3D:
+	get(): 
+		return null if portal_mesh_path == NodePath("") else get_node(portal_mesh_path)
+	set(v): assert(false, "Proxy variable, use 'portal_mesh_path' instead")
+	
+@export_storage var teleport_area_path: NodePath
+var teleport_area: Area3D:
+	get(): 
+		return null if teleport_area_path == NodePath("") else get_node(teleport_area_path)
+	set(v): assert(false, "Proxy variable, use 'teleport_area_path' instead")
 
-@export var teleport_area: Area3D
-@export var teleport_collision: CollisionShape3D
+@export_storage var teleport_collider_path: NodePath
+var teleport_collision: CollisionShape3D:
+	get(): 
+		return null if teleport_collider_path == NodePath("") else get_node(teleport_collider_path)
+	set(v): assert(false, "Proxy variable, use 'teleport_collider_path' instead")
 
-@export_group("")
+
 
 ## Camera that looks through the exit portal. If exit portal is null, the camera doesn't exist 
 ## either.
@@ -111,13 +122,7 @@ var _tb_debug_action: Callable = _debug_action
 
 func _debug_action() -> void:
 	print("[%s] DEBUG")
-	print("Number of children: " + str(get_child_count(true)))
-	print("Node metadata: ")
-	for meta in get_meta_list():
-		print("  - " + meta + ": " + str(get_meta(meta)))
-	print("Node properties:")
-	for prop in get_property_list():
-		if prop["usage"] & PROPERTY_USAGE_SCRIPT_VARIABLE: print("  - ", prop)
+	print({"portal_mesh_path": portal_mesh_path, "portal_mesh": portal_mesh})
 
 #region Public API
 func activate() -> void:
@@ -165,25 +170,29 @@ func _setup_teleport():
 	if is_teleport == false:
 		if teleport_area:
 			teleport_area.queue_free()
-			teleport_area = null
-			teleport_collision = null
+			teleport_area_path = NodePath("")
+		if teleport_collision:
+			teleport_collision.queue_free()
+			teleport_collider_path = NodePath("")
 		return
 	
-	teleport_area = Area3D.new()
-	teleport_area.name = "TeleportArea"
+	var area = Area3D.new()
+	area.name = "TeleportArea"
 	
-	add_child_in_editor(self, teleport_area)
+	add_child_in_editor(self, area)
+	teleport_area_path = get_path_to(area)
 	
-	teleport_collision = CollisionShape3D.new()
-	teleport_collision.name = "Collider"
+	var collider = CollisionShape3D.new()
+	collider.name = "Collider"
 	var box = BoxShape3D.new()
 	box.size.x = portal_size.x
 	box.size.y = portal_size.y
-	teleport_collision.shape = box
+	collider.shape = box
 	
-	add_child_in_editor(teleport_area, teleport_collision)
-	
-	
+	add_child_in_editor(teleport_area, collider)
+	teleport_collider_path = get_path_to(collider)
+
+
 func _on_portal_size_changed() -> void:
 	if portal_mesh == null:
 		printerr("Portal has no mesh!!!")
@@ -331,16 +340,19 @@ func _setup_mesh() -> void:
 	if portal_mesh:
 		return
 	
-	portal_mesh = MeshInstance3D.new()
-	portal_mesh.name = self.name + "_Mesh"
-	portal_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	portal_mesh.layers = portal_render_layer
+	var mi = MeshInstance3D.new() 
+	
+	mi = MeshInstance3D.new()
+	mi.name = self.name + "_Mesh"
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mi.layers = portal_render_layer
 	
 	var p := BoxMesh.new()
 	p.size = Vector3(portal_size.x, portal_size.y, portal_thickness)
-	portal_mesh.mesh = p
+	mi.mesh = p
 	
-	add_child_in_editor(self, portal_mesh)
+	add_child_in_editor(self, mi)
+	portal_mesh_path = get_path_to(mi)
 
 func _setup_cameras() -> void:
 	assert(not Engine.is_editor_hint(), "This should never run in editor")

@@ -50,13 +50,13 @@ data = PackedVector3Array(-2.5, -1.6, -0.1, -2.6, -1.6, -0.1, -2.6, -1.6, 0.1, -
 [sub_resource type="BoxMesh" id="BoxMesh_wviww"]
 size = Vector3(5, 3, 0.05)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_dqevk"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_wviww"]
 size = Vector3(5, 3, 1)
 
-[sub_resource type="BoxMesh" id="BoxMesh_4lvjw"]
+[sub_resource type="BoxMesh" id="BoxMesh_dqevk"]
 size = Vector3(5, 3, 0.05)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_fv6tu"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_dqevk"]
 size = Vector3(5, 3, 1)
 
 [node name="Level_Forward" type="Node3D"]
@@ -133,18 +133,17 @@ mesh = SubResource("ArrayMesh_wviww")
 visible = false
 shape = SubResource("ConcavePolygonShape3D_dqevk")
 
-[node name="GreenPortal" type="Node3D" parent="." node_paths=PackedStringArray("portal_mesh", "teleport_area", "teleport_collision", "exit_portal", "player_camera") groups=["portals"]]
+[node name="GreenPortal" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal") groups=["portals"]]
 process_priority = 100
 process_physics_priority = 100
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.501, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 script = ExtResource("5_wviww")
-portal_mesh = NodePath("Portal3D_Mesh")
-teleport_area = NodePath("TeleportArea")
-teleport_collision = NodePath("TeleportArea/Collider")
+portal_mesh_path = NodePath("Portal3D_Mesh")
+teleport_area_path = NodePath("TeleportArea")
+teleport_collider_path = NodePath("TeleportArea/Collider")
 portal_size = Vector2(5, 3)
 exit_portal = NodePath("../BluePortal")
 portal_frame_width = 0.0
-player_camera = NodePath("../Player/PlayerCamera")
 portals_see_portals = false
 portal_render_layer = 128
 max_viewport_width = 1920
@@ -165,16 +164,16 @@ mesh = SubResource("BoxMesh_wviww")
 [node name="TeleportArea" type="Area3D" parent="GreenPortal"]
 
 [node name="Collider" type="CollisionShape3D" parent="GreenPortal/TeleportArea"]
-shape = SubResource("BoxShape3D_dqevk")
+shape = SubResource("BoxShape3D_wviww")
 
-[node name="BluePortal" type="Node3D" parent="." node_paths=PackedStringArray("portal_mesh", "teleport_area", "teleport_collision", "exit_portal") groups=["portals"]]
+[node name="BluePortal" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal") groups=["portals"]]
 process_priority = 100
 process_physics_priority = 100
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1.501, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1.5, 0)
 script = ExtResource("5_wviww")
-portal_mesh = NodePath("Portal3D_Mesh")
-teleport_area = NodePath("TeleportArea")
-teleport_collision = NodePath("TeleportArea/Collider")
+portal_mesh_path = NodePath("Portal3D_Mesh")
+teleport_area_path = NodePath("TeleportArea")
+teleport_collider_path = NodePath("TeleportArea/Collider")
 portal_size = Vector2(5, 3)
 exit_portal = NodePath("../GreenPortal")
 portal_frame_width = 0.0
@@ -193,9 +192,9 @@ metadata/_edit_group_ = true
 [node name="Portal3D_Mesh" type="MeshInstance3D" parent="BluePortal"]
 layers = 128
 cast_shadow = 0
-mesh = SubResource("BoxMesh_4lvjw")
+mesh = SubResource("BoxMesh_dqevk")
 
 [node name="TeleportArea" type="Area3D" parent="BluePortal"]
 
 [node name="Collider" type="CollisionShape3D" parent="BluePortal/TeleportArea"]
-shape = SubResource("BoxShape3D_fv6tu")
+shape = SubResource("BoxShape3D_dqevk")

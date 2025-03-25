@@ -84,13 +84,13 @@ func _physics_process(delta: float) -> void:
 
 [sub_resource type="SphereMesh" id="SphereMesh_eavfu"]
 
-[sub_resource type="BoxMesh" id="BoxMesh_lbpks"]
+[sub_resource type="BoxMesh" id="BoxMesh_8wh7v"]
 size = Vector3(2, 2.5, 0.05)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_8wh7v"]
 size = Vector3(2, 2.5, 1)
 
-[sub_resource type="BoxMesh" id="BoxMesh_eavfu"]
+[sub_resource type="BoxMesh" id="BoxMesh_lbpks"]
 size = Vector3(2, 2.5, 0.05)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_lbpks"]
@@ -213,14 +213,14 @@ shape = SubResource("SphereShape3D_lbpks")
 material_override = ExtResource("9_lbpks")
 mesh = SubResource("SphereMesh_eavfu")
 
-[node name="CubePortal" type="Node3D" parent="." node_paths=PackedStringArray("portal_mesh", "teleport_area", "teleport_collision", "exit_portal") groups=["portals"]]
+[node name="CubePortal" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal") groups=["portals"]]
 process_priority = 100
 process_physics_priority = 100
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1.25, 0)
 script = ExtResource("8_8wh7v")
-portal_mesh = NodePath("Portal3D_Mesh")
-teleport_area = NodePath("TeleportArea")
-teleport_collision = NodePath("TeleportArea/Collider")
+portal_mesh_path = NodePath("Portal3D_Mesh")
+teleport_area_path = NodePath("TeleportArea")
+teleport_collider_path = NodePath("TeleportArea/Collider")
 portal_size = Vector2(2, 2.5)
 exit_portal = NodePath("../SpherePortal")
 portal_frame_width = 0.0
@@ -239,21 +239,21 @@ metadata/_edit_group_ = true
 [node name="Portal3D_Mesh" type="MeshInstance3D" parent="CubePortal"]
 layers = 128
 cast_shadow = 0
-mesh = SubResource("BoxMesh_lbpks")
+mesh = SubResource("BoxMesh_8wh7v")
 
 [node name="TeleportArea" type="Area3D" parent="CubePortal"]
 
 [node name="Collider" type="CollisionShape3D" parent="CubePortal/TeleportArea"]
 shape = SubResource("BoxShape3D_8wh7v")
 
-[node name="SpherePortal" type="Node3D" parent="." node_paths=PackedStringArray("portal_mesh", "teleport_area", "teleport_collision", "exit_portal") groups=["portals"]]
+[node name="SpherePortal" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal") groups=["portals"]]
 process_priority = 100
 process_physics_priority = 100
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 1.25, 0)
 script = ExtResource("8_8wh7v")
-portal_mesh = NodePath("Portal3D2_Mesh")
-teleport_area = NodePath("TeleportArea")
-teleport_collision = NodePath("TeleportArea/Collider")
+portal_mesh_path = NodePath("Portal3D2_Mesh")
+teleport_area_path = NodePath("TeleportArea")
+teleport_collider_path = NodePath("TeleportArea/Collider")
 portal_size = Vector2(2, 2.5)
 exit_portal = NodePath("../CubePortal")
 portal_frame_width = 0.0
@@ -272,7 +272,7 @@ metadata/_edit_group_ = true
 [node name="Portal3D2_Mesh" type="MeshInstance3D" parent="SpherePortal"]
 layers = 128
 cast_shadow = 0
-mesh = SubResource("BoxMesh_eavfu")
+mesh = SubResource("BoxMesh_lbpks")
 
 [node name="TeleportArea" type="Area3D" parent="SpherePortal"]
 
