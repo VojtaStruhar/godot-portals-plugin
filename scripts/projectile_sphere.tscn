@@ -15,11 +15,22 @@ height = 0.5
 radius = 0.25
 
 [node name="ProjectileSphere" type="RigidBody3D"]
-collision_layer = 129
+editor_description = "This rigidbody doesn't collide with portals. The area nested inside takes care of that."
 physics_material_override = SubResource("PhysicsMaterial_dlerm")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("SphereMesh_m81n0")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_frlfj")
+
+[node name="TeleportingArea" type="Area3D" parent="."]
+editor_description = "The entire point of this node is to use the `teleport_root` metadata somewhere. The simpler solution in this case would be to switch the root body to layer 8, so that it would get teleported automatically.
+But this is another way too."
+collision_layer = 128
+collision_mask = 0
+monitoring = false
+metadata/teleport_root = NodePath("..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TeleportingArea"]
 shape = SubResource("SphereShape3D_frlfj")

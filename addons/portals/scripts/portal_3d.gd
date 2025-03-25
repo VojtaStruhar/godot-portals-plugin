@@ -432,12 +432,10 @@ func _setup_cameras() -> void:
 func _on_teleport_area_entered(area: Area3D) -> void:
 	_watchlist_teleportables.set(area, forward_distance(area))
 
-
 func _on_teleport_area_exited(area: Area3D) -> void:
 	_watchlist_teleportables.erase(area)
 
 func _on_teleport_body_entered(body: Node3D) -> void:
-	#if body.has_meta("teleport_root"):
 	_watchlist_teleportables.set(body, forward_distance(body))
 
 func _on_teleport_body_exited(body: Node3D) -> void:
