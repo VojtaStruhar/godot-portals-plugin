@@ -213,7 +213,7 @@ func _editor_pair_portals() -> void:
 
 func _editor_sync_portal_sizes() -> void:
 	assert(exit_portal != null, "My own exit has to be set!")
-	exit_portal.portal_size = portal_size
+	portal_size = exit_portal.portal_size
 	notify_property_list_changed()
 
 func _setup_teleport():
@@ -580,7 +580,7 @@ func _get_property_list() -> Array[Dictionary]:
 	config.append(AtExport.vector2("portal_size"))
 	
 	if exit_portal != null and not portal_size.is_equal_approx(exit_portal.portal_size):
-		config.append(AtExport.button("_tb_sync_portal_sizes", "Give Exit the Same Size", "Vector2"))
+		config.append(AtExport.button("_tb_sync_portal_sizes", "Take Exit Portal's Size", "Vector2"))
 	
 	config.append(AtExport.node("exit_portal", "Portal3D"))
 	
