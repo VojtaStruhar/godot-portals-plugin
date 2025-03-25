@@ -1,13 +1,14 @@
 extends CharacterBody3D
 
 
-@onready var camera: Camera3D = $PlayerCamera
+@export var camera: Camera3D
 
 @export var SPEED = 4.0
 const JUMP_VELOCITY = 4.5
 const MOUSE_SENSITIVITY = 0.004
 
 func _ready() -> void:
+	assert(camera != null, "Forgot to set camera in editor")
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 func _unhandled_input(event: InputEvent) -> void:

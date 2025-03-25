@@ -268,8 +268,8 @@ func _process(delta: float) -> void:
 	
 
 func _process_cameras() -> void:
-	# NOTE: Camera transformations
 	if portal_camera != null && player_camera != null && exit_portal != null:
+		# Camera transformations
 		portal_camera.global_transform = self.to_exit_transform(player_camera.global_transform)
 		portal_camera.near = _calculate_near_plane()
 		
@@ -278,6 +278,7 @@ func _process_cameras() -> void:
 		var half_height: float = player_camera.near * tan(deg_to_rad(player_camera.fov * 0.5))
 		var half_width: float = half_height * pv_size.x / float(pv_size.y)
 		var near_diagonal: float = Vector3(half_width, half_height, player_camera.near).length()
+		
 		# TODO: This doesn't change much. Update it directly?
 		portal_thickness = near_diagonal
 		_on_portal_size_changed()
@@ -309,6 +310,7 @@ func _process_teleports() -> void:
 			# NOTE: BODIES don't have to specify teleport_root, they are usually the roots. 
 			var teleportable_path = body.get_meta("teleport_root", ".")
 			var teleportable: Node3D = body.get_node(teleportable_path)
+			
 			teleportable.global_transform = self.to_exit_transform(teleportable.global_transform)
 			
 			if teleportable is RigidBody3D:
@@ -321,6 +323,12 @@ func _process_teleports() -> void:
 			
 			on_teleport.emit(teleportable)
 			exit_portal.on_teleport_receive.emit(teleportable)
+			
+			# Force the cameras to refresh if we just teleported a player
+			var was_player := not str(teleportable.get_path_to(player_camera)).begins_with(".")
+			if was_player:
+				_process_cameras()
+				exit_portal._process_cameras()
 		else:
 			_watchlist_teleportables.set(body, current_fw_angle)
 

@@ -182,13 +182,11 @@ skeleton = NodePath("../..")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.25, -2.73127)
 skeleton = NodePath("../..")
 
-[node name="Player" type="CharacterBody3D" parent="."]
-process_priority = 100
-process_physics_priority = 100
+[node name="Player" type="CharacterBody3D" parent="." node_paths=PackedStringArray("camera")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.448394, 0.875832, 4.08334)
 collision_layer = 129
 script = ExtResource("3_lff3k")
-SPEED = 1.0
+camera = NodePath("Node3D/PlayerCamera")
 metadata/_edit_group_ = true
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
@@ -197,7 +195,9 @@ shape = SubResource("CapsuleShape3D_k2msj")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Player"]
 mesh = SubResource("CapsuleMesh_lff3k")
 
-[node name="PlayerCamera" type="Camera3D" parent="Player"]
+[node name="Node3D" type="Node3D" parent="Player"]
+
+[node name="PlayerCamera" type="Camera3D" parent="Player/Node3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
 current = true
 

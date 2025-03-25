@@ -152,12 +152,13 @@ visible = false
 [node name="CollisionShape3D" type="CollisionShape3D" parent="GroundRim/StaticBody3D"]
 shape = SubResource("ConcavePolygonShape3D_7nky4")
 
-[node name="Player" type="CharacterBody3D" parent="."]
+[node name="Player" type="CharacterBody3D" parent="." node_paths=PackedStringArray("camera")]
 process_priority = 100
 process_physics_priority = 100
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.448394, 0.875832, 5.91448)
 collision_layer = 129
 script = ExtResource("2_l6px6")
+camera = NodePath("PlayerCamera")
 metadata/_edit_group_ = true
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
