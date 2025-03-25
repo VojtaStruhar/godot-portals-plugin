@@ -1,7 +1,7 @@
 extends EditorNode3DGizmoPlugin
 
 func _init() -> void:
-	var forward_color = Color.HOT_PINK
+	var forward_color = PortalSettings.get_setting("gizmo_forward_color")
 	create_material("forward", forward_color, false, false, false)
 	
 
