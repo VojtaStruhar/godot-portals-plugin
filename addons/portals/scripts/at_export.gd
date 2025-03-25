@@ -57,7 +57,7 @@ static func float_range(propname: String, min: float, max: float, step: float = 
 static func int_(propname: String) -> Dictionary:
 	return _base(propname, TYPE_INT)
 
-static func int_flags(propname: String, options: Array[String]) -> Dictionary:
+static func int_flags(propname: String, options: Array) -> Dictionary:
 	var result := int_(propname)
 	result["hint"] = PROPERTY_HINT_FLAGS
 	result["hint_string"] = ",".join(options)

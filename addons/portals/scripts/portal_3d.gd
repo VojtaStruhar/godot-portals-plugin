@@ -128,6 +128,24 @@ var teleport_collision_mask: int = 1 << 7
 ## Prevents false negatives when multiple portals are on top of each other.
 var teleport_tolerance: float = 0.5
 
+## Flags for everything that happens when a something is teleported.
+enum OnTeleportInteractions {
+	## The portal will try to call a [code]on_teleport(Portal3D)[/code] function on the teleported 
+	## node. You need to implement this function with a script.
+	CALLBACK = 1,
+	## When the player is teleported, his X and Z rotations are tweened to zero. Resets unwanted
+	## from going through a tilted portal. If checked, this will happen BEFORE the callback.
+	PLAYER_UPRIGHT = 2
+}
+
+## This method will be called on a teleported node if [member OnTeleportInteractions.CALLBACK]
+## is checked in [member on_teleport_interactions]
+const ON_TELEPORT_CALLBACK_METHOD: StringName = &"on_teleport"
+
+## For options, see [enum OnTeleportInteractions]
+var on_teleport_interactions: int = OnTeleportInteractions.CALLBACK \
+									| OnTeleportInteractions.PLAYER_UPRIGHT
+
 #region INTERNALS
 
 @export_storage var portal_thickness: float = 0.05:
@@ -346,6 +364,17 @@ func _process_teleports() -> void:
 			if was_player:
 				_process_cameras()
 				exit_portal._process_cameras()
+			
+			# Resolve teleport interactions
+			
+			if was_player and on_teleport_interactions | OnTeleportInteractions.PLAYER_UPRIGHT:
+				get_tree().create_tween().tween_property(teleportable, "rotation:x", 0, 0.3)
+				get_tree().create_tween().tween_property(teleportable, "rotation:z", 0, 0.3)
+			
+			if on_teleport_interactions | OnTeleportInteractions.CALLBACK:
+				if teleportable.has_method(ON_TELEPORT_CALLBACK_METHOD):
+					teleportable.call(ON_TELEPORT_CALLBACK_METHOD, self)
+			
 		else:
 			_watchlist_teleportables.set(body, current_fw_angle)
 
@@ -585,6 +614,8 @@ func _get_property_list() -> Array[Dictionary]:
 		config.append(AtExport.float_range("rb_velocity_boost", 0, 5, 0.1, ["or_greater"]))
 		config.append(AtExport.int_physics_3d("teleport_collision_mask"))
 		config.append(AtExport.float_range("teleport_tolerance", 0.0, 5.0, 0.1, ["or_greater"]))
+		var opts: Array = OnTeleportInteractions.keys().map(func(s): return s.capitalize())
+		config.append(AtExport.int_flags("on_teleport_interactions", opts))
 		config.append(AtExport.group_end())
 	
 	config.append(AtExport.button("_tb_debug_action", "Debug Button", "Popup"))
@@ -602,6 +633,7 @@ func _property_can_revert(property: StringName) -> bool:
 		&"rb_velocity_boost",
 		&"teleport_collision_mask",
 		&"teleport_tolerance",
+		&"on_teleport_interactions"
 	]
 
 func _property_get_revert(property: StringName) -> Variant:
@@ -622,6 +654,8 @@ func _property_get_revert(property: StringName) -> Variant:
 			return PortalSettings.get_setting("default_teleport_mask")
 		&"teleport_tolerance": 
 			return 0.5
+		&"on_teleport_interactions":
+			return OnTeleportInteractions.CALLBACK | OnTeleportInteractions.PLAYER_UPRIGHT
 	
 	return null
 

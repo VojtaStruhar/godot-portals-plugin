@@ -10,17 +10,10 @@ const MOUSE_SENSITIVITY = 0.004
 func _ready() -> void:
 	assert(camera != null, "Forgot to set camera in editor")
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	
-	for p in get_tree().get_nodes_in_group("portals"):
-		p = p as Portal3D
-		if p:
-			p.on_teleport.connect(_on_teleport)
 
-func _on_teleport(body: Node3D) -> void:
-	if body == self:
-		get_tree().create_tween().tween_property(self, "rotation:x", 0, 0.3)
-		get_tree().create_tween().tween_property(self, "rotation:z", 0, 0.3)
-
+## Implements [member Portal3D.ON_TELEPORT_CALLBACK_METHOD]
+func on_teleport(portal: Portal3D) -> void:
+	pass
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
