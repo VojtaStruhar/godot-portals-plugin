@@ -4,9 +4,10 @@ extends EditorPlugin
 const ExitOutlinesGizmo = preload("uid://pk5ua52g54m1") # gizmos/portal_exit_outline.gd
 var exit_outline_gizmo
 
+const ForwardDirGizmo = preload("uid://cacoywhcpn4ja") # gizmos/portal_forward_direction.gd
+var forward_dir_gizmo
+
 func _enter_tree() -> void:
-	print("Portal plugin _enter_tree")
-	
 	PortalSettings.init_setting("default_portal_layer", 1 << 7)
 	PortalSettings.add_info(AtExport.int_render_3d("default_portal_layer"))
 	
@@ -26,7 +27,11 @@ func _enter_tree() -> void:
 		exit_outline_gizmo = ExitOutlinesGizmo.new()
 		add_node_3d_gizmo_plugin(exit_outline_gizmo)
 	
+	forward_dir_gizmo = ForwardDirGizmo.new()
+	add_node_3d_gizmo_plugin(forward_dir_gizmo)
 
 func _exit_tree() -> void:
 	if exit_outline_gizmo:
 		remove_node_3d_gizmo_plugin(exit_outline_gizmo)
+	
+	remove_node_3d_gizmo_plugin(forward_dir_gizmo)
