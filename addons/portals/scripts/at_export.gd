@@ -69,6 +69,12 @@ static func int_physics_3d(propname: String) -> Dictionary:
 	return result
 
 
+static func int_range(propname: String, min: int, max: int, step: int = 1, extra_hints: Array[String] = []) -> Dictionary:
+	var result := float_range(propname, min, max, step, extra_hints)
+	result["type"] = TYPE_INT
+	return result
+
+
 static func int_render_3d(propname: String) -> Dictionary:
 	var result := int_(propname)
 	result["hint"] = PROPERTY_HINT_LAYERS_3D_RENDER
@@ -116,3 +122,9 @@ static func subgroup(subgroup_name: String, prefix: String = "") -> Dictionary:
 
 static func subgroup_end() -> Dictionary:
 	return subgroup("")
+
+static func vector2(propname: String) -> Dictionary:
+	return _base(propname, TYPE_VECTOR2)
+
+static func vector3(propname: String) -> Dictionary:
+	return _base(propname, TYPE_VECTOR3)

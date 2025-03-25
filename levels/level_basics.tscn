@@ -1,13 +1,12 @@
-[gd_scene load_steps=29 format=4 uid="uid://5vo86e4fice3"]
+[gd_scene load_steps=26 format=4 uid="uid://5vo86e4fice3"]
 
 [ext_resource type="Script" uid="uid://bqnap47txp42k" path="res://levels/level_basics.gd" id="1_8wh7v"]
 [ext_resource type="Material" uid="uid://dgjiw8udooecr" path="res://assets/prototyping/M_prototype_dark.tres" id="1_uy66w"]
-[ext_resource type="Script" uid="uid://cw1r4c1d7beyv" path="res://addons/portals/scripts/portal_3d.gd" id="3_hc4gn"]
 [ext_resource type="Script" uid="uid://d2crarvkhd45r" path="res://scripts/player.gd" id="3_lff3k"]
 [ext_resource type="PackedScene" uid="uid://0vmntyr615js" path="res://assets/prototyping/prop_cube.tscn" id="4_8bheg"]
-[ext_resource type="Shader" uid="uid://bhdb2skdxehes" path="res://addons/portals/materials/portal_shader.gdshader" id="4_8wh7v"]
 [ext_resource type="PackedScene" uid="uid://dxvxy65pv5hoe" path="res://assets/prototyping/prop_sphere.tscn" id="5_p3b8s"]
 [ext_resource type="PackedScene" uid="uid://caqayjkbvlel5" path="res://assets/prototyping/prop_torus.tscn" id="6_p3b8s"]
+[ext_resource type="Script" uid="uid://cw1r4c1d7beyv" path="res://addons/portals/scripts/portal_3d.gd" id="8_8wh7v"]
 [ext_resource type="Material" uid="uid://brj2jayoo0l0d" path="res://assets/prototyping/M_prototype_blue.tres" id="9_lbpks"]
 
 [sub_resource type="GDScript" id="GDScript_hc4gn"]
@@ -70,26 +69,6 @@ height = 1.75
 radius = 0.4
 height = 1.75
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_8wh7v"]
-size = Vector3(2, 2.5, 1)
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_8wh7v"]
-render_priority = 0
-shader = ExtResource("4_8wh7v")
-
-[sub_resource type="BoxMesh" id="BoxMesh_lbpks"]
-size = Vector3(2, 2.5, 0.1)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_lbpks"]
-size = Vector3(2, 2.5, 1)
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_eavfu"]
-render_priority = 0
-shader = ExtResource("4_8wh7v")
-
-[sub_resource type="BoxMesh" id="BoxMesh_im07u"]
-size = Vector3(2, 2.5, 0.1)
-
 [sub_resource type="GDScript" id="GDScript_8wh7v"]
 resource_name = "perpetum_mobile"
 script/source = "extends Area3D
@@ -105,12 +84,24 @@ func _physics_process(delta: float) -> void:
 
 [sub_resource type="SphereMesh" id="SphereMesh_eavfu"]
 
+[sub_resource type="BoxMesh" id="BoxMesh_8wh7v"]
+size = Vector3(2, 2.5, 0.05)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_8wh7v"]
+size = Vector3(2, 2.5, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_lbpks"]
+size = Vector3(2, 2.5, 0.05)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_lbpks"]
+size = Vector3(2, 2.5, 1)
+
 [node name="Level_Basics" type="Node3D"]
 script = ExtResource("1_8wh7v")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="PortalWatcher" type="TextureRect" parent="CanvasLayer" node_paths=PackedStringArray("portal")]
+[node name="PortalWatcher" type="TextureRect" parent="CanvasLayer"]
 clip_contents = true
 anchors_preset = -1
 anchor_right = 0.238
@@ -119,9 +110,8 @@ offset_right = 0.039978
 offset_bottom = -0.400024
 expand_mode = 1
 script = SubResource("GDScript_hc4gn")
-portal = NodePath("../../Portal_Cube")
 
-[node name="PortalWatcher2" type="TextureRect" parent="CanvasLayer" node_paths=PackedStringArray("portal")]
+[node name="PortalWatcher2" type="TextureRect" parent="CanvasLayer"]
 clip_contents = true
 anchors_preset = -1
 anchor_left = 0.757
@@ -129,7 +119,6 @@ anchor_right = 1.0
 anchor_bottom = 0.38
 expand_mode = 1
 script = SubResource("GDScript_hc4gn")
-portal = NodePath("../../Portal_Sphere")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_8bheg")
@@ -211,60 +200,6 @@ mesh = SubResource("CapsuleMesh_lff3k")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
 current = true
 
-[node name="Portal_Cube" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal", "portal_mesh", "teleport_area", "teleport_collision") groups=["portals"]]
-process_priority = 100
-process_physics_priority = 100
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1.25, 0)
-script = ExtResource("3_hc4gn")
-portal_frame_width = 0.1
-exit_portal = NodePath("../Portal_Sphere")
-max_viewport_width = 960
-is_teleport = true
-teleport_collision_mask = 128
-portal_mesh = NodePath("Portal_Cube_Mesh")
-teleport_area = NodePath("TeleportArea")
-teleport_collision = NodePath("TeleportArea/CollisionShape3D")
-metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
-metadata/_edit_group_ = true
-
-[node name="TeleportArea" type="Area3D" parent="Portal_Cube"]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Portal_Cube/TeleportArea"]
-shape = SubResource("BoxShape3D_8wh7v")
-
-[node name="Portal_Cube_Mesh" type="MeshInstance3D" parent="Portal_Cube"]
-layers = 128
-material_override = SubResource("ShaderMaterial_8wh7v")
-cast_shadow = 0
-mesh = SubResource("BoxMesh_lbpks")
-
-[node name="Portal_Sphere" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal", "portal_mesh", "teleport_area", "teleport_collision") groups=["portals"]]
-process_priority = 100
-process_physics_priority = 100
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 1.25, 0)
-script = ExtResource("3_hc4gn")
-portal_frame_width = 0.1
-exit_portal = NodePath("../Portal_Cube")
-max_viewport_width = 960
-is_teleport = true
-teleport_collision_mask = 128
-portal_mesh = NodePath("Portal_Sphere_Mesh")
-teleport_area = NodePath("TeleportArea")
-teleport_collision = NodePath("TeleportArea/CollisionShape3D")
-metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
-metadata/_edit_group_ = true
-
-[node name="TeleportArea" type="Area3D" parent="Portal_Sphere"]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Portal_Sphere/TeleportArea"]
-shape = SubResource("BoxShape3D_lbpks")
-
-[node name="Portal_Sphere_Mesh" type="MeshInstance3D" parent="Portal_Sphere"]
-layers = 128
-material_override = SubResource("ShaderMaterial_eavfu")
-cast_shadow = 0
-mesh = SubResource("BoxMesh_im07u")
-
 [node name="UnstoppableSphere" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.0808, 1.25, 5.75)
 collision_layer = 129
@@ -277,3 +212,69 @@ shape = SubResource("SphereShape3D_lbpks")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="UnstoppableSphere"]
 material_override = ExtResource("9_lbpks")
 mesh = SubResource("SphereMesh_eavfu")
+
+[node name="CubePortal" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal") groups=["portals"]]
+process_priority = 100
+process_physics_priority = 100
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1.25, 0)
+script = ExtResource("8_8wh7v")
+portal_mesh_path = NodePath("Portal3D_Mesh")
+teleport_area_path = NodePath("TeleportArea")
+teleport_collider_path = NodePath("TeleportArea/Collider")
+portal_size = Vector2(2, 2.5)
+exit_portal = NodePath("../SpherePortal")
+portal_frame_width = 0.0
+portals_see_portals = false
+portal_render_layer = 128
+max_viewport_width = 1920
+is_teleport = true
+teleport_direction = 2
+rb_velocity_boost = 0.0
+teleport_collision_mask = 128
+teleport_tolerance = 0.5
+_tb_debug_action = Callable()
+metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
+metadata/_edit_group_ = true
+
+[node name="Portal3D_Mesh" type="MeshInstance3D" parent="CubePortal"]
+layers = 128
+cast_shadow = 0
+mesh = SubResource("BoxMesh_8wh7v")
+
+[node name="TeleportArea" type="Area3D" parent="CubePortal"]
+
+[node name="Collider" type="CollisionShape3D" parent="CubePortal/TeleportArea"]
+shape = SubResource("BoxShape3D_8wh7v")
+
+[node name="SpherePortal" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal") groups=["portals"]]
+process_priority = 100
+process_physics_priority = 100
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 1.25, 0)
+script = ExtResource("8_8wh7v")
+portal_mesh_path = NodePath("Portal3D2_Mesh")
+teleport_area_path = NodePath("TeleportArea")
+teleport_collider_path = NodePath("TeleportArea/Collider")
+portal_size = Vector2(2, 2.5)
+exit_portal = NodePath("../CubePortal")
+portal_frame_width = 0.0
+portals_see_portals = false
+portal_render_layer = 128
+max_viewport_width = 1920
+is_teleport = true
+teleport_direction = 2
+rb_velocity_boost = 0.0
+teleport_collision_mask = 128
+teleport_tolerance = 0.5
+_tb_debug_action = Callable()
+metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
+metadata/_edit_group_ = true
+
+[node name="Portal3D2_Mesh" type="MeshInstance3D" parent="SpherePortal"]
+layers = 128
+cast_shadow = 0
+mesh = SubResource("BoxMesh_lbpks")
+
+[node name="TeleportArea" type="Area3D" parent="SpherePortal"]
+
+[node name="Collider" type="CollisionShape3D" parent="SpherePortal/TeleportArea"]
+shape = SubResource("BoxShape3D_lbpks")

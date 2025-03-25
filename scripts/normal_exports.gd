@@ -2,6 +2,9 @@
 extends Node
 class_name NormalExports
 
+@export_range(0, 100, 1) var intrange = 42
+@export var size: Vector3 = Vector3(1, 2, 3)
+
 @export var parent: Node3D
 
 @export_range(0, 100, 1, "or_greater") var favorite_number: float = 42.0

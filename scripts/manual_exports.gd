@@ -23,7 +23,7 @@ var is_teleport: bool = true:
 
 var teleport_tolerance: float = 0.1
 var teleport_layer: int = 0
-
+var size: Vector2 = Vector2(1, 2)
 
 
 func _get_property_list() -> Array[Dictionary]:
@@ -48,6 +48,7 @@ func _get_property_list() -> Array[Dictionary]:
 		config.append(AtExport.group_end()) # Or you could provide a prefix to the subgroup
 		
 	config.append(AtExport.string("your_name"))
+	config.append(AtExport.vector2("size"))
 	
 	return config
 
