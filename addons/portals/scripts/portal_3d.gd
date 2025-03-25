@@ -45,7 +45,22 @@ var portal_render_layer: int = 1 << 7:
 		if caused_by_user_interaction():
 			portal_mesh.layers = v
 
-var max_viewport_width: int = ProjectSettings.get_setting("display/window/size/viewport_width")
+## Determines how big the internal portal viewports are. It helps to reduce the memory usage
+## by not rendering the portals at full resolution. Viewports are resized on window resize.
+enum PortalViewportSizeMode {
+	## Render at full window resolution.
+	FULL,
+	## Portal viewport max width. Height is calculated from window aspect ratio.
+	MAX_WIDTH_ABSOLUTE,
+	## Portal viewport will be a fraction of full window size.
+	FRACTIONAL
+}
+var viewport_size_mode: PortalViewportSizeMode = PortalViewportSizeMode.FULL:
+	set(v):
+		viewport_size_mode = v
+		notify_property_list_changed()
+var viewport_size_max_width_absolute: int = ProjectSettings.get_setting("display/window/size/viewport_width")
+var viewport_size_fractional: float = 0.5
 
 var is_teleport: bool:
 	set(v):
@@ -88,22 +103,21 @@ var teleport_tolerance: float = 0.5
 
 @export_storage var portal_mesh_path: NodePath
 var portal_mesh: MeshInstance3D:
-	get(): 
+	get():
 		return null if portal_mesh_path == NodePath("") else get_node(portal_mesh_path)
 	set(v): assert(false, "Proxy variable, use 'portal_mesh_path' instead")
 	
 @export_storage var teleport_area_path: NodePath
 var teleport_area: Area3D:
-	get(): 
+	get():
 		return null if teleport_area_path == NodePath("") else get_node(teleport_area_path)
 	set(v): assert(false, "Proxy variable, use 'teleport_area_path' instead")
 
 @export_storage var teleport_collider_path: NodePath
 var teleport_collision: CollisionShape3D:
-	get(): 
+	get():
 		return null if teleport_collider_path == NodePath("") else get_node(teleport_collider_path)
 	set(v): assert(false, "Proxy variable, use 'teleport_collider_path' instead")
-
 
 
 ## Camera that looks through the exit portal. If exit portal is null, the camera doesn't exist 
@@ -343,7 +357,7 @@ func _setup_mesh() -> void:
 	if portal_mesh:
 		return
 	
-	var mi = MeshInstance3D.new() 
+	var mi = MeshInstance3D.new()
 	
 	mi = MeshInstance3D.new()
 	mi.name = self.name + "_Mesh"
@@ -365,7 +379,7 @@ func _setup_cameras() -> void:
 	if exit_portal != null:
 		portal_viewport = SubViewport.new()
 		portal_viewport.name = self.name + "_SubViewport"
-		portal_viewport.size = Vector2i(max_viewport_width, max_viewport_width / get_aspect_ratio())
+		portal_viewport.size = get_desired_viewport_size()
 		self.add_child(portal_viewport, true)
 		
 		# Disable tonemapping on portal cameras
@@ -406,7 +420,7 @@ func _on_teleport_body_exited(body: Node3D) -> void:
 	_watchlist_teleportables.erase(body)
 
 func _on_window_resize() -> void:
-	portal_viewport.size = get_viewport().size
+	portal_viewport.size = get_desired_viewport_size()
 
 #endregion
 
@@ -462,10 +476,25 @@ static func group_node(node: Node) -> void:
 	node.set_meta("_edit_group_", true)
 
 
-func get_aspect_ratio() -> float:
-	var vp = get_viewport()
-	assert(vp != null, "Oops, no viewport. Fall back on project window settings?")
-	return float(vp.size.x) / float(vp.size.y)
+func get_desired_viewport_size() -> Vector2i:
+	var vp_size: Vector2i = get_viewport().size
+	var aspect_ratio: float = float(vp_size.x) / float(vp_size.y)
+	
+	match viewport_size_mode:
+		PortalViewportSizeMode.FULL:
+			return vp_size
+		PortalViewportSizeMode.MAX_WIDTH_ABSOLUTE:
+			var width = min(viewport_size_max_width_absolute, vp_size.x)
+			return Vector2i(width, int(width / aspect_ratio))
+		PortalViewportSizeMode.FRACTIONAL:
+			return Vector2i(vp_size * viewport_size_fractional)
+		
+	
+	push_error("Failed to determine desired viewport size")
+	return Vector2i(
+		ProjectSettings.get_setting("display/window/size/viewport_width"),
+		ProjectSettings.get_setting("display/window/size/viewport_height")
+	)
 
 #endregion
 
@@ -477,8 +506,8 @@ func _get_configuration_warnings() -> PackedStringArray:
 	var global_scale = global_basis.get_scale()
 	if not global_scale.is_equal_approx(Vector3.ONE):
 		warnings.append(
-			("Portals should NOT be scaled. Global portal scale is %v, " % global_scale)+
-			"but should be (1.0, 1.0, 1.0). Make sure the portal and any of portal parents " + 
+			("Portals should NOT be scaled. Global portal scale is %v, " % global_scale) +
+			"but should be (1.0, 1.0, 1.0). Make sure the portal and any of portal parents " +
 			"aren't scaled."
 			)
 	
@@ -513,7 +542,15 @@ func _get_property_list() -> Array[Dictionary]:
 	config.append(AtExport.node("player_camera", "Camera3D"))
 	config.append(AtExport.bool_("portals_see_portals"))
 	config.append(AtExport.int_render_3d("portal_render_layer")) # TODO: Rename to `portal_layer`
-	config.append(AtExport.int_range("max_viewport_width", 2, 4096, 1))
+	
+	config.append(AtExport.enum_(
+		"viewport_size_mode", &"Portal3D.PortalViewportSizeMode", PortalViewportSizeMode))
+		
+	if viewport_size_mode == PortalViewportSizeMode.MAX_WIDTH_ABSOLUTE:
+		config.append(AtExport.int_range("viewport_size_max_width_absolute", 2, 4096))
+	elif viewport_size_mode == PortalViewportSizeMode.FRACTIONAL:
+		config.append(AtExport.float_range("viewport_size_fractional", 0, 1))
+		
 	config.append(AtExport.group_end())
 	
 	
@@ -540,7 +577,7 @@ func _property_can_revert(property: StringName) -> bool:
 		&"player_camera",
 		&"portals_see_portals",
 		&"portal_render_layer",
-		&"max_viewport_width",
+		&"viewport_size_max_width_absolute",
 		&"teleport_direction",
 		&"rb_velocity_boost",
 		&"teleport_collision_mask",
@@ -549,15 +586,23 @@ func _property_can_revert(property: StringName) -> bool:
 
 func _property_get_revert(property: StringName) -> Variant:
 	match property:
-		&"portal_size": return Vector2(2, 2.5)
-		&"portal_frame_width": return 0.0
-		&"portals_see_portals": return false
-		&"portal_render_layer": return PortalSettings.get_setting("default_portal_layer")
-		&"max_viewport_width":
-			return int(ProjectSettings.get_setting("display/window/size/viewport_width"))
-		&"teleport_direction": return TeleportDirection.FRONT_AND_BACK
-		&"rb_velocity_boost": return 0.0
-		&"teleport_collision_mask": return PortalSettings.get_setting("default_teleport_mask")
-		&"teleport_tolerance": return 0.5
+		&"portal_size": 
+			return Vector2(2, 2.5)
+		&"portal_frame_width": 
+			return 0.0
+		&"portals_see_portals": 
+			return false
+		&"portal_render_layer": 
+			return PortalSettings.get_setting("default_portal_layer")
+		&"viewport_size_max_width_absolute": 
+			return ProjectSettings.get_setting("display/window/size/viewport_width")
+		&"teleport_direction": 
+			return TeleportDirection.FRONT_AND_BACK
+		&"rb_velocity_boost": 
+			return 0.0
+		&"teleport_collision_mask": 
+			return PortalSettings.get_setting("default_teleport_mask")
+		&"teleport_tolerance": 
+			return 0.5
 	
 	return null
