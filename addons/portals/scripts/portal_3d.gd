@@ -31,6 +31,7 @@ var exit_portal: Portal3D:
 		notify_property_list_changed()
 
 var _tb_pair_portals: Callable = _editor_pair_portals
+var _tb_sync_portal_sizes: Callable = _editor_sync_portal_sizes
 var player_camera: Camera3D
 
 ## The width of the frame portal. Adjusts the near clip distance of the camera looking through 
@@ -158,12 +159,14 @@ func _editor_ready() -> void:
 	self.group_node(self)
 
 
-func _editor_pair_portals():
-	if exit_portal == null:
-		push_error("[%s] _editor_pair_portals called, but 'exit_portal' is null" % name)
-		return
-	
+func _editor_pair_portals() -> void:
+	assert(exit_portal != null, "My own exit has to be set!")
 	exit_portal.exit_portal = self
+	notify_property_list_changed()
+
+func _editor_sync_portal_sizes() -> void:
+	assert(exit_portal != null, "My own exit has to be set!")
+	exit_portal.portal_size = portal_size
 	notify_property_list_changed()
 
 func _setup_teleport():
@@ -471,10 +474,13 @@ func get_aspect_ratio() -> float:
 func _get_configuration_warnings() -> PackedStringArray:
 	var warnings: Array[String] = []
 	
-	if not scale.is_equal_approx(Vector3.ONE):
+	var global_scale = global_basis.get_scale()
+	if not global_scale.is_equal_approx(Vector3.ONE):
 		warnings.append(
-			"Portals should NOT be scaled. Set portal scaling to (1, 1, 1) and " +
-			"reload the scene. Use the 'portal_size' property for sizing.")
+			("Portals should NOT be scaled. Global portal scale is %v, " % global_scale)+
+			"but should be (1.0, 1.0, 1.0). Make sure the portal and any of portal parents " + 
+			"aren't scaled."
+			)
 	
 	if exit_portal == null:
 		warnings.append("Exit portal is null")
@@ -492,7 +498,12 @@ func _get_property_list() -> Array[Dictionary]:
 	var config: Array[Dictionary] = []
 	
 	config.append(AtExport.vector2("portal_size"))
+	
+	if exit_portal != null and not portal_size.is_equal_approx(exit_portal.portal_size):
+		config.append(AtExport.button("_tb_sync_portal_sizes", "Give Exit the Same Size", "Vector2"))
+	
 	config.append(AtExport.node("exit_portal", "Portal3D"))
+	
 	if exit_portal != null and exit_portal.exit_portal == null:
 		config.append(AtExport.button("_tb_pair_portals", "Pair Portals", "SliderJoint3D"))
 	
