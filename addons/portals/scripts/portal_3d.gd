@@ -10,7 +10,7 @@ class_name Portal3D extends Node3D
 ## Emitted when this portal triggers a teleport.
 signal on_teleport(body_or_area: Node3D)
 
-## Emitted when this portal [i]receives[/i] a teleported node. Whoever had [b]thi[/b] portal as
+## Emitted when this portal [i]receives[/i] a teleported node. Whoever had [b]this[/b] portal as
 ## its [member exit_portal] triggered a teleport!
 signal on_teleport_receive(body_or_area: Node3D)
 
@@ -114,7 +114,7 @@ var teleport_area: Area3D:
 	set(v): assert(false, "Proxy variable, use 'teleport_area_path' instead")
 
 @export_storage var teleport_collider_path: NodePath
-var teleport_collision: CollisionShape3D:
+var teleport_collider: CollisionShape3D:
 	get():
 		return null if teleport_collider_path == NodePath("") else get_node(teleport_collider_path)
 	set(v): assert(false, "Proxy variable, use 'teleport_collider_path' instead")
@@ -188,8 +188,8 @@ func _setup_teleport():
 		if teleport_area:
 			teleport_area.queue_free()
 			teleport_area_path = NodePath("")
-		if teleport_collision:
-			teleport_collision.queue_free()
+		if teleport_collider:
+			teleport_collider.queue_free()
 			teleport_collider_path = NodePath("")
 		return
 	
@@ -218,8 +218,8 @@ func _on_portal_size_changed() -> void:
 	var p: BoxMesh = portal_mesh.mesh
 	p.size = Vector3(portal_size.x, portal_size.y, portal_thickness)
 	
-	if is_teleport and teleport_collision:
-		var box: BoxShape3D = teleport_collision.shape
+	if is_teleport and teleport_collider:
+		var box: BoxShape3D = teleport_collider.shape
 		box.size.x = portal_size.x
 		box.size.y = portal_size.y
 	
@@ -498,7 +498,7 @@ func get_desired_viewport_size() -> Vector2i:
 
 #endregion
 
-# ---------- GODOT ENGINE INTEGRATIONS --------------
+#region GODOT ENGINE INTEGRATIONS
 
 func _get_configuration_warnings() -> PackedStringArray:
 	var warnings: Array[String] = []
@@ -606,3 +606,5 @@ func _property_get_revert(property: StringName) -> Variant:
 			return 0.5
 	
 	return null
+
+#endregion
