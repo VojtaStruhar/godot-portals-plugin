@@ -22,10 +22,16 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 		Vector3.ZERO, Vector3(0, 0, 1)
 	]
 	if active:
-		var offset = 0.005
+		var arrow_spread = 0.05
 		lines.append_array([
-			Vector3(offset, offset, 0), Vector3(offset, offset, 1),
+			Vector3(0, 0, 1), Vector3(arrow_spread, -arrow_spread, 0.9),
+			Vector3(0, 0, 1), Vector3(-arrow_spread, arrow_spread, 0.9),
 		])
+		
+		var offset = 0.005
+		for i in range(lines.size()):
+			var p = lines[i]
+			lines.append(Vector3(p.x + offset, p.y + offset, p.z))
 	
 	gizmo.add_lines(
 		PackedVector3Array(lines),
