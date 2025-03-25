@@ -1,5 +1,5 @@
 @tool
-class_name Portal3D extends Node3D 
+class_name Portal3D extends Node3D
 
 ## Configurator node that manages the setup of a 3D portal.
 ##
@@ -17,7 +17,7 @@ signal on_teleport_receive(body_or_area: Node3D)
 var portal_size: Vector2 = Vector2(2.0, 2.5):
 	set(v):
 		portal_size = v
-		if caused_by_user_interaction(): 
+		if caused_by_user_interaction():
 			_on_portal_size_changed()
 			update_configuration_warnings()
 			if exit_portal:
@@ -49,18 +49,18 @@ var max_viewport_width: int = ProjectSettings.get_setting("display/window/size/v
 var is_teleport: bool:
 	set(v):
 		is_teleport = v
-		if caused_by_user_interaction(): 
+		if caused_by_user_interaction():
 			_setup_teleport()
 			notify_property_list_changed()
 
-
+## Dictates from which direction an object has to enter the portal to be teleported.
 enum TeleportDirection {
 	## Corresponds to portal's FORWARD direction (-Z)
 	FRONT,
 	## Corresponds to portal's BACK direction (+Z)
-	BACK, 
+	BACK,
 	## Teleports stuff coming from either side.
-	FRONT_AND_BACK 
+	FRONT_AND_BACK
 }
 
 ## If the portal is also a teleport, it will only teleport things coming from
@@ -87,10 +87,10 @@ var teleport_tolerance: float = 0.5
 		portal_thickness = v
 		if caused_by_user_interaction(): _on_portal_size_changed()
 
-@export_storage var portal_mesh: MeshInstance3D
+@export var portal_mesh: MeshInstance3D
 
-@export_storage var teleport_area: Area3D
-@export_storage var teleport_collision: CollisionShape3D
+@export var teleport_area: Area3D
+@export var teleport_collision: CollisionShape3D
 
 @export_group("")
 
@@ -105,7 +105,7 @@ var portal_viewport: SubViewport = null
 ## the body crossed the portal and should be teleported.
 var _watchlist_teleportables: Dictionary[Node3D, float] = {}
 
-@export_tool_button("Debug Button", "Popup") 
+
 var _tb_debug_action: Callable = _debug_action
 
 
@@ -163,7 +163,7 @@ func _editor_pair_portals():
 
 func _setup_teleport():
 	if is_teleport == false:
-		if teleport_area: 
+		if teleport_area:
 			teleport_area.queue_free()
 			teleport_area = null
 			teleport_collision = null
@@ -184,9 +184,6 @@ func _setup_teleport():
 	add_child_in_editor(teleport_area, teleport_collision)
 	
 	
-
-
-
 func _on_portal_size_changed() -> void:
 	if portal_mesh == null:
 		printerr("Portal has no mesh!!!")
@@ -222,8 +219,8 @@ func _ready() -> void:
 	
 	var mat: ShaderMaterial = ShaderMaterial.new()
 	mat.shader = PORTAL_SHADER
-	mat.set_shader_parameter("albedo", portal_viewport.get_texture())
 	portal_mesh.material_override = mat
+	portal_mesh.material_override.set_shader_parameter("albedo", portal_viewport.get_texture())
 	
 	if is_teleport:
 		assert(teleport_area, "Teleport area should be already set up from editor")
@@ -269,7 +266,7 @@ func _process_cameras() -> void:
 
 func _process_teleports() -> void:
 	for body in _watchlist_teleportables.keys():
-		body = body as Node3D  # Conversion just for type hints
+		body = body as Node3D # Conversion just for type hints
 		var last_fw_angle: float = _watchlist_teleportables.get(body)
 		var current_fw_angle: float = forward_distance(body)
 		
@@ -313,19 +310,19 @@ func _calculate_near_plane() -> float:
 	var _pos := _aabb.position
 	var _size := _aabb.size
 	
-	var corner_1:Vector3 = exit_portal.to_global(Vector3(_pos.x, _pos.y, 0))
-	var corner_2:Vector3 = exit_portal.to_global(Vector3(_pos.x + _size.x, _pos.y, 0))
-	var corner_3:Vector3 = exit_portal.to_global(Vector3(_pos.x + _size.x, _pos.y + _size.y, 0))
-	var corner_4:Vector3 = exit_portal.to_global(Vector3(_pos.x, _pos.y + _size.y, 0))
+	var corner_1: Vector3 = exit_portal.to_global(Vector3(_pos.x, _pos.y, 0))
+	var corner_2: Vector3 = exit_portal.to_global(Vector3(_pos.x + _size.x, _pos.y, 0))
+	var corner_3: Vector3 = exit_portal.to_global(Vector3(_pos.x + _size.x, _pos.y + _size.y, 0))
+	var corner_4: Vector3 = exit_portal.to_global(Vector3(_pos.x, _pos.y + _size.y, 0))
 
 	# Calculate the distance along the exit camera forward vector at which each of the portal 
 	# corners projects
-	var camera_forward:Vector3 = -portal_camera.global_transform.basis.z.normalized()
+	var camera_forward: Vector3 = - portal_camera.global_transform.basis.z.normalized()
 
-	var d_1:float = (corner_1 - portal_camera.global_position).dot(camera_forward)
-	var d_2:float = (corner_2 - portal_camera.global_position).dot(camera_forward)
-	var d_3:float = (corner_3 - portal_camera.global_position).dot(camera_forward)
-	var d_4:float = (corner_4 - portal_camera.global_position).dot(camera_forward)
+	var d_1: float = (corner_1 - portal_camera.global_position).dot(camera_forward)
+	var d_2: float = (corner_2 - portal_camera.global_position).dot(camera_forward)
+	var d_3: float = (corner_3 - portal_camera.global_position).dot(camera_forward)
+	var d_4: float = (corner_4 - portal_camera.global_position).dot(camera_forward)
 	
 	# The near clip distance is the shortest distance which still contains all the corners
 	return max(0.01, min(d_1, d_2, d_3, d_4) - exit_portal.portal_frame_width)
@@ -409,9 +406,9 @@ func to_exit_transform(g_transform: Transform3D) -> Transform3D:
 	return relative_to_target
 
 ## Similar to [method to_exit_transform], but this one only transforms a vector.
-func to_exit_direction(real:Vector3) -> Vector3:
+func to_exit_direction(real: Vector3) -> Vector3:
 	var relative_to_portal: Vector3 = global_transform.basis.inverse() * real
-	var flipped:Vector3 = relative_to_portal.rotated(Vector3.UP, PI)
+	var flipped: Vector3 = relative_to_portal.rotated(Vector3.UP, PI)
 	var relative_to_target: Vector3 = exit_portal.global_transform.basis * flipped
 	return relative_to_target
 
@@ -430,8 +427,8 @@ func forward_distance(node: Node3D) -> float:
 ## as parent's.
 func add_child_in_editor(parent: Node, node: Node) -> void:
 	parent.add_child(node, true)
-	# self.owner should be the editor scene root. Just pass that
-	node.owner = self.owner
+	# self.owner is null if this node is the scene root. Supply self.
+	node.owner = self if self.owner == null else self.owner
 
 ## Used to conditionally run property setters.
 ## [br]
@@ -473,7 +470,7 @@ func _get_configuration_warnings() -> PackedStringArray:
 	if exit_portal != null:
 		if not portal_size.is_equal_approx(exit_portal.portal_size):
 			warnings.append(
-				"Portal size should be the same as exit portal's (it's %s and %s)" % 
+				"Portal size should be the same as exit portal's (it's %s and %s)" %
 				[portal_size, exit_portal.portal_size]
 			)
 	
@@ -509,9 +506,9 @@ func _get_property_list() -> Array[Dictionary]:
 		config.append(AtExport.float_range("teleport_tolerance", 0.0, 5.0, 0.1, ["or_greater"]))
 		config.append(AtExport.group_end())
 	
+	config.append(AtExport.button("_tb_debug_action", "Debug Button", "Popup"))
+	
 	return config
-
-
 
 func _property_can_revert(property: StringName) -> bool:
 	return property in [
@@ -533,7 +530,7 @@ func _property_get_revert(property: StringName) -> Variant:
 		&"portal_frame_width": return 0.0
 		&"portals_see_portals": return false
 		&"portal_render_layer": return PortalSettings.get_setting("default_portal_layer")
-		&"max_viewport_width": 
+		&"max_viewport_width":
 			return int(ProjectSettings.get_setting("display/window/size/viewport_width"))
 		&"teleport_direction": return TeleportDirection.FRONT_AND_BACK
 		&"rb_velocity_boost": return 0.0
