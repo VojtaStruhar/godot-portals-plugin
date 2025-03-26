@@ -366,12 +366,11 @@ func _process_teleports() -> void:
 				exit_portal._process_cameras()
 			
 			# Resolve teleport interactions
-			
-			if was_player and on_teleport_interactions | OnTeleportInteractions.PLAYER_UPRIGHT:
+			if was_player and (on_teleport_interactions & OnTeleportInteractions.PLAYER_UPRIGHT):
 				get_tree().create_tween().tween_property(teleportable, "rotation:x", 0, 0.3)
 				get_tree().create_tween().tween_property(teleportable, "rotation:z", 0, 0.3)
 			
-			if on_teleport_interactions | OnTeleportInteractions.CALLBACK:
+			if on_teleport_interactions & OnTeleportInteractions.CALLBACK:
 				if teleportable.has_method(ON_TELEPORT_CALLBACK_METHOD):
 					teleportable.call(ON_TELEPORT_CALLBACK_METHOD, self)
 			

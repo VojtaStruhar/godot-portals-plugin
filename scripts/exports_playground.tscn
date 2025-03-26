@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://svpdsk6g8xy2"]
+[gd_scene load_steps=9 format=3 uid="uid://svpdsk6g8xy2"]
 
 [ext_resource type="Script" uid="uid://c2wi3h0jt2fxb" path="res://scripts/normal_exports.gd" id="1_465jp"]
 [ext_resource type="Script" uid="uid://b6cegp28gdigl" path="res://scripts/manual_exports.gd" id="1_oe0o1"]
@@ -15,12 +15,14 @@ size = Vector3(2, 2.5, 0.1)
 [sub_resource type="BoxShape3D" id="BoxShape3D_o8r8w"]
 size = Vector3(2, 2.5, 1)
 
+[sub_resource type="BoxMesh" id="BoxMesh_o8r8w"]
+size = Vector3(2, 2.5, 0.05)
+
 [node name="ExportsPlayground" type="Node3D"]
 
 [node name="NormalExports" type="Node" parent="." node_paths=PackedStringArray("parent")]
 editor_description = "Demo script with normal @export annotations. I'll try to replicate its inspector with a custom _get_property_list() implementation."
 script = ExtResource("1_465jp")
-size = null
 parent = NodePath("..")
 favorite_number = 100.0
 teleport_layer = 128
@@ -34,23 +36,24 @@ is_teleport = true
 teleport_tolerance = 0.1
 teleport_layer = 0
 your_name = null
-size = null
+size = Vector2(1, 2)
 
-[node name="Portal3D" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal") groups=["portals"]]
+[node name="Portal3D" type="Node3D" parent="." groups=["portals"]]
 process_priority = 100
 process_physics_priority = 100
 script = ExtResource("3_o8r8w")
+portal_mesh_path = NodePath("Portal3D_Mesh2")
 portal_size = Vector2(2, 2.5)
-exit_portal = NodePath("")
 portal_frame_width = 0.0
-portals_see_portals = false
 portal_render_layer = 128
-max_viewport_width = 1920
+viewport_size_mode = 0
 is_teleport = true
 teleport_direction = 2
 rb_velocity_boost = 0.0
 teleport_collision_mask = 128
 teleport_tolerance = 0.5
+on_teleport_interactions = 3
+_tb_debug_action = Callable()
 metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
 metadata/_edit_group_ = true
 
@@ -64,3 +67,8 @@ mesh = SubResource("BoxMesh_n2bwa")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Portal3D/TeleportArea"]
 shape = SubResource("BoxShape3D_o8r8w")
+
+[node name="Portal3D_Mesh2" type="MeshInstance3D" parent="Portal3D"]
+layers = 128
+cast_shadow = 0
+mesh = SubResource("BoxMesh_o8r8w")
