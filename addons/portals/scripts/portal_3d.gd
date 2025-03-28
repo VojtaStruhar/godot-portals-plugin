@@ -1,4 +1,5 @@
 @tool
+@icon("uid://ct62bsuel5hyc")
 class_name Portal3D extends Node3D
 
 ## Configurator node that manages the setup of a 3D portal.
