@@ -2,15 +2,14 @@
 @icon("uid://ct62bsuel5hyc")
 class_name Portal3D extends Node3D
 
-## Configurator node that manages the setup of a 3D portal.
+## Seamless 3D portal
 ##
-## This node is a tool script that provides configuration options to the user. It's only purpose
-## is to manage the portal setup in editor. During gameplay, it moves portal cameras around and
-## provides API to interact with the portal system.
+## This node is a tool script that provides configuration options for portal setup. The portal
+## can be visual-only or also teleporting.
 
 #region Public API
 
-## Emitted when this portal triggers a teleport.
+## Emitted when this portal teleports something. Also see [signal on_teleport_receive]
 signal on_teleport(body_or_area: Node3D)
 
 ## Emitted when this portal [i]receives[/i] a teleported node. Whoever had [b]this[/b] portal as
@@ -123,6 +122,7 @@ var teleport_direction: TeleportDirection = TeleportDirection.FRONT_AND_BACK
 ## Recommended values: 1 to 3
 var rb_velocity_boost: float = 0.0
 
+## [CollisionObject3D]s detected by this mask will be registered by the portal and teleported. 
 var teleport_collision_mask: int = 1 << 7
 
 ## When teleporting, the portal checks if the teleported object is less than [b]this[/b] near.
@@ -143,6 +143,11 @@ enum OnTeleportInteractions {
 ## is checked in [member on_teleport_interactions]
 const ON_TELEPORT_CALLBACK_METHOD: StringName = &"on_teleport"
 
+## When a [CollisionObject3D] should be teleported, the portal check for a [NodePath] for an 
+## alternative node to teleport. For example it's useful when the [Area3D] that's triggering the 
+## teleport isn't the root of a player or object.
+const TELEPORT_ROOT_META: StringName = &"teleport_root"
+
 ## For options, see [enum OnTeleportInteractions]
 var on_teleport_interactions: int = OnTeleportInteractions.CALLBACK \
 									| OnTeleportInteractions.PLAYER_UPRIGHT
@@ -157,19 +162,19 @@ var on_teleport_interactions: int = OnTeleportInteractions.CALLBACK \
 @export_storage var portal_mesh_path: NodePath
 var portal_mesh: MeshInstance3D:
 	get():
-		return null if not portal_mesh_path else get_node(portal_mesh_path)
+		return get_node(portal_mesh_path) if portal_mesh_path else null
 	set(v): assert(false, "Proxy variable, use 'portal_mesh_path' instead")
 	
 @export_storage var teleport_area_path: NodePath
 var teleport_area: Area3D:
 	get():
-		return null if not teleport_area_path else get_node(teleport_area_path)
+		return get_node(teleport_area_path) if teleport_area_path else null
 	set(v): assert(false, "Proxy variable, use 'teleport_area_path' instead")
 
 @export_storage var teleport_collider_path: NodePath
 var teleport_collider: CollisionShape3D:
 	get():
-		return null if not teleport_collider_path else get_node(teleport_collider_path)
+		return get_node(teleport_collider_path) if teleport_collider_path else null
 	set(v): assert(false, "Proxy variable, use 'teleport_collider_path' instead")
 
 
@@ -179,9 +184,9 @@ var portal_camera: Camera3D = null
 var portal_viewport: SubViewport = null
 
 
-## These physics bodies are being watched by the portal. The value in dictionary
-## is their dot product from last frame. As soon as the dot product changes signs,
-## the body crossed the portal and should be teleported.
+# These physics bodies are being watched by the portal. The value in dictionary
+# is their dot product from last frame. As soon as the dot product changes signs,
+# the body crossed the portal and should be teleported.
 var _watchlist_teleportables: Dictionary[Node3D, float] = {}
 
 var _tb_debug_action: Callable = _debug_action
@@ -344,7 +349,7 @@ func _process_teleports() -> void:
 		
 		if should_teleport and abs(current_fw_angle) < teleport_tolerance:
 			# NOTE: BODIES don't have to specify teleport_root, they are usually the roots. 
-			var teleportable_path = body.get_meta("teleport_root", ".")
+			var teleportable_path = body.get_meta(TELEPORT_ROOT_META, ".")
 			var teleportable: Node3D = body.get_node(teleportable_path)
 			
 			teleportable.global_transform = self.to_exit_transform(teleportable.global_transform)
