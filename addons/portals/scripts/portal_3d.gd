@@ -184,10 +184,15 @@ var portal_camera: Camera3D = null
 var portal_viewport: SubViewport = null
 
 
+class TeleportableMeta:
+	var forward: float = 0
+	var meshes: Array[MeshInstance3D] = []
+	var mesh_clones: Array[MeshInstance3D] = []
+
 # These physics bodies are being watched by the portal. The value in dictionary
 # is their dot product from last frame. As soon as the dot product changes signs,
 # the body crossed the portal and should be teleported.
-var _watchlist_teleportables: Dictionary[Node3D, float] = {}
+var _watchlist_teleportables: Dictionary[Node3D, TeleportableMeta] = {}
 
 var _tb_debug_action: Callable = _debug_action
 
@@ -195,6 +200,7 @@ func _debug_action() -> void:
 	print("[%s] DEBUG")
 	print({"portal_mesh_path": portal_mesh_path, "portal_mesh": portal_mesh})
 
+#endregion
 
 #region Editor Configuration Stuff
 
@@ -333,7 +339,8 @@ func _process_cameras() -> void:
 func _process_teleports() -> void:
 	for body in _watchlist_teleportables.keys():
 		body = body as Node3D # Conversion just for type hints
-		var last_fw_angle: float = _watchlist_teleportables.get(body)
+		var tp_meta: TeleportableMeta = _watchlist_teleportables.get(body)
+		var last_fw_angle: float = tp_meta.forward
 		var current_fw_angle: float = forward_distance(body)
 		
 		var should_teleport: bool = false
@@ -360,7 +367,6 @@ func _process_teleports() -> void:
 					teleportable.linear_velocity.normalized() * rb_velocity_boost
 				)
 			
-			_watchlist_teleportables.erase(body)
 			
 			on_teleport.emit(teleportable)
 			exit_portal.on_teleport_receive.emit(teleportable)
@@ -380,8 +386,13 @@ func _process_teleports() -> void:
 				if teleportable.has_method(ON_TELEPORT_CALLBACK_METHOD):
 					teleportable.call(ON_TELEPORT_CALLBACK_METHOD, self)
 			
+			# cleanup
+			for m in tp_meta.mesh_clones: m.queue_free()
+			_watchlist_teleportables.erase(body)
 		else:
-			_watchlist_teleportables.set(body, current_fw_angle)
+			tp_meta.forward = current_fw_angle
+			for i in tp_meta.mesh_clones.size():
+				tp_meta.mesh_clones[i].global_transform = to_exit_transform(tp_meta.meshes[i].global_transform)
 
 func _calculate_near_plane() -> float:
 	# Adjustment for cube portals. This AABB is basically a plane.
@@ -464,13 +475,30 @@ func _setup_cameras() -> void:
 #region Event handlers
 
 func _on_teleport_area_entered(area: Area3D) -> void:
-	_watchlist_teleportables.set(area, forward_distance(area))
+	var meta = TeleportableMeta.new()
+	meta.forward = forward_distance(area)
+	
+	var root = area.get_node(area.get_meta(TELEPORT_ROOT_META, "."))
+	for child in root.get_children():
+		if child is MeshInstance3D:
+			prints("[%s] Duplicating a mesh:" % name, child.name)
+			meta.meshes.append(child)
+			var dupe = child.duplicate(0)
+			meta.mesh_clones.append(dupe)
+			self.add_child(dupe)
+		
+	
+	_watchlist_teleportables.set(area, meta)
 
 func _on_teleport_area_exited(area: Area3D) -> void:
-	_watchlist_teleportables.erase(area)
+	if _watchlist_teleportables.has(area):
+		for m in _watchlist_teleportables[area].mesh_clones: m.queue_free()
+		_watchlist_teleportables.erase(area)
 
 func _on_teleport_body_entered(body: Node3D) -> void:
-	_watchlist_teleportables.set(body, forward_distance(body))
+	var meta = TeleportableMeta.new()
+	meta.forward = forward_distance(body)
+	_watchlist_teleportables.set(body, meta)
 
 func _on_teleport_body_exited(body: Node3D) -> void:
 	_watchlist_teleportables.erase(body)
@@ -544,7 +572,6 @@ func get_desired_viewport_size() -> Vector2i:
 			return Vector2i(width, int(width / aspect_ratio))
 		PortalViewportSizeMode.FRACTIONAL:
 			return Vector2i(vp_size * viewport_size_fractional)
-		
 	
 	push_error("Failed to determine desired viewport size")
 	return Vector2i(
