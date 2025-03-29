@@ -355,6 +355,7 @@ func _process_teleports() -> void:
 				assert(false, "This match statement should be exhaustive")
 		
 		if should_teleport and abs(current_fw_angle) < teleport_tolerance:
+			print("[%s] Teleporting %s " % [name, body.name])
 			# NOTE: BODIES don't have to specify teleport_root, they are usually the roots. 
 			var teleportable_path = body.get_meta(TELEPORT_ROOT_META, ".")
 			var teleportable: Node3D = body.get_node(teleportable_path)
@@ -386,8 +387,9 @@ func _process_teleports() -> void:
 				if teleportable.has_method(ON_TELEPORT_CALLBACK_METHOD):
 					teleportable.call(ON_TELEPORT_CALLBACK_METHOD, self)
 			
-			# cleanup
-			for m in tp_meta.mesh_clones: m.queue_free()
+			# transfer the thing to exit portal
+			tp_meta.forward = exit_portal.forward_distance(body)
+			exit_portal._watchlist_teleportables.set(body, tp_meta)
 			_watchlist_teleportables.erase(body)
 		else:
 			tp_meta.forward = current_fw_angle
@@ -475,6 +477,9 @@ func _setup_cameras() -> void:
 #region Event handlers
 
 func _on_teleport_area_entered(area: Area3D) -> void:
+	if _watchlist_teleportables.has(area):
+		print("[%s] already watching %s" % [name, area.name])
+		return
 	var meta = TeleportableMeta.new()
 	meta.forward = forward_distance(area)
 	
