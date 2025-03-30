@@ -120,7 +120,7 @@ var teleport_direction: TeleportDirection = TeleportDirection.FRONT_AND_BACK
 ## When a [RigidBody3D] goes through the portal, give its new normalized velocity a 
 ## little boost. Makes stuff flying out of portals more fun. [br][br]
 ## Recommended values: 1 to 3
-var rb_velocity_boost: float = 0.0
+var rigidbody_boost: float = 0.0
 
 ## [CollisionObject3D]s detected by this mask will be registered by the portal and teleported. 
 var teleport_collision_mask: int = 1 << 7
@@ -365,7 +365,7 @@ func _process_teleports() -> void:
 			if teleportable is RigidBody3D:
 				teleportable.linear_velocity = to_exit_direction(teleportable.linear_velocity)
 				teleportable.apply_central_impulse(
-					teleportable.linear_velocity.normalized() * rb_velocity_boost
+					teleportable.linear_velocity.normalized() * rigidbody_boost
 				)
 			
 			
@@ -648,7 +648,7 @@ func _get_property_list() -> Array[Dictionary]:
 		
 		config.append(
 			AtExport.enum_("teleport_direction", &"Portal3D.TeleportDirection", TeleportDirection))
-		config.append(AtExport.float_range("rb_velocity_boost", 0, 5, 0.1, ["or_greater"]))
+		config.append(AtExport.float_range("rigidbody_boost", 0, 5, 0.1, ["or_greater"]))
 		config.append(AtExport.int_physics_3d("teleport_collision_mask"))
 		config.append(AtExport.float_range("teleport_tolerance", 0.0, 5.0, 0.1, ["or_greater"]))
 		var opts: Array = OnTeleportInteractions.keys().map(func(s): return s.capitalize())
@@ -667,7 +667,7 @@ func _property_can_revert(property: StringName) -> bool:
 		&"portal_render_layer",
 		&"viewport_size_max_width_absolute",
 		&"teleport_direction",
-		&"rb_velocity_boost",
+		&"rigidbody_boost",
 		&"teleport_collision_mask",
 		&"teleport_tolerance",
 		&"on_teleport_interactions"
@@ -685,7 +685,7 @@ func _property_get_revert(property: StringName) -> Variant:
 			return ProjectSettings.get_setting("display/window/size/viewport_width")
 		&"teleport_direction": 
 			return TeleportDirection.FRONT_AND_BACK
-		&"rb_velocity_boost": 
+		&"rigidbody_boost": 
 			return 0.0
 		&"teleport_collision_mask": 
 			return PortalSettings.get_setting("default_teleport_mask")
