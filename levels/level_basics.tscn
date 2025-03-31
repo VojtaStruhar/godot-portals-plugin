@@ -1,13 +1,12 @@
-[gd_scene load_steps=26 format=4 uid="uid://5vo86e4fice3"]
+[gd_scene load_steps=27 format=4 uid="uid://5vo86e4fice3"]
 
-[ext_resource type="Script" uid="uid://bqnap47txp42k" path="res://levels/level_basics.gd" id="1_8wh7v"]
 [ext_resource type="Material" uid="uid://dgjiw8udooecr" path="res://assets/prototyping/M_prototype_dark.tres" id="1_uy66w"]
 [ext_resource type="Script" uid="uid://d2crarvkhd45r" path="res://scripts/player.gd" id="3_lff3k"]
 [ext_resource type="PackedScene" uid="uid://0vmntyr615js" path="res://assets/prototyping/prop_cube.tscn" id="4_8bheg"]
 [ext_resource type="PackedScene" uid="uid://dxvxy65pv5hoe" path="res://assets/prototyping/prop_sphere.tscn" id="5_p3b8s"]
 [ext_resource type="PackedScene" uid="uid://caqayjkbvlel5" path="res://assets/prototyping/prop_torus.tscn" id="6_p3b8s"]
+[ext_resource type="Texture2D" uid="uid://dj7d77ksm7a6t" path="res://assets/prototyping/prototype_blue.png" id="7_8wh7v"]
 [ext_resource type="Script" uid="uid://cw1r4c1d7beyv" path="res://addons/portals/scripts/portal_3d.gd" id="8_8wh7v"]
-[ext_resource type="Material" uid="uid://brj2jayoo0l0d" path="res://assets/prototyping/M_prototype_blue.tres" id="9_lbpks"]
 
 [sub_resource type="GDScript" id="GDScript_hc4gn"]
 resource_name = "portal_watcher"
@@ -82,11 +81,109 @@ func _physics_process(delta: float) -> void:
 	global_position += forward * speed * delta
 
 func get_teleportable_meshes() -> Array[MeshInstance3D]:
-	print(\"[%s] Returning teleportable meshes\" % name)
 	return [sphere_mesh]
+
+
+func _process(delta: float) -> void:
+	if Input.is_action_just_pressed(\"toggle_portals\"):
+		print(\"Reversing %s\" % name)
+		speed *= -1
 "
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_lbpks"]
+
+[sub_resource type="Shader" id="Shader_lbpks"]
+code = "// NOTE: Shader automatically converted from Godot Engine 4.4.1.stable's StandardMaterial3D.
+
+shader_type spatial;
+render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_schlick_ggx;
+
+uniform vec4 albedo : source_color;
+uniform sampler2D texture_albedo : source_color, filter_linear_mipmap, repeat_enable;
+uniform ivec2 albedo_texture_size;
+uniform float point_size : hint_range(0.1, 128.0, 0.1);
+
+uniform float roughness : hint_range(0.0, 1.0);
+uniform sampler2D texture_metallic : hint_default_white, filter_linear_mipmap, repeat_enable;
+uniform vec4 metallic_texture_channel;
+uniform sampler2D texture_roughness : hint_roughness_r, filter_linear_mipmap, repeat_enable;
+
+uniform float specular : hint_range(0.0, 1.0, 0.01);
+uniform float metallic : hint_range(0.0, 1.0, 0.01);
+varying vec3 uv1_triplanar_pos;
+
+uniform float uv1_blend_sharpness : hint_range(0.0, 150.0, 0.001);
+varying vec3 uv1_power_normal;
+
+uniform vec3 uv1_scale;
+uniform vec3 uv1_offset;
+uniform vec3 uv2_scale;
+uniform vec3 uv2_offset;
+
+#include \"res://addons/portals/materials/clip_uniforms.gdshaderinc\"
+
+void vertex() {
+	vec3 normal = NORMAL;
+
+	TANGENT = vec3(0.0, 0.0, -1.0) * abs(normal.x);
+	TANGENT += vec3(1.0, 0.0, 0.0) * abs(normal.y);
+	TANGENT += vec3(1.0, 0.0, 0.0) * abs(normal.z);
+	TANGENT = normalize(TANGENT);
+
+	BINORMAL = vec3(0.0, 1.0, 0.0) * abs(normal.x);
+	BINORMAL += vec3(0.0, 0.0, -1.0) * abs(normal.y);
+	BINORMAL += vec3(0.0, 1.0, 0.0) * abs(normal.z);
+	BINORMAL = normalize(BINORMAL);
+
+	// UV1 Triplanar: Enabled
+	uv1_power_normal = pow(abs(NORMAL), vec3(uv1_blend_sharpness));
+	uv1_triplanar_pos = VERTEX * uv1_scale + uv1_offset;
+	uv1_power_normal /= dot(uv1_power_normal, vec3(1.0));
+	uv1_triplanar_pos *= vec3(1.0, -1.0, 1.0);
+	
+	#include \"res://addons/portals/materials/clip_vertex.gdshaderinc\"
+}
+
+vec4 triplanar_texture(sampler2D p_sampler, vec3 p_weights, vec3 p_triplanar_pos) {
+	vec4 samp = vec4(0.0);
+	samp += texture(p_sampler, p_triplanar_pos.xy) * p_weights.z;
+	samp += texture(p_sampler, p_triplanar_pos.xz) * p_weights.y;
+	samp += texture(p_sampler, p_triplanar_pos.zy * vec2(-1.0, 1.0)) * p_weights.x;
+	return samp;
+}
+
+void fragment() {
+	vec4 albedo_tex = triplanar_texture(texture_albedo, uv1_power_normal, uv1_triplanar_pos);
+	ALBEDO = albedo.rgb * albedo_tex.rgb;
+
+	float metallic_tex = dot(triplanar_texture(texture_metallic, uv1_power_normal, uv1_triplanar_pos), metallic_texture_channel);
+	METALLIC = metallic_tex * metallic;
+	SPECULAR = specular;
+
+	vec4 roughness_texture_channel = vec4(1.0, 0.0, 0.0, 0.0);
+	float roughness_tex = dot(triplanar_texture(texture_roughness, uv1_power_normal, uv1_triplanar_pos), roughness_texture_channel);
+	ROUGHNESS = roughness_tex * roughness;
+	
+	#include \"res://addons/portals/materials/clip_fragment.gdshaderinc\"
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_eavfu"]
+render_priority = 0
+shader = SubResource("Shader_lbpks")
+shader_parameter/albedo = Color(1, 1, 1, 1)
+shader_parameter/texture_albedo = ExtResource("7_8wh7v")
+shader_parameter/albedo_texture_size = Vector2i(1024, 1024)
+shader_parameter/point_size = 1.0
+shader_parameter/roughness = 1.0
+shader_parameter/metallic_texture_channel = Vector4(1, 0, 0, 0)
+shader_parameter/specular = 0.5
+shader_parameter/metallic = 0.0
+shader_parameter/uv1_blend_sharpness = 1.0
+shader_parameter/uv1_scale = Vector3(1, 1, 1)
+shader_parameter/uv1_offset = Vector3(0, 0, 0)
+shader_parameter/uv2_scale = Vector3(1, 1, 1)
+shader_parameter/uv2_offset = Vector3(0, 0, 0)
 
 [sub_resource type="SphereMesh" id="SphereMesh_eavfu"]
 
@@ -103,7 +200,6 @@ size = Vector3(2, 2.5, 0.05)
 size = Vector3(2, 2.5, 1)
 
 [node name="Level_Basics" type="Node3D"]
-script = ExtResource("1_8wh7v")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
@@ -161,7 +257,7 @@ mesh = SubResource("ArrayMesh_hllyk")
 skeleton = NodePath("../..")
 
 [node name="PortalFrame_B" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0, 0)
+transform = Transform3D(0.866025, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866025, 2.5, 0, 0)
 
 [node name="PortalFrameCollision" type="CollisionShape3D" parent="PortalFrame_B"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.375, 0)
@@ -217,7 +313,10 @@ speed = 1.0
 shape = SubResource("SphereShape3D_lbpks")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="UnstoppableSphere"]
-material_override = ExtResource("9_lbpks")
+material_override = SubResource("ShaderMaterial_eavfu")
+instance_shader_parameters/clip_active = true
+instance_shader_parameters/clip_normal = Vector3(0, 1, 0)
+instance_shader_parameters/clip_point = Vector3(0, 0, 0)
 mesh = SubResource("SphereMesh_eavfu")
 
 [node name="CubePortal" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal") groups=["portals"]]
@@ -256,7 +355,7 @@ shape = SubResource("BoxShape3D_8wh7v")
 [node name="SpherePortal" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal") groups=["portals"]]
 process_priority = 100
 process_physics_priority = 100
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 1.25, 0)
+transform = Transform3D(0.866025, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866025, 2.5, 1.25, 0)
 script = ExtResource("8_8wh7v")
 portal_mesh_path = NodePath("Portal3D2_Mesh")
 teleport_area_path = NodePath("TeleportArea")
