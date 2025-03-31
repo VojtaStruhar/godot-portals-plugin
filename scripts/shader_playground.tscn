@@ -40,7 +40,9 @@ uniform vec3 uv1_offset;
 uniform vec3 uv2_scale;
 uniform vec3 uv2_offset;
 
-#include \"res://addons/portals/materials/clip_uniforms.gdshaderinc\"
+#include \"uid://cpxsita6rqndc\"
+
+PORTALCLIP_UNIFORMS
 
 void vertex() {
 	vec3 normal = NORMAL;
@@ -60,8 +62,8 @@ void vertex() {
 	uv1_triplanar_pos = VERTEX * uv1_scale + uv1_offset;
 	uv1_power_normal /= dot(uv1_power_normal, vec3(1.0));
 	uv1_triplanar_pos *= vec3(1.0, -1.0, 1.0);
-	
-	#include \"res://addons/portals/materials/clip_vertex.gdshaderinc\"
+
+	PORTALCLIP_VERTEX
 }
 
 vec4 triplanar_texture(sampler2D p_sampler, vec3 p_weights, vec3 p_triplanar_pos) {
@@ -83,8 +85,8 @@ void fragment() {
 	vec4 roughness_texture_channel = vec4(1.0, 0.0, 0.0, 0.0);
 	float roughness_tex = dot(triplanar_texture(texture_roughness, uv1_power_normal, uv1_triplanar_pos), roughness_texture_channel);
 	ROUGHNESS = roughness_tex * roughness;
-	
-	#include \"res://addons/portals/materials/clip_fragment.gdshaderinc\"
+
+	PORTALCLIP_FRAGMENT
 }
 "
 
@@ -138,10 +140,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.0102, 0.185177, 0.172441)
 mesh = SubResource("BoxMesh_efj51")
 
 [node name="PropCube" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.852786, -0.52226, 0, 0.52226, 0.852786, 0, 0, -0.093932)
+transform = Transform3D(1, 0, 0, 0, 0.852786, -0.52226, 0, 0.52226, 0.852786, 0, 0, 0.439453)
 material_override = SubResource("ShaderMaterial_efj51")
+instance_shader_parameters/clip_active = true
 instance_shader_parameters/clip_normal = Vector3(0, 0, 1)
-instance_shader_parameters/clip_point = Vector3(0, 0, 0.12)
+instance_shader_parameters/clip_point = Vector3(0, 0, 0)
 mesh = SubResource("BoxMesh_tk8yd")
 
 [node name="PropSphere" parent="." instance=ExtResource("2_xywcf")]

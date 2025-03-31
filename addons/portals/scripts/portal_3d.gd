@@ -370,8 +370,6 @@ func _process_teleports() -> void:
 				assert(false, "This match statement should be exhaustive")
 		
 		if should_teleport and abs(current_fw_angle) < teleport_tolerance:
-			print("[%s] Teleporting %s " % [name, body.name])
-			# NOTE: BODIES don't have to specify teleport_root, they are usually the roots. 
 			var teleportable_path = body.get_meta(TELEPORT_ROOT_META, ".")
 			var teleportable: Node3D = body.get_node(teleportable_path)
 			
@@ -492,9 +490,6 @@ func _setup_cameras() -> void:
 func _on_teleport_area_entered(area: Area3D) -> void:
 	if _watchlist_teleportables.has(area):
 		print("[%s] already watching %s" % [name, area.name])
-		var meta = _watchlist_teleportables[area]
-		for m in meta.meshes: enable_mesh_clipping(m, self)
-		for m in meta.mesh_clones: enable_mesh_clipping(m, exit_portal)
 		return
 	
 	var meta = TeleportableMeta.new()

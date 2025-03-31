@@ -120,7 +120,9 @@ uniform vec3 uv1_offset;
 uniform vec3 uv2_scale;
 uniform vec3 uv2_offset;
 
-#include \"res://addons/portals/materials/clip_uniforms.gdshaderinc\"
+#include \"res://addons/portals/materials/portalclip_mesh.gdshaderinc\"
+
+PORTALCLIP_UNIFORMS
 
 void vertex() {
 	vec3 normal = NORMAL;
@@ -141,7 +143,7 @@ void vertex() {
 	uv1_power_normal /= dot(uv1_power_normal, vec3(1.0));
 	uv1_triplanar_pos *= vec3(1.0, -1.0, 1.0);
 	
-	#include \"res://addons/portals/materials/clip_vertex.gdshaderinc\"
+	PORTALCLIP_VERTEX;
 }
 
 vec4 triplanar_texture(sampler2D p_sampler, vec3 p_weights, vec3 p_triplanar_pos) {
@@ -164,7 +166,7 @@ void fragment() {
 	float roughness_tex = dot(triplanar_texture(texture_roughness, uv1_power_normal, uv1_triplanar_pos), roughness_texture_channel);
 	ROUGHNESS = roughness_tex * roughness;
 	
-	#include \"res://addons/portals/materials/clip_fragment.gdshaderinc\"
+	PORTALCLIP_FRAGMENT;
 }
 "
 
