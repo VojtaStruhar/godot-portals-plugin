@@ -131,7 +131,7 @@ var teleport_collision_mask: int = 1 << 7
 var teleport_tolerance: float = 0.5
 
 ## Flags for everything that happens when a something is teleported.
-enum OnTeleportInteractions {
+enum TeleportInteractions {
 	## The portal will try to call a [code]on_teleport(Portal3D)[/code] function on the teleported 
 	## node. You need to implement this function with a script.
 	CALLBACK = 1 << 0,
@@ -147,23 +147,28 @@ enum OnTeleportInteractions {
 	DUPLICATE_MESHES = 1 << 2
 }
 
-## This method will be called on a teleported node if [member OnTeleportInteractions.CALLBACK]
+## This method will be called on a teleported node if [member TeleportInteractions.CALLBACK]
 ## is checked in [member teleport_interactions]
 const ON_TELEPORT_CALLBACK_METHOD: StringName = &"on_teleport"
+
+## This method will be called on a node that will get into close proximity of a portal that has 
+## [member TeleportInteractions.DUPLICATE_MESHES] turned on. The method is expected to return an
+## array of [MeshInstance3D]s.
+const DUPLICATE_MESHES_METHOD: StringName = &"get_teleportable_meshes"
 
 ## When a [CollisionObject3D] should be teleported, the portal check for a [NodePath] for an 
 ## alternative node to teleport. For example it's useful when the [Area3D] that's triggering the 
 ## teleport isn't the root of a player or object.
 const TELEPORT_ROOT_META: StringName = &"teleport_root"
 
-const DUPLICATE_MESHES_METHOD: StringName = &"get_teleportable_meshes"
 
-## For options, see [enum OnTeleportInteractions]
-var teleport_interactions: int = OnTeleportInteractions.CALLBACK \
-									| OnTeleportInteractions.PLAYER_UPRIGHT
+## For options, see [enum TeleportInteractions]
+var teleport_interactions: int = TeleportInteractions.CALLBACK \
+									| TeleportInteractions.PLAYER_UPRIGHT
 
 #region INTERNALS
 
+# TODO: Prefix with an underscore.
 @export_storage var portal_thickness: float = 0.05:
 	set(v):
 		portal_thickness = v
@@ -389,11 +394,11 @@ func _process_teleports() -> void:
 				exit_portal._process_cameras()
 			
 			# Resolve teleport interactions
-			if was_player and (teleport_interactions & OnTeleportInteractions.PLAYER_UPRIGHT):
+			if was_player and (teleport_interactions & TeleportInteractions.PLAYER_UPRIGHT):
 				get_tree().create_tween().tween_property(teleportable, "rotation:x", 0, 0.3)
 				get_tree().create_tween().tween_property(teleportable, "rotation:z", 0, 0.3)
 			
-			if teleport_interactions & OnTeleportInteractions.CALLBACK:
+			if teleport_interactions & TeleportInteractions.CALLBACK:
 				if teleportable.has_method(ON_TELEPORT_CALLBACK_METHOD):
 					teleportable.call(ON_TELEPORT_CALLBACK_METHOD, self)
 			
@@ -493,15 +498,13 @@ func _on_teleport_area_entered(area: Area3D) -> void:
 	var meta = TeleportableMeta.new()
 	meta.forward = forward_distance(area)
 	
-	var root = area.get_node(area.get_meta(TELEPORT_ROOT_META, "."))
-	for child in root.get_children():
-		if child is MeshInstance3D:
-			prints("[%s] Duplicating a mesh:" % name, child.name)
-			meta.meshes.append(child)
-			var dupe = child.duplicate(0)
+	if area.has_method(DUPLICATE_MESHES_METHOD):
+		meta.meshes = area.call(DUPLICATE_MESHES_METHOD)
+		for m in meta.meshes:
+			var dupe = m.duplicate(0)
 			meta.mesh_clones.append(dupe)
+			# TODO: Place the children in a container for easier cleanup?
 			self.add_child(dupe)
-		
 	
 	_watchlist_teleportables.set(area, meta)
 
@@ -661,7 +664,7 @@ func _get_property_list() -> Array[Dictionary]:
 		config.append(AtExport.float_range("rigidbody_boost", 0, 5, 0.1, ["or_greater"]))
 		config.append(AtExport.int_physics_3d("teleport_collision_mask"))
 		config.append(AtExport.float_range("teleport_tolerance", 0.0, 5.0, 0.1, ["or_greater"]))
-		var opts: Array = OnTeleportInteractions.keys().map(func(s): return s.capitalize())
+		var opts: Array = TeleportInteractions.keys().map(func(s): return s.capitalize())
 		config.append(AtExport.int_flags("teleport_interactions", opts))
 		config.append(AtExport.group_end())
 	
@@ -702,7 +705,7 @@ func _property_get_revert(property: StringName) -> Variant:
 		&"teleport_tolerance":
 			return 0.5
 		&"teleport_interactions":
-			return OnTeleportInteractions.CALLBACK | OnTeleportInteractions.PLAYER_UPRIGHT
+			return TeleportInteractions.CALLBACK | TeleportInteractions.PLAYER_UPRIGHT
 	
 	return null
 

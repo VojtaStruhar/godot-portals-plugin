@@ -75,9 +75,15 @@ script/source = "extends Area3D
 
 @export var speed: float = 2
 
+@onready var sphere_mesh: MeshInstance3D = $MeshInstance3D
+
 func _physics_process(delta: float) -> void:
 	var forward = -global_basis.z
 	global_position += forward * speed * delta
+
+func get_teleportable_meshes() -> Array[MeshInstance3D]:
+	print(\"[%s] Returning teleportable meshes\" % name)
+	return [sphere_mesh]
 "
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_lbpks"]

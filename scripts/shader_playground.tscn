@@ -109,7 +109,6 @@ shader_parameter/uv2_scale = Vector3(1, 1, 1)
 shader_parameter/uv2_offset = Vector3(0, 0, 0)
 
 [sub_resource type="BoxMesh" id="BoxMesh_tk8yd"]
-material = SubResource("ShaderMaterial_efj51")
 
 [sub_resource type="GDScript" id="GDScript_efj51"]
 script/source = "extends Node
@@ -123,6 +122,8 @@ func _ready() -> void:
 		printt(\"Has isp/clip_normal:\", m.get(\"instance_shader_parameters/clip_normal\"))
 		printt(\"clip_normal\", m.get_instance_shader_parameter(\"clip_normal\"))
 		printt(\"clip_point\", m.get_instance_shader_parameter(\"clip_point\"))
+		print(\"Trying to set a parameter blindly:\")
+		m.set_instance_shader_parameter(\"clip_normal\", Vector3.ONE)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -138,6 +139,7 @@ mesh = SubResource("BoxMesh_efj51")
 
 [node name="PropCube" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.852786, -0.52226, 0, 0.52226, 0.852786, 0, 0, -0.093932)
+material_override = SubResource("ShaderMaterial_efj51")
 instance_shader_parameters/clip_normal = Vector3(0, 0, 1)
 instance_shader_parameters/clip_point = Vector3(0, 0, 0.12)
 mesh = SubResource("BoxMesh_tk8yd")
