@@ -65,6 +65,7 @@ var player_camera: Camera3D
 ## THIS portal.
 var portal_frame_width: float = 0
 
+## @deprecated
 ## Indicates whether you can see a portal through another portal. This does [b]not[/b]
 ## automatically lead to recursive portals.
 ## [br]
@@ -133,10 +134,17 @@ var teleport_tolerance: float = 0.5
 enum OnTeleportInteractions {
 	## The portal will try to call a [code]on_teleport(Portal3D)[/code] function on the teleported 
 	## node. You need to implement this function with a script.
-	CALLBACK = 1,
+	CALLBACK = 1 << 0,
 	## When the player is teleported, his X and Z rotations are tweened to zero. Resets unwanted
 	## from going through a tilted portal. If checked, this will happen BEFORE the callback.
-	PLAYER_UPRIGHT = 2
+	PLAYER_UPRIGHT = 1 << 1,
+	## Duplicate meshes present on the teleported object, resulting in a [i]smooth teleport[/i] 
+	## from a 3rd point of view. [br]
+	## This option is quite involved, requires a method named [constant DUPLICATE_MESHES_METHOD] 
+	## implemented on the teleported body, which returns an array of mesh instances that should be 
+	## duplicated. Every one of those meshes also needs to implement a special shader to clip it 
+	## along the portal plane.
+	DUPLICATE_MESHES = 1 << 2
 }
 
 ## This method will be called on a teleported node if [member OnTeleportInteractions.CALLBACK]
@@ -147,6 +155,8 @@ const ON_TELEPORT_CALLBACK_METHOD: StringName = &"on_teleport"
 ## alternative node to teleport. For example it's useful when the [Area3D] that's triggering the 
 ## teleport isn't the root of a player or object.
 const TELEPORT_ROOT_META: StringName = &"teleport_root"
+
+const DUPLICATE_MESHES_METHOD: StringName = &"get_teleportable_meshes"
 
 ## For options, see [enum OnTeleportInteractions]
 var teleport_interactions: int = OnTeleportInteractions.CALLBACK \
