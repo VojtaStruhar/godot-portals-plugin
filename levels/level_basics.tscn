@@ -259,7 +259,7 @@ mesh = SubResource("ArrayMesh_hllyk")
 skeleton = NodePath("../..")
 
 [node name="PortalFrame_B" type="StaticBody3D" parent="."]
-transform = Transform3D(0.866025, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866025, 2.5, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0, 0)
 
 [node name="PortalFrameCollision" type="CollisionShape3D" parent="PortalFrame_B"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.375, 0)
@@ -339,7 +339,7 @@ teleport_direction = 2
 rigidbody_boost = 0.0
 teleport_collision_mask = 128
 teleport_tolerance = 0.5
-teleport_interactions = 3
+teleport_interactions = 7
 _tb_debug_action = Callable()
 metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
 metadata/_edit_group_ = true
@@ -357,7 +357,7 @@ shape = SubResource("BoxShape3D_8wh7v")
 [node name="SpherePortal" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal") groups=["portals"]]
 process_priority = 100
 process_physics_priority = 100
-transform = Transform3D(0.866025, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866025, 2.5, 1.25, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 1.25, 0)
 script = ExtResource("8_8wh7v")
 portal_mesh_path = NodePath("Portal3D2_Mesh")
 teleport_area_path = NodePath("TeleportArea")
@@ -372,7 +372,7 @@ teleport_direction = 2
 rigidbody_boost = 0.0
 teleport_collision_mask = 128
 teleport_tolerance = 0.5
-teleport_interactions = 3
+teleport_interactions = 7
 _tb_debug_action = Callable()
 metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
 metadata/_edit_group_ = true

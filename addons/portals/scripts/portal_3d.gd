@@ -392,11 +392,11 @@ func _process_teleports() -> void:
 				exit_portal._process_cameras()
 			
 			# Resolve teleport interactions
-			if was_player and (teleport_interactions & TeleportInteractions.PLAYER_UPRIGHT):
+			if was_player and check_tp_interaction(TeleportInteractions.PLAYER_UPRIGHT):
 				get_tree().create_tween().tween_property(teleportable, "rotation:x", 0, 0.3)
 				get_tree().create_tween().tween_property(teleportable, "rotation:z", 0, 0.3)
 			
-			if teleport_interactions & TeleportInteractions.CALLBACK:
+			if check_tp_interaction(TeleportInteractions.CALLBACK):
 				if teleportable.has_method(ON_TELEPORT_CALLBACK_METHOD):
 					teleportable.call(ON_TELEPORT_CALLBACK_METHOD, self)
 			
@@ -489,39 +489,23 @@ func _setup_cameras() -> void:
 
 func _on_teleport_area_entered(area: Area3D) -> void:
 	if _watchlist_teleportables.has(area):
-		print("[%s] already watching %s" % [name, area.name])
+		# Already on watchlist
 		return
 	
-	var meta = TeleportableMeta.new()
-	meta.forward = forward_distance(area)
-	
-	if area.has_method(DUPLICATE_MESHES_METHOD):
-		meta.meshes = area.call(DUPLICATE_MESHES_METHOD)
-		for m in meta.meshes:
-			enable_mesh_clipping(m, self)
-			
-			var dupe = m.duplicate(0)
-			meta.mesh_clones.append(dupe)
-			# TODO: Place the children in a container for easier cleanup?
-			self.add_child(dupe)
-			enable_mesh_clipping(dupe, exit_portal)
-	
-	_watchlist_teleportables.set(area, meta)
-
-func _on_teleport_area_exited(area: Area3D) -> void:
-	if _watchlist_teleportables.has(area):
-		var meta: TeleportableMeta = _watchlist_teleportables[area]
-		for m in meta.meshes: disable_mesh_clipping(m)
-		for m in meta.mesh_clones: m.queue_free()
-		_watchlist_teleportables.erase(area)
+	construct_tp_metadata(area)
 
 func _on_teleport_body_entered(body: Node3D) -> void:
-	var meta = TeleportableMeta.new()
-	meta.forward = forward_distance(body)
-	_watchlist_teleportables.set(body, meta)
+	if _watchlist_teleportables.has(body):
+		# Already on watchlist
+		return
+	
+	construct_tp_metadata(body)
+
+func _on_teleport_area_exited(area: Area3D) -> void:
+	erase_tp_metadata(area)
 
 func _on_teleport_body_exited(body: Node3D) -> void:
-	_watchlist_teleportables.erase(body)
+	erase_tp_metadata(body)
 
 func _on_window_resize() -> void:
 	portal_viewport.size = get_desired_viewport_size()
@@ -529,6 +513,26 @@ func _on_window_resize() -> void:
 #endregion
 
 #region UTILS
+
+func construct_tp_metadata(node: Node3D) -> void:
+	var meta = TeleportableMeta.new()
+	meta.forward = forward_distance(node)
+	
+	if check_tp_interaction(TeleportInteractions.DUPLICATE_MESHES) and \
+		node.has_method(DUPLICATE_MESHES_METHOD):
+		
+		meta.meshes = node.call(DUPLICATE_MESHES_METHOD)
+		for m in meta.meshes:
+			enable_mesh_clipping(m, self)
+			var dupe = m.duplicate(0)
+			meta.mesh_clones.append(dupe)
+			self.add_child(dupe)
+			enable_mesh_clipping(dupe, exit_portal)
+	
+	_watchlist_teleportables.set(node, meta)
+
+func erase_tp_metadata(node: Node3D) -> void:
+	_watchlist_teleportables.erase(node)
 
 func enable_mesh_clipping(mi: MeshInstance3D, portal: Portal3D) -> void:
 	mi.set_instance_shader_parameter("clip_active", true)
@@ -549,7 +553,7 @@ func transfer_tp_metadata_to_exit(for_body: Node3D) -> void:
 	for m in tp_meta.mesh_clones: enable_mesh_clipping(m, self) # switch
 	
 	exit_portal._watchlist_teleportables.set(for_body, tp_meta)
-	_watchlist_teleportables.erase(for_body)
+	erase_tp_metadata(for_body)
 
 ## [b]Crucial[/b] piece of a portal - transforming where objects should appear 
 ## on the other side. Used for both cameras and teleports.
@@ -619,6 +623,9 @@ func get_desired_viewport_size() -> Vector2i:
 		ProjectSettings.get_setting("display/window/size/viewport_width"),
 		ProjectSettings.get_setting("display/window/size/viewport_height")
 	)
+
+func check_tp_interaction(flag: int) -> bool:
+	return (teleport_interactions & flag) > 0
 
 #endregion
 
