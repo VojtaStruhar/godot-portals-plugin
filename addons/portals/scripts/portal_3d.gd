@@ -65,6 +65,7 @@ var player_camera: Camera3D
 ## THIS portal.
 var portal_frame_width: float = 0
 
+## @deprecated
 ## Indicates whether you can see a portal through another portal. This does [b]not[/b]
 ## automatically lead to recursive portals.
 ## [br]
@@ -120,7 +121,7 @@ var teleport_direction: TeleportDirection = TeleportDirection.FRONT_AND_BACK
 ## When a [RigidBody3D] goes through the portal, give its new normalized velocity a 
 ## little boost. Makes stuff flying out of portals more fun. [br][br]
 ## Recommended values: 1 to 3
-var rb_velocity_boost: float = 0.0
+var rigidbody_boost: float = 0.0
 
 ## [CollisionObject3D]s detected by this mask will be registered by the portal and teleported. 
 var teleport_collision_mask: int = 1 << 7
@@ -130,30 +131,44 @@ var teleport_collision_mask: int = 1 << 7
 var teleport_tolerance: float = 0.5
 
 ## Flags for everything that happens when a something is teleported.
-enum OnTeleportInteractions {
+enum TeleportInteractions {
 	## The portal will try to call a [code]on_teleport(Portal3D)[/code] function on the teleported 
 	## node. You need to implement this function with a script.
-	CALLBACK = 1,
+	CALLBACK = 1 << 0,
 	## When the player is teleported, his X and Z rotations are tweened to zero. Resets unwanted
 	## from going through a tilted portal. If checked, this will happen BEFORE the callback.
-	PLAYER_UPRIGHT = 2
+	PLAYER_UPRIGHT = 1 << 1,
+	## Duplicate meshes present on the teleported object, resulting in a [i]smooth teleport[/i] 
+	## from a 3rd point of view. [br]
+	## This option is quite involved, requires a method named [constant DUPLICATE_MESHES_METHOD] 
+	## implemented on the teleported body, which returns an array of mesh instances that should be 
+	## duplicated. Every one of those meshes also needs to implement a special shader to clip it 
+	## along the portal plane.
+	DUPLICATE_MESHES = 1 << 2
 }
 
-## This method will be called on a teleported node if [member OnTeleportInteractions.CALLBACK]
-## is checked in [member on_teleport_interactions]
+## This method will be called on a teleported node if [member TeleportInteractions.CALLBACK]
+## is checked in [member teleport_interactions]
 const ON_TELEPORT_CALLBACK_METHOD: StringName = &"on_teleport"
+
+## This method will be called on a node that will get into close proximity of a portal that has 
+## [member TeleportInteractions.DUPLICATE_MESHES] turned on. The method is expected to return an
+## array of [MeshInstance3D]s.
+const DUPLICATE_MESHES_METHOD: StringName = &"get_teleportable_meshes"
 
 ## When a [CollisionObject3D] should be teleported, the portal check for a [NodePath] for an 
 ## alternative node to teleport. For example it's useful when the [Area3D] that's triggering the 
 ## teleport isn't the root of a player or object.
 const TELEPORT_ROOT_META: StringName = &"teleport_root"
 
-## For options, see [enum OnTeleportInteractions]
-var on_teleport_interactions: int = OnTeleportInteractions.CALLBACK \
-									| OnTeleportInteractions.PLAYER_UPRIGHT
+
+## For options, see [enum TeleportInteractions]
+var teleport_interactions: int = TeleportInteractions.CALLBACK \
+									| TeleportInteractions.PLAYER_UPRIGHT
 
 #region INTERNALS
 
+# TODO: Prefix with an underscore.
 @export_storage var portal_thickness: float = 0.05:
 	set(v):
 		portal_thickness = v
@@ -184,10 +199,15 @@ var portal_camera: Camera3D = null
 var portal_viewport: SubViewport = null
 
 
+class TeleportableMeta:
+	var forward: float = 0
+	var meshes: Array[MeshInstance3D] = []
+	var mesh_clones: Array[MeshInstance3D] = []
+
 # These physics bodies are being watched by the portal. The value in dictionary
 # is their dot product from last frame. As soon as the dot product changes signs,
 # the body crossed the portal and should be teleported.
-var _watchlist_teleportables: Dictionary[Node3D, float] = {}
+var _watchlist_teleportables: Dictionary[Node3D, TeleportableMeta] = {}
 
 var _tb_debug_action: Callable = _debug_action
 
@@ -195,6 +215,7 @@ func _debug_action() -> void:
 	print("[%s] DEBUG")
 	print({"portal_mesh_path": portal_mesh_path, "portal_mesh": portal_mesh})
 
+#endregion
 
 #region Editor Configuration Stuff
 
@@ -333,7 +354,8 @@ func _process_cameras() -> void:
 func _process_teleports() -> void:
 	for body in _watchlist_teleportables.keys():
 		body = body as Node3D # Conversion just for type hints
-		var last_fw_angle: float = _watchlist_teleportables.get(body)
+		var tp_meta: TeleportableMeta = _watchlist_teleportables.get(body)
+		var last_fw_angle: float = tp_meta.forward
 		var current_fw_angle: float = forward_distance(body)
 		
 		var should_teleport: bool = false
@@ -348,7 +370,6 @@ func _process_teleports() -> void:
 				assert(false, "This match statement should be exhaustive")
 		
 		if should_teleport and abs(current_fw_angle) < teleport_tolerance:
-			# NOTE: BODIES don't have to specify teleport_root, they are usually the roots. 
 			var teleportable_path = body.get_meta(TELEPORT_ROOT_META, ".")
 			var teleportable: Node3D = body.get_node(teleportable_path)
 			
@@ -357,10 +378,9 @@ func _process_teleports() -> void:
 			if teleportable is RigidBody3D:
 				teleportable.linear_velocity = to_exit_direction(teleportable.linear_velocity)
 				teleportable.apply_central_impulse(
-					teleportable.linear_velocity.normalized() * rb_velocity_boost
+					teleportable.linear_velocity.normalized() * rigidbody_boost
 				)
 			
-			_watchlist_teleportables.erase(body)
 			
 			on_teleport.emit(teleportable)
 			exit_portal.on_teleport_receive.emit(teleportable)
@@ -372,16 +392,20 @@ func _process_teleports() -> void:
 				exit_portal._process_cameras()
 			
 			# Resolve teleport interactions
-			if was_player and (on_teleport_interactions & OnTeleportInteractions.PLAYER_UPRIGHT):
+			if was_player and check_tp_interaction(TeleportInteractions.PLAYER_UPRIGHT):
 				get_tree().create_tween().tween_property(teleportable, "rotation:x", 0, 0.3)
 				get_tree().create_tween().tween_property(teleportable, "rotation:z", 0, 0.3)
 			
-			if on_teleport_interactions & OnTeleportInteractions.CALLBACK:
+			if check_tp_interaction(TeleportInteractions.CALLBACK):
 				if teleportable.has_method(ON_TELEPORT_CALLBACK_METHOD):
 					teleportable.call(ON_TELEPORT_CALLBACK_METHOD, self)
 			
+			# transfer the thing to exit portal
+			transfer_tp_metadata_to_exit(body)
 		else:
-			_watchlist_teleportables.set(body, current_fw_angle)
+			tp_meta.forward = current_fw_angle
+			for i in tp_meta.mesh_clones.size():
+				tp_meta.mesh_clones[i].global_transform = to_exit_transform(tp_meta.meshes[i].global_transform)
 
 func _calculate_near_plane() -> float:
 	# Adjustment for cube portals. This AABB is basically a plane.
@@ -464,16 +488,24 @@ func _setup_cameras() -> void:
 #region Event handlers
 
 func _on_teleport_area_entered(area: Area3D) -> void:
-	_watchlist_teleportables.set(area, forward_distance(area))
-
-func _on_teleport_area_exited(area: Area3D) -> void:
-	_watchlist_teleportables.erase(area)
+	if _watchlist_teleportables.has(area):
+		# Already on watchlist
+		return
+	
+	construct_tp_metadata(area)
 
 func _on_teleport_body_entered(body: Node3D) -> void:
-	_watchlist_teleportables.set(body, forward_distance(body))
+	if _watchlist_teleportables.has(body):
+		# Already on watchlist
+		return
+	
+	construct_tp_metadata(body)
+
+func _on_teleport_area_exited(area: Area3D) -> void:
+	erase_tp_metadata(area)
 
 func _on_teleport_body_exited(body: Node3D) -> void:
-	_watchlist_teleportables.erase(body)
+	erase_tp_metadata(body)
 
 func _on_window_resize() -> void:
 	portal_viewport.size = get_desired_viewport_size()
@@ -481,6 +513,47 @@ func _on_window_resize() -> void:
 #endregion
 
 #region UTILS
+
+func construct_tp_metadata(node: Node3D) -> void:
+	var meta = TeleportableMeta.new()
+	meta.forward = forward_distance(node)
+	
+	if check_tp_interaction(TeleportInteractions.DUPLICATE_MESHES) and \
+		node.has_method(DUPLICATE_MESHES_METHOD):
+		
+		meta.meshes = node.call(DUPLICATE_MESHES_METHOD)
+		for m in meta.meshes:
+			enable_mesh_clipping(m, self)
+			var dupe = m.duplicate(0)
+			meta.mesh_clones.append(dupe)
+			self.add_child(dupe)
+			enable_mesh_clipping(dupe, exit_portal)
+	
+	_watchlist_teleportables.set(node, meta)
+
+func erase_tp_metadata(node: Node3D) -> void:
+	_watchlist_teleportables.erase(node)
+
+func enable_mesh_clipping(mi: MeshInstance3D, portal: Portal3D) -> void:
+	mi.set_instance_shader_parameter("clip_active", true)
+	mi.set_instance_shader_parameter("clip_point", portal.global_position)
+	mi.set_instance_shader_parameter("clip_normal", portal.global_basis.z)
+
+func disable_mesh_clipping(mi: MeshInstance3D) -> void:
+	mi.set_instance_shader_parameter("clip_active", false)
+
+func transfer_tp_metadata_to_exit(for_body: Node3D) -> void:
+	var tp_meta = _watchlist_teleportables[for_body]
+	if tp_meta == null:
+		push_error("Attempted to trasfer teleport metadata for a node that is not being watched.")
+		return
+	
+	tp_meta.forward = exit_portal.forward_distance(for_body)
+	for m in tp_meta.meshes: enable_mesh_clipping(m, exit_portal) # switch
+	for m in tp_meta.mesh_clones: enable_mesh_clipping(m, self) # switch
+	
+	exit_portal._watchlist_teleportables.set(for_body, tp_meta)
+	erase_tp_metadata(for_body)
 
 ## [b]Crucial[/b] piece of a portal - transforming where objects should appear 
 ## on the other side. Used for both cameras and teleports.
@@ -544,13 +617,15 @@ func get_desired_viewport_size() -> Vector2i:
 			return Vector2i(width, int(width / aspect_ratio))
 		PortalViewportSizeMode.FRACTIONAL:
 			return Vector2i(vp_size * viewport_size_fractional)
-		
 	
 	push_error("Failed to determine desired viewport size")
 	return Vector2i(
 		ProjectSettings.get_setting("display/window/size/viewport_width"),
 		ProjectSettings.get_setting("display/window/size/viewport_height")
 	)
+
+func check_tp_interaction(flag: int) -> bool:
+	return (teleport_interactions & flag) > 0
 
 #endregion
 
@@ -616,11 +691,11 @@ func _get_property_list() -> Array[Dictionary]:
 		
 		config.append(
 			AtExport.enum_("teleport_direction", &"Portal3D.TeleportDirection", TeleportDirection))
-		config.append(AtExport.float_range("rb_velocity_boost", 0, 5, 0.1, ["or_greater"]))
+		config.append(AtExport.float_range("rigidbody_boost", 0, 5, 0.1, ["or_greater"]))
 		config.append(AtExport.int_physics_3d("teleport_collision_mask"))
 		config.append(AtExport.float_range("teleport_tolerance", 0.0, 5.0, 0.1, ["or_greater"]))
-		var opts: Array = OnTeleportInteractions.keys().map(func(s): return s.capitalize())
-		config.append(AtExport.int_flags("on_teleport_interactions", opts))
+		var opts: Array = TeleportInteractions.keys().map(func(s): return s.capitalize())
+		config.append(AtExport.int_flags("teleport_interactions", opts))
 		config.append(AtExport.group_end())
 	
 	config.append(AtExport.button("_tb_debug_action", "Debug Button", "Popup"))
@@ -635,32 +710,32 @@ func _property_can_revert(property: StringName) -> bool:
 		&"portal_render_layer",
 		&"viewport_size_max_width_absolute",
 		&"teleport_direction",
-		&"rb_velocity_boost",
+		&"rigidbody_boost",
 		&"teleport_collision_mask",
 		&"teleport_tolerance",
-		&"on_teleport_interactions"
+		&"teleport_interactions"
 	]
 
 func _property_get_revert(property: StringName) -> Variant:
 	match property:
-		&"portal_size": 
+		&"portal_size":
 			return Vector2(2, 2.5)
-		&"portal_frame_width": 
+		&"portal_frame_width":
 			return 0.0
-		&"portal_render_layer": 
+		&"portal_render_layer":
 			return PortalSettings.get_setting("default_portal_layer")
-		&"viewport_size_max_width_absolute": 
+		&"viewport_size_max_width_absolute":
 			return ProjectSettings.get_setting("display/window/size/viewport_width")
-		&"teleport_direction": 
+		&"teleport_direction":
 			return TeleportDirection.FRONT_AND_BACK
-		&"rb_velocity_boost": 
+		&"rigidbody_boost":
 			return 0.0
-		&"teleport_collision_mask": 
+		&"teleport_collision_mask":
 			return PortalSettings.get_setting("default_teleport_mask")
-		&"teleport_tolerance": 
+		&"teleport_tolerance":
 			return 0.5
-		&"on_teleport_interactions":
-			return OnTeleportInteractions.CALLBACK | OnTeleportInteractions.PLAYER_UPRIGHT
+		&"teleport_interactions":
+			return TeleportInteractions.CALLBACK | TeleportInteractions.PLAYER_UPRIGHT
 	
 	return null
 

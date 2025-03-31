@@ -1,0 +1,155 @@
+[gd_scene load_steps=10 format=3 uid="uid://664na4csmqe"]
+
+[ext_resource type="Shader" uid="uid://xoa3hj7pynf" path="res://scripts/clipping_shader.gdshader" id="1_picon"]
+[ext_resource type="PackedScene" uid="uid://dxvxy65pv5hoe" path="res://assets/prototyping/prop_sphere.tscn" id="2_xywcf"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_picon"]
+render_priority = 0
+shader = ExtResource("1_picon")
+shader_parameter/clip_normal = Vector3(0, 0, 1)
+shader_parameter/clip_point = Vector3(0.5, 0.73, 0)
+
+[sub_resource type="BoxMesh" id="BoxMesh_efj51"]
+material = SubResource("ShaderMaterial_picon")
+
+[sub_resource type="Shader" id="Shader_picon"]
+code = "// NOTE: Shader automatically converted from Godot Engine 4.4.1.stable's StandardMaterial3D.
+
+shader_type spatial;
+render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_schlick_ggx;
+
+uniform vec4 albedo : source_color;
+uniform sampler2D texture_albedo : source_color, filter_linear_mipmap, repeat_enable;
+uniform ivec2 albedo_texture_size;
+uniform float point_size : hint_range(0.1, 128.0, 0.1);
+
+uniform float roughness : hint_range(0.0, 1.0);
+uniform sampler2D texture_metallic : hint_default_white, filter_linear_mipmap, repeat_enable;
+uniform vec4 metallic_texture_channel;
+uniform sampler2D texture_roughness : hint_roughness_r, filter_linear_mipmap, repeat_enable;
+
+uniform float specular : hint_range(0.0, 1.0, 0.01);
+uniform float metallic : hint_range(0.0, 1.0, 0.01);
+varying vec3 uv1_triplanar_pos;
+
+uniform float uv1_blend_sharpness : hint_range(0.0, 150.0, 0.001);
+varying vec3 uv1_power_normal;
+
+uniform vec3 uv1_scale;
+uniform vec3 uv1_offset;
+uniform vec3 uv2_scale;
+uniform vec3 uv2_offset;
+
+#include \"uid://cpxsita6rqndc\"
+
+PORTALCLIP_UNIFORMS
+
+void vertex() {
+	vec3 normal = NORMAL;
+
+	TANGENT = vec3(0.0, 0.0, -1.0) * abs(normal.x);
+	TANGENT += vec3(1.0, 0.0, 0.0) * abs(normal.y);
+	TANGENT += vec3(1.0, 0.0, 0.0) * abs(normal.z);
+	TANGENT = normalize(TANGENT);
+
+	BINORMAL = vec3(0.0, 1.0, 0.0) * abs(normal.x);
+	BINORMAL += vec3(0.0, 0.0, -1.0) * abs(normal.y);
+	BINORMAL += vec3(0.0, 1.0, 0.0) * abs(normal.z);
+	BINORMAL = normalize(BINORMAL);
+
+	// UV1 Triplanar: Enabled
+	uv1_power_normal = pow(abs(NORMAL), vec3(uv1_blend_sharpness));
+	uv1_triplanar_pos = VERTEX * uv1_scale + uv1_offset;
+	uv1_power_normal /= dot(uv1_power_normal, vec3(1.0));
+	uv1_triplanar_pos *= vec3(1.0, -1.0, 1.0);
+
+	PORTALCLIP_VERTEX
+}
+
+vec4 triplanar_texture(sampler2D p_sampler, vec3 p_weights, vec3 p_triplanar_pos) {
+	vec4 samp = vec4(0.0);
+	samp += texture(p_sampler, p_triplanar_pos.xy) * p_weights.z;
+	samp += texture(p_sampler, p_triplanar_pos.xz) * p_weights.y;
+	samp += texture(p_sampler, p_triplanar_pos.zy * vec2(-1.0, 1.0)) * p_weights.x;
+	return samp;
+}
+
+void fragment() {
+	vec4 albedo_tex = triplanar_texture(texture_albedo, uv1_power_normal, uv1_triplanar_pos);
+	ALBEDO = albedo.rgb * albedo_tex.rgb;
+
+	float metallic_tex = dot(triplanar_texture(texture_metallic, uv1_power_normal, uv1_triplanar_pos), metallic_texture_channel);
+	METALLIC = metallic_tex * metallic;
+	SPECULAR = specular;
+
+	vec4 roughness_texture_channel = vec4(1.0, 0.0, 0.0, 0.0);
+	float roughness_tex = dot(triplanar_texture(texture_roughness, uv1_power_normal, uv1_triplanar_pos), roughness_texture_channel);
+	ROUGHNESS = roughness_tex * roughness;
+
+	PORTALCLIP_FRAGMENT
+}
+"
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_xywcf"]
+load_path = "res://.godot/imported/prototype_orange.png-9b9b0bc75b7082cdaeea1d5182ec6513.s3tc.ctex"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_efj51"]
+render_priority = 0
+shader = SubResource("Shader_picon")
+shader_parameter/albedo = Color(1, 1, 1, 1)
+shader_parameter/texture_albedo = SubResource("CompressedTexture2D_xywcf")
+shader_parameter/albedo_texture_size = Vector2i(1024, 1024)
+shader_parameter/point_size = 1.0
+shader_parameter/roughness = 1.0
+shader_parameter/metallic_texture_channel = Vector4(1, 0, 0, 0)
+shader_parameter/specular = 0.5
+shader_parameter/metallic = 0.0
+shader_parameter/uv1_blend_sharpness = 1.0
+shader_parameter/uv1_scale = Vector3(1, 1, 1)
+shader_parameter/uv1_offset = Vector3(0, 0, 0)
+shader_parameter/uv2_scale = Vector3(1, 1, 1)
+shader_parameter/uv2_offset = Vector3(0, 0, 0)
+
+[sub_resource type="BoxMesh" id="BoxMesh_tk8yd"]
+
+[sub_resource type="GDScript" id="GDScript_efj51"]
+script/source = "extends Node
+
+@export var meshes: Array[MeshInstance3D] = []
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	for m in meshes:
+		print(\"-- Checking %s --\" % m.name)
+		printt(\"Has isp/clip_normal:\", m.get(\"instance_shader_parameters/clip_normal\"))
+		printt(\"clip_normal\", m.get_instance_shader_parameter(\"clip_normal\"))
+		printt(\"clip_point\", m.get_instance_shader_parameter(\"clip_point\"))
+		print(\"Trying to set a parameter blindly:\")
+		m.set_instance_shader_parameter(\"clip_normal\", Vector3.ONE)
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta: float) -> void:
+	pass
+"
+
+[node name="ShaderPlayground" type="Node3D"]
+
+[node name="ShaderTest" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.0102, 0.185177, 0.172441)
+mesh = SubResource("BoxMesh_efj51")
+
+[node name="PropCube" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.852786, -0.52226, 0, 0.52226, 0.852786, 0, 0, 0.439453)
+material_override = SubResource("ShaderMaterial_efj51")
+instance_shader_parameters/clip_active = true
+instance_shader_parameters/clip_normal = Vector3(0, 0, 1)
+instance_shader_parameters/clip_point = Vector3(0, 0, 0)
+mesh = SubResource("BoxMesh_tk8yd")
+
+[node name="PropSphere" parent="." instance=ExtResource("2_xywcf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.91982)
+
+[node name="ShaderChecker" type="Node" parent="." node_paths=PackedStringArray("meshes")]
+script = SubResource("GDScript_efj51")
+meshes = [NodePath("../ShaderTest"), NodePath("../PropCube"), NodePath("../PropSphere")]
