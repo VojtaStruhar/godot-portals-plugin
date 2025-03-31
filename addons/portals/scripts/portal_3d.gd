@@ -689,8 +689,6 @@ func _get_property_list() -> Array[Dictionary]:
 		config.append(AtExport.int_flags("teleport_interactions", opts))
 		config.append(AtExport.group_end())
 	
-	config.append(AtExport.button("_tb_debug_action", "Debug Button", "Popup"))
-	
 	return config
 
 func _property_can_revert(property: StringName) -> bool:

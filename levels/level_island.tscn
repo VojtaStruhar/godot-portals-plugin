@@ -1,0 +1,138 @@
+[gd_scene load_steps=15 format=3 uid="uid://dxe2g23t2qp0j"]
+
+[ext_resource type="Material" uid="uid://dgjiw8udooecr" path="res://assets/prototyping/M_prototype_dark.tres" id="1_amkmy"]
+[ext_resource type="PackedScene" uid="uid://caqayjkbvlel5" path="res://assets/prototyping/prop_torus.tscn" id="2_kiw5m"]
+[ext_resource type="Script" uid="uid://cw1r4c1d7beyv" path="res://addons/portals/scripts/portal_3d.gd" id="3_q16ke"]
+[ext_resource type="Script" uid="uid://d2crarvkhd45r" path="res://scripts/player.gd" id="4_h8f6p"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_kiw5m"]
+sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
+ground_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
+
+[sub_resource type="Sky" id="Sky_q16ke"]
+sky_material = SubResource("ProceduralSkyMaterial_kiw5m")
+
+[sub_resource type="Environment" id="Environment_h8f6p"]
+background_mode = 1
+background_color = Color(0.403919, 0.487281, 0.596623, 1)
+sky = SubResource("Sky_q16ke")
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="BoxMesh" id="BoxMesh_5fjc1"]
+material = ExtResource("1_amkmy")
+size = Vector3(8, 1, 8)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_amkmy"]
+points = PackedVector3Array(-4, -0.5, -4, -4, 0.5, -4, 4, -0.5, -4, -4, -0.5, 4, -4, 0.5, 4, 4, 0.5, -4, 4, -0.5, 4, 4, 0.5, 4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_h8f6p"]
+size = Vector3(16, 16, 0.05)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_q16ke"]
+size = Vector3(16, 16, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ucxm3"]
+size = Vector3(16, 16, 0.05)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ucxm3"]
+height = 1.75
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_lgfis"]
+radius = 0.4
+height = 1.75
+
+[node name="LevelIsland" type="Node3D"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_h8f6p")
+
+[node name="Ground" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
+mesh = SubResource("BoxMesh_5fjc1")
+metadata/_edit_lock_ = true
+metadata/_edit_group_ = true
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Ground"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground/StaticBody3D"]
+visible = false
+shape = SubResource("ConvexPolygonShape3D_amkmy")
+
+[node name="PropTorus" parent="." instance=ExtResource("2_kiw5m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.25, -0.25, 2.75)
+
+[node name="BottomPortal" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal") groups=["portals"]]
+process_priority = 100
+process_physics_priority = 100
+transform = Transform3D(-1, -8.74228e-08, -3.82137e-15, 0, -4.37114e-08, 1, -8.74228e-08, 1, 4.37114e-08, 0, -8, 0)
+script = ExtResource("3_q16ke")
+_portal_mesh_path = NodePath("Portal3D_Mesh")
+_teleport_area_path = NodePath("TeleportArea")
+_teleport_collider_path = NodePath("TeleportArea/Collider")
+portal_size = Vector2(16, 16)
+exit_portal = NodePath("../SkyPortal")
+portal_frame_width = 0.0
+portal_render_layer = 128
+viewport_size_mode = 0
+is_teleport = true
+teleport_direction = 2
+rigidbody_boost = 0.0
+teleport_collision_mask = 128
+teleport_tolerance = 0.5
+teleport_interactions = 3
+metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
+metadata/_edit_group_ = true
+
+[node name="Portal3D_Mesh" type="MeshInstance3D" parent="BottomPortal"]
+layers = 128
+cast_shadow = 0
+mesh = SubResource("BoxMesh_h8f6p")
+
+[node name="TeleportArea" type="Area3D" parent="BottomPortal"]
+
+[node name="Collider" type="CollisionShape3D" parent="BottomPortal/TeleportArea"]
+shape = SubResource("BoxShape3D_q16ke")
+
+[node name="SkyPortal" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal") groups=["portals"]]
+process_priority = 100
+process_physics_priority = 100
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 8, 0)
+script = ExtResource("3_q16ke")
+_portal_mesh_path = NodePath("Portal3D_Mesh")
+portal_size = Vector2(16, 16)
+exit_portal = NodePath("../BottomPortal")
+portal_frame_width = 0.0
+portal_render_layer = 128
+viewport_size_mode = 0
+is_teleport = false
+metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
+metadata/_edit_group_ = true
+
+[node name="Portal3D_Mesh" type="MeshInstance3D" parent="SkyPortal"]
+layers = 128
+cast_shadow = 0
+mesh = SubResource("BoxMesh_ucxm3")
+
+[node name="Player" type="CharacterBody3D" parent="." node_paths=PackedStringArray("camera")]
+process_priority = 100
+process_physics_priority = 100
+transform = Transform3D(0.275419, 0, -0.961324, 0, 1, 0, 0.961324, 0, 0.275419, -2.07862, 1.21586, 1.84023)
+collision_layer = 129
+script = ExtResource("4_h8f6p")
+camera = NodePath("PlayerCamera")
+metadata/_edit_group_ = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
+shape = SubResource("CapsuleShape3D_ucxm3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Player"]
+mesh = SubResource("CapsuleMesh_lgfis")
+
+[node name="PlayerCamera" type="Camera3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
+current = true

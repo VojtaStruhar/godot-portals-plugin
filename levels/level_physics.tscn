@@ -207,7 +207,6 @@ rigidbody_boost = 1.0
 teleport_collision_mask = 128
 teleport_tolerance = 0.5
 teleport_interactions = 3
-_tb_debug_action = Callable()
 metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
 metadata/_edit_group_ = true
 
@@ -246,7 +245,6 @@ rigidbody_boost = 1.0
 teleport_collision_mask = 128
 teleport_tolerance = 0.5
 teleport_interactions = 3
-_tb_debug_action = Callable()
 metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
 metadata/_edit_group_ = true
 
@@ -286,7 +284,6 @@ rigidbody_boost = 1.0
 teleport_collision_mask = 128
 teleport_tolerance = 0.5
 teleport_interactions = 3
-_tb_debug_action = Callable()
 metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
 metadata/_edit_group_ = true
 
@@ -326,7 +323,6 @@ rigidbody_boost = 0.5
 teleport_collision_mask = 128
 teleport_tolerance = 0.5
 teleport_interactions = 3
-_tb_debug_action = Callable()
 metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
 metadata/_edit_group_ = true
 
