@@ -534,6 +534,9 @@ func disable_mesh_clipping(mi: MeshInstance3D) -> void:
 	mi.set_instance_shader_parameter("clip_active", false)
 
 func transfer_tp_metadata_to_exit(for_body: Node3D) -> void:
+	if not exit_portal.is_teleport:
+		return # One-way teleport scenario
+	
 	var tp_meta = _watchlist_teleportables[for_body]
 	if tp_meta == null:
 		push_error("Attempted to trasfer teleport metadata for a node that is not being watched.")

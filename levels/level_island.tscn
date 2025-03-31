@@ -30,7 +30,7 @@ points = PackedVector3Array(-4, -0.5, -4, -4, 0.5, -4, 4, -0.5, -4, -4, -0.5, 4,
 size = Vector3(16, 16, 0.05)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_q16ke"]
-size = Vector3(16, 16, 1)
+size = Vector3(16, 16, 6)
 
 [sub_resource type="BoxMesh" id="BoxMesh_ucxm3"]
 size = Vector3(16, 16, 0.05)
@@ -101,6 +101,7 @@ shape = SubResource("BoxShape3D_q16ke")
 [node name="SkyPortal" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal") groups=["portals"]]
 process_priority = 100
 process_physics_priority = 100
+editor_description = "This portal IS NOT a teleport! It's here just for show :)"
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 8, 0)
 script = ExtResource("3_q16ke")
 _portal_mesh_path = NodePath("Portal3D_Mesh")
