@@ -23,8 +23,7 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 		return
 	
 	
-	
-	var extents = Vector3(ep.portal_size.x, ep.portal_size.y, ep.portal_thickness) / 2
+	var extents = Vector3(ep.portal_size.x, ep.portal_size.y, ep._portal_thickness) / 2
 	
 	var lines: Array[Vector3] = [
 		# Front rect
@@ -34,10 +33,10 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 		extents * Vector3(-1, 1, 1), extents * Vector3(-1, -1, 1),
 		
 		# Back rect
-		-extents, -extents * Vector3(1, -1, 1),
-		-extents, -extents * Vector3(-1, 1, 1),
-		-extents * Vector3(1, -1, 1), -extents * Vector3(-1, -1, 1),
-		-extents * Vector3(-1, 1, 1), -extents * Vector3(-1, -1, 1),
+		- extents, -extents * Vector3(1, -1, 1),
+		- extents, -extents * Vector3(-1, 1, 1),
+		- extents * Vector3(1, -1, 1), -extents * Vector3(-1, -1, 1),
+		- extents * Vector3(-1, 1, 1), -extents * Vector3(-1, -1, 1),
 		
 		# Short Z connections
 		extents * Vector3(1, 1, 1), extents * Vector3(1, 1, -1),
@@ -57,6 +56,3 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 		PackedVector3Array(lines),
 		get_material("outline", gizmo)
 	)
-	
-	
-	

@@ -132,7 +132,7 @@ var teleport_tolerance: float = 0.5
 
 ## Flags for everything that happens when a something is teleported.
 enum TeleportInteractions {
-	## The portal will try to call a [code]on_teleport(Portal3D)[/code] function on the teleported 
+	## The portal will try to call [constant ON_TELEPORT_CALLBACK_METHOD] method on the teleported
 	## node. You need to implement this function with a script.
 	CALLBACK = 1 << 0,
 	## When the player is teleported, his X and Z rotations are tweened to zero. Resets unwanted
@@ -168,29 +168,28 @@ var teleport_interactions: int = TeleportInteractions.CALLBACK \
 
 #region INTERNALS
 
-# TODO: Prefix with an underscore.
-@export_storage var portal_thickness: float = 0.05:
+@export_storage var _portal_thickness: float = 0.05:
 	set(v):
-		portal_thickness = v
+		_portal_thickness = v
 		if caused_by_user_interaction(): _on_portal_size_changed()
 
-@export_storage var portal_mesh_path: NodePath
+@export_storage var _portal_mesh_path: NodePath
 var portal_mesh: MeshInstance3D:
 	get():
-		return get_node(portal_mesh_path) if portal_mesh_path else null
-	set(v): assert(false, "Proxy variable, use 'portal_mesh_path' instead")
+		return get_node(_portal_mesh_path) if _portal_mesh_path else null
+	set(v): assert(false, "Proxy variable, use '_portal_mesh_path' instead")
 	
-@export_storage var teleport_area_path: NodePath
+@export_storage var _teleport_area_path: NodePath
 var teleport_area: Area3D:
 	get():
-		return get_node(teleport_area_path) if teleport_area_path else null
-	set(v): assert(false, "Proxy variable, use 'teleport_area_path' instead")
+		return get_node(_teleport_area_path) if _teleport_area_path else null
+	set(v): assert(false, "Proxy variable, use '_teleport_area_path' instead")
 
-@export_storage var teleport_collider_path: NodePath
+@export_storage var _teleport_collider_path: NodePath
 var teleport_collider: CollisionShape3D:
 	get():
-		return get_node(teleport_collider_path) if teleport_collider_path else null
-	set(v): assert(false, "Proxy variable, use 'teleport_collider_path' instead")
+		return get_node(_teleport_collider_path) if _teleport_collider_path else null
+	set(v): assert(false, "Proxy variable, use '_teleport_collider_path' instead")
 
 
 ## Camera that looks through the exit portal and renders to [member portal_viewport]
@@ -209,17 +208,11 @@ class TeleportableMeta:
 # the body crossed the portal and should be teleported.
 var _watchlist_teleportables: Dictionary[Node3D, TeleportableMeta] = {}
 
-var _tb_debug_action: Callable = _debug_action
-
-func _debug_action() -> void:
-	print("[%s] DEBUG")
-	print({"portal_mesh_path": portal_mesh_path, "portal_mesh": portal_mesh})
-
 #endregion
 
 #region Editor Configuration Stuff
 
-const PORTAL_SHADER = preload("uid://bhdb2skdxehes")
+const _PORTAL_SHADER = preload("uid://bhdb2skdxehes")
 
 ## _ready(), but only in editor.
 func _editor_ready() -> void:
@@ -247,17 +240,17 @@ func _setup_teleport():
 	if is_teleport == false:
 		if teleport_area:
 			teleport_area.queue_free()
-			teleport_area_path = NodePath("")
+			_teleport_area_path = NodePath("")
 		if teleport_collider:
 			teleport_collider.queue_free()
-			teleport_collider_path = NodePath("")
+			_teleport_collider_path = NodePath("")
 		return
 	
 	var area = Area3D.new()
 	area.name = "TeleportArea"
 	
 	add_child_in_editor(self, area)
-	teleport_area_path = get_path_to(area)
+	_teleport_area_path = get_path_to(area)
 	
 	var collider = CollisionShape3D.new()
 	collider.name = "Collider"
@@ -267,16 +260,16 @@ func _setup_teleport():
 	collider.shape = box
 	
 	add_child_in_editor(teleport_area, collider)
-	teleport_collider_path = get_path_to(collider)
+	_teleport_collider_path = get_path_to(collider)
 
 
 func _on_portal_size_changed() -> void:
 	if portal_mesh == null:
-		printerr("Portal has no mesh!!!")
+		push_error("Failed to update portal size, portal has no mesh")
 		return
 	
 	var p: BoxMesh = portal_mesh.mesh
-	p.size = Vector3(portal_size.x, portal_size.y, portal_thickness)
+	p.size = Vector3(portal_size.x, portal_size.y, _portal_thickness)
 	
 	if is_teleport and teleport_collider:
 		var box: BoxShape3D = teleport_collider.shape
@@ -304,7 +297,7 @@ func _ready() -> void:
 	assert(portal_viewport != null, "[%s] Portal should have a viewport!" % name)
 	
 	var mat: ShaderMaterial = ShaderMaterial.new()
-	mat.shader = PORTAL_SHADER
+	mat.shader = _PORTAL_SHADER
 	portal_mesh.material_override = mat
 	portal_mesh.material_override.set_shader_parameter("albedo", portal_viewport.get_texture())
 	
@@ -342,7 +335,7 @@ func _process_cameras() -> void:
 		var near_diagonal: float = Vector3(half_width, half_height, player_camera.near).length()
 		
 		# TODO: This doesn't change much. Update it directly?
-		portal_thickness = near_diagonal
+		_portal_thickness = near_diagonal
 		_on_portal_size_changed()
 		
 		var player_in_front_of_portal: bool = forward_distance(player_camera) > 0
@@ -409,7 +402,6 @@ func _process_teleports() -> void:
 
 func _calculate_near_plane() -> float:
 	# Adjustment for cube portals. This AABB is basically a plane.
-	# TODO: May or may not be a little broken now that portal mesh moves a little
 	var _aabb: AABB = AABB(
 		Vector3(-exit_portal.portal_size.x / 2, -exit_portal.portal_size.y / 2, 0),
 		Vector3(exit_portal.portal_size.x, exit_portal.portal_size.y, 0)
@@ -446,11 +438,11 @@ func _setup_mesh() -> void:
 	mi.layers = portal_render_layer
 	
 	var p := BoxMesh.new()
-	p.size = Vector3(portal_size.x, portal_size.y, portal_thickness)
+	p.size = Vector3(portal_size.x, portal_size.y, _portal_thickness)
 	mi.mesh = p
 	
 	add_child_in_editor(self, mi)
-	portal_mesh_path = get_path_to(mi)
+	_portal_mesh_path = get_path_to(mi)
 
 func _setup_cameras() -> void:
 	assert(not Engine.is_editor_hint(), "This should never run in editor")
@@ -520,7 +512,6 @@ func construct_tp_metadata(node: Node3D) -> void:
 	
 	if check_tp_interaction(TeleportInteractions.DUPLICATE_MESHES) and \
 		node.has_method(DUPLICATE_MESHES_METHOD):
-		
 		meta.meshes = node.call(DUPLICATE_MESHES_METHOD)
 		for m in meta.meshes:
 			enable_mesh_clipping(m, self)
