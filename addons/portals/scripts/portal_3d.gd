@@ -140,7 +140,7 @@ enum OnTeleportInteractions {
 }
 
 ## This method will be called on a teleported node if [member OnTeleportInteractions.CALLBACK]
-## is checked in [member on_teleport_interactions]
+## is checked in [member teleport_interactions]
 const ON_TELEPORT_CALLBACK_METHOD: StringName = &"on_teleport"
 
 ## When a [CollisionObject3D] should be teleported, the portal check for a [NodePath] for an 
@@ -149,7 +149,7 @@ const ON_TELEPORT_CALLBACK_METHOD: StringName = &"on_teleport"
 const TELEPORT_ROOT_META: StringName = &"teleport_root"
 
 ## For options, see [enum OnTeleportInteractions]
-var on_teleport_interactions: int = OnTeleportInteractions.CALLBACK \
+var teleport_interactions: int = OnTeleportInteractions.CALLBACK \
 									| OnTeleportInteractions.PLAYER_UPRIGHT
 
 #region INTERNALS
@@ -379,11 +379,11 @@ func _process_teleports() -> void:
 				exit_portal._process_cameras()
 			
 			# Resolve teleport interactions
-			if was_player and (on_teleport_interactions & OnTeleportInteractions.PLAYER_UPRIGHT):
+			if was_player and (teleport_interactions & OnTeleportInteractions.PLAYER_UPRIGHT):
 				get_tree().create_tween().tween_property(teleportable, "rotation:x", 0, 0.3)
 				get_tree().create_tween().tween_property(teleportable, "rotation:z", 0, 0.3)
 			
-			if on_teleport_interactions & OnTeleportInteractions.CALLBACK:
+			if teleport_interactions & OnTeleportInteractions.CALLBACK:
 				if teleportable.has_method(ON_TELEPORT_CALLBACK_METHOD):
 					teleportable.call(ON_TELEPORT_CALLBACK_METHOD, self)
 			
@@ -652,7 +652,7 @@ func _get_property_list() -> Array[Dictionary]:
 		config.append(AtExport.int_physics_3d("teleport_collision_mask"))
 		config.append(AtExport.float_range("teleport_tolerance", 0.0, 5.0, 0.1, ["or_greater"]))
 		var opts: Array = OnTeleportInteractions.keys().map(func(s): return s.capitalize())
-		config.append(AtExport.int_flags("on_teleport_interactions", opts))
+		config.append(AtExport.int_flags("teleport_interactions", opts))
 		config.append(AtExport.group_end())
 	
 	config.append(AtExport.button("_tb_debug_action", "Debug Button", "Popup"))
@@ -670,28 +670,28 @@ func _property_can_revert(property: StringName) -> bool:
 		&"rigidbody_boost",
 		&"teleport_collision_mask",
 		&"teleport_tolerance",
-		&"on_teleport_interactions"
+		&"teleport_interactions"
 	]
 
 func _property_get_revert(property: StringName) -> Variant:
 	match property:
-		&"portal_size": 
+		&"portal_size":
 			return Vector2(2, 2.5)
-		&"portal_frame_width": 
+		&"portal_frame_width":
 			return 0.0
-		&"portal_render_layer": 
+		&"portal_render_layer":
 			return PortalSettings.get_setting("default_portal_layer")
-		&"viewport_size_max_width_absolute": 
+		&"viewport_size_max_width_absolute":
 			return ProjectSettings.get_setting("display/window/size/viewport_width")
-		&"teleport_direction": 
+		&"teleport_direction":
 			return TeleportDirection.FRONT_AND_BACK
-		&"rigidbody_boost": 
+		&"rigidbody_boost":
 			return 0.0
-		&"teleport_collision_mask": 
+		&"teleport_collision_mask":
 			return PortalSettings.get_setting("default_teleport_mask")
-		&"teleport_tolerance": 
+		&"teleport_tolerance":
 			return 0.5
-		&"on_teleport_interactions":
+		&"teleport_interactions":
 			return OnTeleportInteractions.CALLBACK | OnTeleportInteractions.PLAYER_UPRIGHT
 	
 	return null
