@@ -140,7 +140,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.0102, 0.185177, 0.172441)
 mesh = SubResource("BoxMesh_efj51")
 
 [node name="PropCube" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.852786, -0.52226, 0, 0.52226, 0.852786, 0, 0, 0.439453)
+transform = Transform3D(1, 0, 0, 0, 0.852786, -0.52226, 0, 0.52226, 0.852786, 0, 0, -0.0342)
 material_override = SubResource("ShaderMaterial_efj51")
 instance_shader_parameters/clip_active = true
 instance_shader_parameters/clip_normal = Vector3(0, 0, 1)

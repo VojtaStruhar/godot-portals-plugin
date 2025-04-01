@@ -32,12 +32,12 @@ func _ready() -> void:
 sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
 ground_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
 
-[sub_resource type="Sky" id="Sky_hllyk"]
+[sub_resource type="Sky" id="Sky_hc4gn"]
 sky_material = SubResource("ProceduralSkyMaterial_lff3k")
 
 [sub_resource type="Environment" id="Environment_8bheg"]
 background_mode = 2
-sky = SubResource("Sky_hllyk")
+sky = SubResource("Sky_hc4gn")
 tonemap_mode = 3
 glow_enabled = true
 
@@ -205,7 +205,7 @@ size = Vector3(2, 2.5, 1)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="PortalWatcher" type="TextureRect" parent="CanvasLayer"]
+[node name="PortalWatcher" type="TextureRect" parent="CanvasLayer" node_paths=PackedStringArray("portal")]
 clip_contents = true
 anchors_preset = -1
 anchor_right = 0.238
@@ -214,8 +214,9 @@ offset_right = 0.039978
 offset_bottom = -0.400024
 expand_mode = 1
 script = SubResource("GDScript_hc4gn")
+portal = NodePath("../../CubePortal")
 
-[node name="PortalWatcher2" type="TextureRect" parent="CanvasLayer"]
+[node name="PortalWatcher2" type="TextureRect" parent="CanvasLayer" node_paths=PackedStringArray("portal")]
 clip_contents = true
 anchors_preset = -1
 anchor_left = 0.757
@@ -223,6 +224,7 @@ anchor_right = 1.0
 anchor_bottom = 0.38
 expand_mode = 1
 script = SubResource("GDScript_hc4gn")
+portal = NodePath("../../SpherePortal")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_8bheg")
