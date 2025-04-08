@@ -14,7 +14,7 @@ config/name="Portals Plugin"
 config/tags=PackedStringArray("addon", "dp")
 run/main_scene="uid://dfuudoym2pnvu"
 config/features=PackedStringArray("4.4", "Forward Plus")
-config/icon="res://icon.svg"
+config/icon="uid://buu38oc58an8l"
 
 [display]
 
