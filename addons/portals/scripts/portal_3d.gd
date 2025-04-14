@@ -10,11 +10,11 @@ class_name Portal3D extends Node3D
 #region Public API
 
 ## Emitted when this portal teleports something. Also see [signal on_teleport_receive]
-signal on_teleport(body_or_area: Node3D)
+signal on_teleport(node: Node3D)
 
 ## Emitted when this portal [i]receives[/i] a teleported node. Whoever had [b]this[/b] portal as
 ## its [member exit_portal] triggered a teleport!
-signal on_teleport_receive(body_or_area: Node3D)
+signal on_teleport_receive(node: Node3D)
 
 ## The portal starts rendering again, [member portal_mesh] becomes visible and teleport
 ## activates (if the portal is teleporting).
@@ -33,6 +33,26 @@ func deactivate() -> void:
 	
 	if is_teleport:
 		teleport_area.monitoring = false
+
+
+
+
+func forward_raycast(raycast: RayCast3D) -> PhysicsBody3D:
+	var start: Vector3 = to_exit_position(raycast.get_collision_point())
+	var goal: Vector3 = to_exit_position(raycast.to_global(raycast.target_position))
+	
+	var space_state = get_world_3d().direct_space_state
+	var query = PhysicsRayQueryParameters3D.create(
+		start, 
+		goal, 
+		raycast.collision_mask, 
+		[self.teleport_area, exit_portal.teleport_area]
+	)
+	query.collide_with_areas = raycast.collide_with_areas
+	query.collide_with_bodies = raycast.collide_with_bodies
+	var result = space_state.intersect_ray(query)
+	
+	return result.get("collider", null)
 
 #endregion
 
@@ -576,12 +596,24 @@ func to_exit_transform(g_transform: Transform3D) -> Transform3D:
 	var relative_to_target = exit_portal.global_transform * flipped
 	return relative_to_target
 
-## Similar to [method to_exit_transform], but this one only transforms a vector.
+
+## Similar to [method to_exit_transform], but this one uses [member global_basis] for calculations, 
+## so it [b]only transforms rotation[/b], since portal scale should aways be 1. Use for transforming
+## directions.
 func to_exit_direction(real: Vector3) -> Vector3:
-	var relative_to_portal: Vector3 = global_transform.basis.inverse() * real
+	var relative_to_portal: Vector3 = global_basis.inverse() * real
 	var flipped: Vector3 = relative_to_portal.rotated(Vector3.UP, PI)
-	var relative_to_target: Vector3 = exit_portal.global_transform.basis * flipped
+	var relative_to_target: Vector3 = exit_portal.global_basis * flipped
 	return relative_to_target
+
+
+## Similar to [method to_exit_transform], but expects a global position.
+func to_exit_position(g_pos:Vector3) -> Vector3:
+	var local: Vector3 = global_transform.affine_inverse() * g_pos
+	local = local.rotated(Vector3.UP, PI)
+	var local_at_exit: Vector3 = exit_portal.global_transform * local
+	return local_at_exit
+
 
 ## Calculates the dot product of portal's forward vector with the global 
 ## position of [param node] relative to the portal. Used for detecting teleports.

@@ -1,11 +1,14 @@
-[gd_scene load_steps=20 format=4 uid="uid://cey6k8ip6nn8w"]
+[gd_scene load_steps=26 format=4 uid="uid://cey6k8ip6nn8w"]
 
 [ext_resource type="Material" uid="uid://dgjiw8udooecr" path="res://assets/prototyping/M_prototype_dark.tres" id="1_6hsda"]
 [ext_resource type="Script" uid="uid://bqnap47txp42k" path="res://levels/level_basics.gd" id="1_dqevk"]
 [ext_resource type="Material" uid="uid://dyx4l6ea0am6f" path="res://assets/prototyping/M_prototype_green.tres" id="1_ym1tr"]
+[ext_resource type="Script" uid="uid://bjknytsx2gu0i" path="res://levels/forwarded_raycast.gd" id="3_4lvjw"]
 [ext_resource type="Material" uid="uid://brj2jayoo0l0d" path="res://assets/prototyping/M_prototype_blue.tres" id="3_nrnmy"]
 [ext_resource type="Script" uid="uid://d2crarvkhd45r" path="res://scripts/player.gd" id="4_nrnmy"]
 [ext_resource type="Script" uid="uid://cw1r4c1d7beyv" path="res://addons/portals/scripts/portal_3d.gd" id="5_wviww"]
+[ext_resource type="Script" uid="uid://c7oiumhuoj71s" path="res://levels/colorshift_cube.gd" id="7_dqevk"]
+[ext_resource type="PackedScene" uid="uid://bb1b3cg0khq5k" path="res://scripts/poor_mans_crosshair.tscn" id="9_fv6tu"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_62h3h"]
 sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
@@ -59,8 +62,16 @@ size = Vector3(5, 3, 0.05)
 [sub_resource type="BoxShape3D" id="BoxShape3D_dqevk"]
 size = Vector3(5, 3, 1)
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_p3b8s"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4lvjw"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_4lvjw"]
+
 [node name="Level_Forward" type="Node3D"]
 script = ExtResource("1_dqevk")
+
+[node name="PoorMansCrosshair" parent="." instance=ExtResource("9_fv6tu")]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
@@ -87,6 +98,13 @@ mesh = SubResource("CapsuleMesh_wviww")
 [node name="PlayerCamera" type="Camera3D" parent="Player"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
 current = true
+
+[node name="ForwardedRaycast" type="RayCast3D" parent="Player/PlayerCamera"]
+target_position = Vector3(0, 0, -20)
+collision_mask = 129
+collide_with_areas = true
+debug_shape_thickness = 3
+script = ExtResource("3_4lvjw")
 
 [node name="Ground" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, -1.00701e-05, 8.73277e-06, 1.00701e-05, 1, -1.12671e-05, -8.73277e-06, 1.12671e-05, 1, 0, -0.5, 0)
@@ -124,7 +142,7 @@ visible = false
 shape = SubResource("ConcavePolygonShape3D_dqevk")
 
 [node name="PortalFrame2" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1.501, 0)
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 12, 1.501, 0)
 material_override = ExtResource("1_6hsda")
 mesh = SubResource("ArrayMesh_wviww")
 
@@ -169,7 +187,7 @@ shape = SubResource("BoxShape3D_wviww")
 [node name="BluePortal" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal") groups=["portals"]]
 process_priority = 100
 process_physics_priority = 100
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1.5, 0)
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 12, 1.5, 0)
 script = ExtResource("5_wviww")
 _portal_mesh_path = NodePath("Portal3D_Mesh")
 _teleport_area_path = NodePath("TeleportArea")
@@ -197,3 +215,20 @@ mesh = SubResource("BoxMesh_dqevk")
 
 [node name="Collider" type="CollisionShape3D" parent="BluePortal/TeleportArea"]
 shape = SubResource("BoxShape3D_dqevk")
+
+[node name="ColorshiftCube" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.75, 0.5, -3.75)
+script = ExtResource("7_dqevk")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ColorshiftCube"]
+shape = SubResource("BoxShape3D_p3b8s")
+
+[node name="CubeMesh" type="MeshInstance3D" parent="ColorshiftCube"]
+material_override = SubResource("StandardMaterial3D_4lvjw")
+mesh = SubResource("BoxMesh_4lvjw")
+skeleton = NodePath("../..")
+
+[node name="Label3D" type="Label3D" parent="ColorshiftCube"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.928163, 0)
+billboard = 2
+text = "Shoot to change color"
