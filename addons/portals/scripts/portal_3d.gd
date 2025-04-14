@@ -50,6 +50,8 @@ func forward_raycast(raycast: RayCast3D) -> CollisionObject3D:
 	)
 	query.collide_with_areas = raycast.collide_with_areas
 	query.collide_with_bodies = raycast.collide_with_bodies
+	query.hit_back_faces = raycast.hit_back_faces
+	query.hit_from_inside = raycast.hit_from_inside
 	var result = get_world_3d().direct_space_state.intersect_ray(query)
 	
 	return result.get("collider", null)
