@@ -34,14 +34,14 @@ func deactivate() -> void:
 	if is_teleport:
 		teleport_area.monitoring = false
 
-
-
-
-func forward_raycast(raycast: RayCast3D) -> PhysicsBody3D:
-	var start: Vector3 = to_exit_position(raycast.get_collision_point())
-	var goal: Vector3 = to_exit_position(raycast.to_global(raycast.target_position))
+## If your [RayCast3D] node hits a portal that it was meant to go through, pass it to this function
+## and it will get you the next collider behind the portal.
+## Uses [method PhysicsDirectSpaceState3D.intersect_ray] under the hood.[br][br]
+## Also see [method forward_raycast_query].
+func forward_raycast(raycast: RayCast3D) -> CollisionObject3D:
+	var start := to_exit_position(raycast.get_collision_point())
+	var goal := to_exit_position(raycast.to_global(raycast.target_position))
 	
-	var space_state = get_world_3d().direct_space_state
 	var query = PhysicsRayQueryParameters3D.create(
 		start, 
 		goal, 
@@ -50,9 +50,31 @@ func forward_raycast(raycast: RayCast3D) -> PhysicsBody3D:
 	)
 	query.collide_with_areas = raycast.collide_with_areas
 	query.collide_with_bodies = raycast.collide_with_bodies
-	var result = space_state.intersect_ray(query)
+	var result = get_world_3d().direct_space_state.intersect_ray(query)
 	
 	return result.get("collider", null)
+
+## When doing raycasts with [method PhysicsDirectSpaceState3D.intersect_ray] and you hit a portal
+## that you want to go through, pass the existing [PhysicsRayQueryParameters3D] to this function.
+## It will take over the parameters and calculate the ray's continuation. [br][br]
+## See [method forward_raycast] for usage with [RayCast3D].
+func forward_raycast_query(params: PhysicsRayQueryParameters3D) -> Dictionary:
+	var start := to_exit_position(params.from)
+	var end := to_exit_position(params.to)
+	start = exit_portal.line_intersection(start, end)
+	
+	var excludes = [self.teleport_area, exit_portal.teleport_area]
+	excludes.append_array(params.exclude)
+	
+	var query = PhysicsRayQueryParameters3D.create(
+		start, end, params.collision_mask, excludes
+	)
+	query.collide_with_areas = params.collide_with_areas
+	query.collide_with_bodies = params.collide_with_bodies
+	query.hit_back_faces = params.hit_back_faces
+	query.hit_from_inside = params.hit_from_inside
+
+	return get_world_3d().direct_space_state.intersect_ray(query)
 
 #endregion
 
@@ -671,6 +693,21 @@ func get_desired_viewport_size() -> Vector2i:
 
 func check_tp_interaction(flag: int) -> bool:
 	return (teleport_interactions & flag) > 0
+
+## Get a point where the portal plane intersects a line. Line ends [param start] and [param end] 
+## are in global coordinates and so is the result. Used for forwarding raycast queries.
+func line_intersection(start: Vector3, end: Vector3) -> Vector3:
+	var plane_normal = -global_basis.z
+	var plane_point = global_position
+	
+	var line_dir = end - start
+	var denom = plane_normal.dot(line_dir)
+
+	if abs(denom) < 1e-6:
+		return Vector3.ZERO # No intersection, line is parallel to the plane
+
+	var t = plane_normal.dot(plane_point - start) / denom
+	return start + line_dir * t
 
 #endregion
 
