@@ -36,6 +36,8 @@ func deactivate() -> void:
 
 #endregion
 
+## Size of the portal rectangle. [br][br]
+## Detph of the portal is an implementation detail and is set automatically.
 var portal_size: Vector2 = Vector2(2.0, 2.5):
 	set(v):
 		portal_size = v
@@ -59,10 +61,14 @@ var exit_portal: Portal3D:
 var _tb_pair_portals: Callable = _editor_pair_portals
 var _tb_sync_portal_sizes: Callable = _editor_sync_portal_sizes
 
+## Manually specify the main camera. By default it's inferred as the camera rendering the
+## parent viewport of the portal. You might have to specify this, if your game uses multiple
+## [SubViewport]s.
 var player_camera: Camera3D
 
-## The width of the frame portal. Adjusts the near clip distance of the camera looking through 
-## THIS portal.
+## If there is a frame mesh around the portal, the [member portal_camera] clipping on the other
+## side might be visible. The [code]portal_frame_width[/code] is subtracted from the near clip 
+## plane distance to offset this.
 var portal_frame_width: float = 0
 
 ## @deprecated
@@ -74,6 +80,9 @@ var portal_frame_width: float = 0
 ## restricts teleporting options.
 const portals_see_portals: bool = false
 
+## [member VisualInstance3D.layers] settging for [member portal_mesh]. So that the portal cameras
+## don't see other portals.[br][br]
+## You can set the default in [i]Project settings > Addons > Portals[/i].
 var portal_render_layer: int = 1 << 7:
 	set(v):
 		portal_render_layer = v
@@ -90,13 +99,18 @@ enum PortalViewportSizeMode {
 	## Portal viewport will be a fraction of full window size.
 	FRACTIONAL
 }
+## Size mode to use for the portal viewport size.
 var viewport_size_mode: PortalViewportSizeMode = PortalViewportSizeMode.FULL:
 	set(v):
 		viewport_size_mode = v
 		notify_property_list_changed()
-var viewport_size_max_width_absolute: int = ProjectSettings.get_setting("display/window/size/viewport_width")
-var viewport_size_fractional: float = 0.5
+var _viewport_size_max_width_absolute: int = ProjectSettings.get_setting("display/window/size/viewport_width")
+var _viewport_size_fractional: float = 0.5
 
+## If [code]true[/code], the portal is also a teleport.
+## [br][br]
+## You are expected to toggle this in the editor. For runtime teleport toggling, see 
+## [method activate] and [method deactivate].
 var is_teleport: bool:
 	set(v):
 		is_teleport = v
@@ -162,7 +176,7 @@ const DUPLICATE_MESHES_METHOD: StringName = &"get_teleportable_meshes"
 const TELEPORT_ROOT_META: StringName = &"teleport_root"
 
 
-## For options, see [enum TeleportInteractions]
+## See [enum TeleportInteractions] for options.
 var teleport_interactions: int = TeleportInteractions.CALLBACK \
 									| TeleportInteractions.PLAYER_UPRIGHT
 
@@ -174,18 +188,23 @@ var teleport_interactions: int = TeleportInteractions.CALLBACK \
 		if caused_by_user_interaction(): _on_portal_size_changed()
 
 @export_storage var _portal_mesh_path: NodePath
+## Mesh used to visualize the portal surface. Created when the portal is added to the scene 
+## [b]in the editor[/b].
 var portal_mesh: MeshInstance3D:
 	get():
 		return get_node(_portal_mesh_path) if _portal_mesh_path else null
 	set(v): assert(false, "Proxy variable, use '_portal_mesh_path' instead")
 	
 @export_storage var _teleport_area_path: NodePath
+## When a teleportable object comes near the portal, it's registered by this area and watched 
+## every frame to trigger the teleport. [br][br] Created by toggling [member is_teleport] in editor.
 var teleport_area: Area3D:
 	get():
 		return get_node(_teleport_area_path) if _teleport_area_path else null
 	set(v): assert(false, "Proxy variable, use '_teleport_area_path' instead")
 
 @export_storage var _teleport_collider_path: NodePath
+## Collider for [member teleport_area].
 var teleport_collider: CollisionShape3D:
 	get():
 		return get_node(_teleport_collider_path) if _teleport_collider_path else null
@@ -394,7 +413,7 @@ func _process_teleports() -> void:
 					teleportable.call(ON_TELEPORT_CALLBACK_METHOD, self)
 			
 			# transfer the thing to exit portal
-			transfer_tp_metadata_to_exit(body)
+			_transfer_tp_metadata_to_exit(body)
 		else:
 			tp_meta.forward = current_fw_angle
 			for i in tp_meta.mesh_clones.size():
@@ -484,20 +503,20 @@ func _on_teleport_area_entered(area: Area3D) -> void:
 		# Already on watchlist
 		return
 	
-	construct_tp_metadata(area)
+	_construct_tp_metadata(area)
 
 func _on_teleport_body_entered(body: Node3D) -> void:
 	if _watchlist_teleportables.has(body):
 		# Already on watchlist
 		return
 	
-	construct_tp_metadata(body)
+	_construct_tp_metadata(body)
 
 func _on_teleport_area_exited(area: Area3D) -> void:
-	erase_tp_metadata(area)
+	_erase_tp_metadata(area)
 
 func _on_teleport_body_exited(body: Node3D) -> void:
-	erase_tp_metadata(body)
+	_erase_tp_metadata(body)
 
 func _on_window_resize() -> void:
 	portal_viewport.size = get_desired_viewport_size()
@@ -506,7 +525,7 @@ func _on_window_resize() -> void:
 
 #region UTILS
 
-func construct_tp_metadata(node: Node3D) -> void:
+func _construct_tp_metadata(node: Node3D) -> void:
 	var meta = TeleportableMeta.new()
 	meta.forward = forward_distance(node)
 	
@@ -522,7 +541,7 @@ func construct_tp_metadata(node: Node3D) -> void:
 	
 	_watchlist_teleportables.set(node, meta)
 
-func erase_tp_metadata(node: Node3D) -> void:
+func _erase_tp_metadata(node: Node3D) -> void:
 	_watchlist_teleportables.erase(node)
 
 func enable_mesh_clipping(mi: MeshInstance3D, portal: Portal3D) -> void:
@@ -533,7 +552,7 @@ func enable_mesh_clipping(mi: MeshInstance3D, portal: Portal3D) -> void:
 func disable_mesh_clipping(mi: MeshInstance3D) -> void:
 	mi.set_instance_shader_parameter("portal_clip_active", false)
 
-func transfer_tp_metadata_to_exit(for_body: Node3D) -> void:
+func _transfer_tp_metadata_to_exit(for_body: Node3D) -> void:
 	if not exit_portal.is_teleport:
 		return # One-way teleport scenario
 	
@@ -547,7 +566,7 @@ func transfer_tp_metadata_to_exit(for_body: Node3D) -> void:
 	for m in tp_meta.mesh_clones: enable_mesh_clipping(m, self) # switch
 	
 	exit_portal._watchlist_teleportables.set(for_body, tp_meta)
-	erase_tp_metadata(for_body)
+	_erase_tp_metadata(for_body)
 
 ## [b]Crucial[/b] piece of a portal - transforming where objects should appear 
 ## on the other side. Used for both cameras and teleports.
@@ -607,10 +626,10 @@ func get_desired_viewport_size() -> Vector2i:
 		PortalViewportSizeMode.FULL:
 			return vp_size
 		PortalViewportSizeMode.MAX_WIDTH_ABSOLUTE:
-			var width = min(viewport_size_max_width_absolute, vp_size.x)
+			var width = min(_viewport_size_max_width_absolute, vp_size.x)
 			return Vector2i(width, int(width / aspect_ratio))
 		PortalViewportSizeMode.FRACTIONAL:
-			return Vector2i(vp_size * viewport_size_fractional)
+			return Vector2i(vp_size * _viewport_size_fractional)
 	
 	push_error("Failed to determine desired viewport size")
 	return Vector2i(
@@ -671,9 +690,9 @@ func _get_property_list() -> Array[Dictionary]:
 		"viewport_size_mode", &"Portal3D.PortalViewportSizeMode", PortalViewportSizeMode))
 		
 	if viewport_size_mode == PortalViewportSizeMode.MAX_WIDTH_ABSOLUTE:
-		config.append(AtExport.int_range("viewport_size_max_width_absolute", 2, 4096))
+		config.append(AtExport.int_range("_viewport_size_max_width_absolute", 2, 4096))
 	elif viewport_size_mode == PortalViewportSizeMode.FRACTIONAL:
-		config.append(AtExport.float_range("viewport_size_fractional", 0, 1))
+		config.append(AtExport.float_range("_viewport_size_fractional", 0, 1))
 		
 	config.append(AtExport.group_end())
 	
@@ -700,7 +719,7 @@ func _property_can_revert(property: StringName) -> bool:
 		&"portal_frame_width",
 		&"player_camera",
 		&"portal_render_layer",
-		&"viewport_size_max_width_absolute",
+		&"_viewport_size_max_width_absolute",
 		&"teleport_direction",
 		&"rigidbody_boost",
 		&"teleport_collision_mask",
@@ -716,7 +735,7 @@ func _property_get_revert(property: StringName) -> Variant:
 			return 0.0
 		&"portal_render_layer":
 			return PortalSettings.get_setting("default_portal_layer")
-		&"viewport_size_max_width_absolute":
+		&"_viewport_size_max_width_absolute":
 			return ProjectSettings.get_setting("display/window/size/viewport_width")
 		&"teleport_direction":
 			return TeleportDirection.FRONT_AND_BACK
