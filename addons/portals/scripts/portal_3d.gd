@@ -280,6 +280,7 @@ const _PORTAL_SHADER = preload("uid://bhdb2skdxehes")
 ## _ready(), but only in editor.
 func _editor_ready() -> void:
 	add_to_group(PortalSettings.get_setting("portals_group_name"), true)
+	set_notify_transform(true)
 	
 	process_priority = 100
 	process_physics_priority = 100
@@ -288,6 +289,11 @@ func _editor_ready() -> void:
 	
 	self.group_node(self)
 
+func _notification(what: int) -> void:
+	match what:
+		NOTIFICATION_TRANSFORM_CHANGED:
+			print("%s: Transform changed" % name)
+			update_gizmos()
 
 func _editor_pair_portals() -> void:
 	assert(exit_portal != null, "My own exit has to be set!")
