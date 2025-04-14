@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://664na4csmqe"]
+[gd_scene load_steps=9 format=3 uid="uid://664na4csmqe"]
 
 [ext_resource type="Shader" uid="uid://xoa3hj7pynf" path="res://scripts/clipping_shader.gdshader" id="1_picon"]
 [ext_resource type="PackedScene" uid="uid://dxvxy65pv5hoe" path="res://assets/prototyping/prop_sphere.tscn" id="2_xywcf"]
@@ -112,27 +112,6 @@ shader_parameter/uv2_offset = Vector3(0, 0, 0)
 
 [sub_resource type="BoxMesh" id="BoxMesh_tk8yd"]
 
-[sub_resource type="GDScript" id="GDScript_efj51"]
-script/source = "extends Node
-
-@export var meshes: Array[MeshInstance3D] = []
-
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	for m in meshes:
-		print(\"-- Checking %s --\" % m.name)
-		printt(\"Has isp/clip_normal:\", m.get(\"instance_shader_parameters/clip_normal\"))
-		printt(\"clip_normal\", m.get_instance_shader_parameter(\"clip_normal\"))
-		printt(\"clip_point\", m.get_instance_shader_parameter(\"clip_point\"))
-		print(\"Trying to set a parameter blindly:\")
-		m.set_instance_shader_parameter(\"clip_normal\", Vector3.ONE)
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
-"
-
 [node name="ShaderPlayground" type="Node3D"]
 
 [node name="ShaderTest" type="MeshInstance3D" parent="."]
@@ -142,14 +121,9 @@ mesh = SubResource("BoxMesh_efj51")
 [node name="PropCube" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.852786, -0.52226, 0, 0.52226, 0.852786, 0, 0, -0.0342)
 material_override = SubResource("ShaderMaterial_efj51")
-instance_shader_parameters/clip_active = true
-instance_shader_parameters/clip_normal = Vector3(0, 0, 1)
-instance_shader_parameters/clip_point = Vector3(0, 0, 0)
 mesh = SubResource("BoxMesh_tk8yd")
 
 [node name="PropSphere" parent="." instance=ExtResource("2_xywcf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.91982)
 
-[node name="ShaderChecker" type="Node" parent="." node_paths=PackedStringArray("meshes")]
-script = SubResource("GDScript_efj51")
-meshes = [NodePath("../ShaderTest"), NodePath("../PropCube"), NodePath("../PropSphere")]
+[node name="ShaderChecker" type="Node" parent="."]

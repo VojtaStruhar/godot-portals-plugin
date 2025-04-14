@@ -526,12 +526,12 @@ func erase_tp_metadata(node: Node3D) -> void:
 	_watchlist_teleportables.erase(node)
 
 func enable_mesh_clipping(mi: MeshInstance3D, portal: Portal3D) -> void:
-	mi.set_instance_shader_parameter("clip_active", true)
-	mi.set_instance_shader_parameter("clip_point", portal.global_position)
-	mi.set_instance_shader_parameter("clip_normal", portal.global_basis.z)
+	mi.set_instance_shader_parameter("portal_clip_active", true)
+	mi.set_instance_shader_parameter("portal_clip_point", portal.global_position)
+	mi.set_instance_shader_parameter("portal_clip_normal", portal.global_basis.z)
 
 func disable_mesh_clipping(mi: MeshInstance3D) -> void:
-	mi.set_instance_shader_parameter("clip_active", false)
+	mi.set_instance_shader_parameter("portal_clip_active", false)
 
 func transfer_tp_metadata_to_exit(for_body: Node3D) -> void:
 	if not exit_portal.is_teleport:

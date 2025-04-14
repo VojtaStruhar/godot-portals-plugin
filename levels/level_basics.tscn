@@ -74,7 +74,7 @@ script/source = "extends Area3D
 
 @export var speed: float = 2
 
-@onready var sphere_mesh: MeshInstance3D = $MeshInstance3D
+@onready var sphere_mesh: MeshInstance3D = $SphereMesh
 
 func _physics_process(delta: float) -> void:
 	var forward = -global_basis.z
@@ -316,11 +316,8 @@ speed = 1.0
 [node name="CollisionShape3D" type="CollisionShape3D" parent="UnstoppableSphere"]
 shape = SubResource("SphereShape3D_lbpks")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="UnstoppableSphere"]
+[node name="SphereMesh" type="MeshInstance3D" parent="UnstoppableSphere"]
 material_override = SubResource("ShaderMaterial_eavfu")
-instance_shader_parameters/clip_active = true
-instance_shader_parameters/clip_normal = Vector3(0, 1, 0)
-instance_shader_parameters/clip_point = Vector3(0, 0, 0)
 mesh = SubResource("SphereMesh_eavfu")
 
 [node name="CubePortal" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal") groups=["portals"]]
