@@ -415,6 +415,10 @@ func _process_cameras() -> void:
 
 func _process_teleports() -> void:
 	for body in _watchlist_teleportables.keys():
+		if not is_instance_valid(body):
+			_erase_tp_metadata(body)
+			continue
+		
 		body = body as Node3D # Conversion just for type hints
 		var tp_meta: TeleportableMeta = _watchlist_teleportables.get(body)
 		var last_fw_angle: float = tp_meta.forward
