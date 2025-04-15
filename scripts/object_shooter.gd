@@ -15,4 +15,7 @@ func _process(delta: float) -> void:
 		bullet.global_position += forward * fire_offset
 		bullet.rotation_degrees = Vector3(randf(), randf(), randf()) * 180
 		bullet.apply_central_impulse(forward * fire_force)
-		get_tree().create_timer(projectile_lifetime).timeout.connect(func(): bullet.queue_free())
+		get_tree().create_timer(projectile_lifetime).timeout.connect(
+			func(): 
+				if is_instance_valid(bullet): bullet.queue_free()
+		)
