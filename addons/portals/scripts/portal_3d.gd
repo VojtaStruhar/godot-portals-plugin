@@ -355,9 +355,6 @@ func _ready() -> void:
 		return
 	
 	if player_camera == null:
-		# FIXME: This WILL fail if the root does a SubViewportContainer thing. Maybe.
-		# It's probably best to assign this manually.
-		push_warning("Inferring player camera from parent viewport.")
 		player_camera = get_viewport().get_camera_3d()
 		assert(player_camera != null, "Player camera is missing!")
 	
