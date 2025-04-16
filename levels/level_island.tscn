@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://dxe2g23t2qp0j"]
+[gd_scene load_steps=16 format=3 uid="uid://dxe2g23t2qp0j"]
 
 [ext_resource type="Material" uid="uid://dgjiw8udooecr" path="res://assets/prototyping/M_prototype_dark.tres" id="1_amkmy"]
 [ext_resource type="PackedScene" uid="uid://caqayjkbvlel5" path="res://assets/prototyping/prop_torus.tscn" id="2_kiw5m"]
@@ -42,7 +42,12 @@ height = 1.75
 radius = 0.4
 height = 1.75
 
+[sub_resource type="SphereShape3D" id="SphereShape3D_h8f6p"]
+
 [node name="LevelIsland" type="Node3D"]
+editor_description = "When the player was also used for teleport detection here, it resulted in blinking. This was because the camera is NOT at the vertical origin of the player. That means the player (body) triggers the teleport BEFORE its camera ever reaches the portal. Therefore when the player is teleported, its camera is ABOVE the SkyPortal, resulting in a glitch.
+
+I turned off Player's collision with the portal layer and added a teleport trigger area to the same spot where his camera is. Works like a charm!"
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
@@ -123,7 +128,6 @@ mesh = SubResource("BoxMesh_ucxm3")
 process_priority = 100
 process_physics_priority = 100
 transform = Transform3D(0.275419, 0, -0.961324, 0, 1, 0, 0.961324, 0, 0.275419, -2.07862, 1.21586, 1.84023)
-collision_layer = 129
 script = ExtResource("4_h8f6p")
 camera = NodePath("PlayerCamera")
 metadata/_edit_group_ = true
@@ -137,3 +141,12 @@ mesh = SubResource("CapsuleMesh_lgfis")
 [node name="PlayerCamera" type="Camera3D" parent="Player"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
 current = true
+
+[node name="TeleportTrigger" type="Area3D" parent="Player/PlayerCamera"]
+transform = Transform3D(1, 0, -2.98023e-08, 0, 1, 0, 2.98023e-08, 0, 1, 0, 0, 0)
+collision_layer = 128
+collision_mask = 0
+metadata/teleport_root = NodePath("../..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player/PlayerCamera/TeleportTrigger"]
+shape = SubResource("SphereShape3D_h8f6p")
