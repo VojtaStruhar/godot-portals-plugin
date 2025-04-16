@@ -292,7 +292,6 @@ func _editor_ready() -> void:
 func _notification(what: int) -> void:
 	match what:
 		NOTIFICATION_TRANSFORM_CHANGED:
-			print("%s: Transform changed" % name)
 			update_gizmos()
 
 func _editor_pair_portals() -> void:

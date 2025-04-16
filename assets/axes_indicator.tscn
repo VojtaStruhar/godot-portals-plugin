@@ -1,0 +1,73 @@
+[gd_scene load_steps=7 format=3 uid="uid://bvl76leh5bkne"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fv6tu"]
+no_depth_test = true
+shading_mode = 0
+albedo_color = Color(0, 1, 0, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_kw6xj"]
+top_radius = 0.01
+bottom_radius = 0.01
+height = 1.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_e3bov"]
+top_radius = 0.0
+bottom_radius = 0.05
+height = 0.1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vxs3i"]
+no_depth_test = true
+shading_mode = 0
+albedo_color = Color(1, 0.188235, 0.133333, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_x4l0t"]
+no_depth_test = true
+shading_mode = 0
+albedo_color = Color(0, 0.564706, 1, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_u0e4s"]
+no_depth_test = true
+shading_mode = 0
+albedo_color = Color(0, 0.564706, 1, 1)
+
+[node name="AxesIndicator" type="Node3D"]
+
+[node name="Up" type="Node3D" parent="."]
+
+[node name="Line" type="MeshInstance3D" parent="Up"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+material_override = SubResource("StandardMaterial3D_fv6tu")
+mesh = SubResource("CylinderMesh_kw6xj")
+
+[node name="ArrowHead" type="MeshInstance3D" parent="Up"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+material_override = SubResource("StandardMaterial3D_fv6tu")
+mesh = SubResource("CylinderMesh_e3bov")
+
+[node name="Right" type="Node3D" parent="."]
+transform = Transform3D(-4.37114e-08, -1, 8.74228e-08, 1, -4.37114e-08, -8.74228e-08, 8.74228e-08, 8.74228e-08, 1, 0, 0, 0)
+
+[node name="Line" type="MeshInstance3D" parent="Right"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+material_override = SubResource("StandardMaterial3D_vxs3i")
+mesh = SubResource("CylinderMesh_kw6xj")
+
+[node name="ArrowHead" type="MeshInstance3D" parent="Right"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+material_override = SubResource("StandardMaterial3D_vxs3i")
+mesh = SubResource("CylinderMesh_e3bov")
+
+[node name="Back" type="Node3D" parent="."]
+transform = Transform3D(1, -8.74228e-08, -8.74228e-08, 8.74228e-08, -4.37114e-08, 1, -8.74228e-08, -1, -4.37114e-08, 0, 0, 0)
+
+[node name="Line" type="MeshInstance3D" parent="Back"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+material_override = SubResource("StandardMaterial3D_x4l0t")
+mesh = SubResource("CylinderMesh_kw6xj")
+skeleton = NodePath("../../Right")
+
+[node name="ArrowHead" type="MeshInstance3D" parent="Back"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+material_override = SubResource("StandardMaterial3D_u0e4s")
+mesh = SubResource("CylinderMesh_e3bov")
+skeleton = NodePath("../../Right")
