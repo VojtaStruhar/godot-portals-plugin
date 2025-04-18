@@ -9,13 +9,13 @@
 sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
 ground_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
 
-[sub_resource type="Sky" id="Sky_q16ke"]
+[sub_resource type="Sky" id="Sky_h8f6p"]
 sky_material = SubResource("ProceduralSkyMaterial_kiw5m")
 
 [sub_resource type="Environment" id="Environment_h8f6p"]
 background_mode = 1
 background_color = Color(0.403919, 0.487281, 0.596623, 1)
-sky = SubResource("Sky_q16ke")
+sky = SubResource("Sky_h8f6p")
 tonemap_mode = 2
 glow_enabled = true
 
@@ -84,6 +84,7 @@ exit_portal = NodePath("../SkyPortal")
 portal_frame_width = 0.0
 portal_render_layer = 128
 viewport_size_mode = 0
+view_direction = null
 is_teleport = true
 teleport_direction = 2
 rigidbody_boost = 0.0
@@ -115,6 +116,7 @@ exit_portal = NodePath("../BottomPortal")
 portal_frame_width = 0.0
 portal_render_layer = 128
 viewport_size_mode = 0
+view_direction = null
 is_teleport = false
 metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
 metadata/_edit_group_ = true

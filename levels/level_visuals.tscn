@@ -1,0 +1,350 @@
+[gd_scene load_steps=30 format=4 uid="uid://ds222tuqqcsfc"]
+
+[ext_resource type="Material" uid="uid://dgjiw8udooecr" path="res://assets/prototyping/M_prototype_dark.tres" id="1_dd4c5"]
+[ext_resource type="Script" uid="uid://d2crarvkhd45r" path="res://scripts/player.gd" id="2_0foui"]
+[ext_resource type="Texture2D" uid="uid://ccft22qceqgic" path="res://assets/skybox.exr" id="3_0foui"]
+[ext_resource type="Material" uid="uid://bbvyey800ra6l" path="res://assets/prototyping/M_prototype_light.tres" id="4_gwold"]
+[ext_resource type="Script" uid="uid://cw1r4c1d7beyv" path="res://addons/portals/scripts/portal_3d.gd" id="5_i7d02"]
+[ext_resource type="Material" uid="uid://1nvrnylcajfg" path="res://assets/prototyping/M_prototype_red.tres" id="6_1bwv4"]
+[ext_resource type="PackedScene" uid="uid://0vmntyr615js" path="res://assets/prototyping/prop_cube.tscn" id="7_036eg"]
+[ext_resource type="Script" uid="uid://crsvyf0qu1jsr" path="res://scripts/random_spin.gd" id="8_8yb2m"]
+[ext_resource type="PackedScene" uid="uid://caqayjkbvlel5" path="res://assets/prototyping/prop_torus.tscn" id="9_1bwv4"]
+[ext_resource type="Material" uid="uid://dyx4l6ea0am6f" path="res://assets/prototyping/M_prototype_green.tres" id="9_036eg"]
+[ext_resource type="Material" uid="uid://brj2jayoo0l0d" path="res://assets/prototyping/M_prototype_blue.tres" id="11_15hb3"]
+[ext_resource type="PackedScene" uid="uid://ciuwt2yj4hcu2" path="res://assets/prototyping/prop_prism.tscn" id="12_1gc01"]
+[ext_resource type="Material" uid="uid://7to3kb1tisdd" path="res://assets/prototyping/M_prototype_orange.tres" id="13_cwtkw"]
+[ext_resource type="PackedScene" uid="uid://c5hkhu8upxsf7" path="res://assets/prototyping/prop_cylinder.tscn" id="14_k6lcj"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_gwold"]
+panorama = ExtResource("3_0foui")
+
+[sub_resource type="Sky" id="Sky_3o01d"]
+sky_material = SubResource("PanoramaSkyMaterial_gwold")
+
+[sub_resource type="Environment" id="Environment_egjbn"]
+background_mode = 2
+background_color = Color(0.403919, 0.487281, 0.596623, 1)
+sky = SubResource("Sky_3o01d")
+tonemap_mode = 2
+ssao_enabled = true
+glow_enabled = true
+
+[sub_resource type="BoxMesh" id="BoxMesh_gwold"]
+material = ExtResource("1_dd4c5")
+size = Vector3(30, 1, 30)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_0foui"]
+size = Vector3(30, 1, 30)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_egjbn"]
+height = 1.75
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_smu88"]
+radius = 0.4
+height = 1.75
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_3o01d"]
+_surfaces = [{
+"aabb": AABB(-1.5, -1.5, -1.5, 3, 3, 3),
+"attribute_data": PackedByteArray("7+5uP4uIiD0AAIA/AACAPwAAgD8AAAAA7+5uP4uIiD0AAIA/AAAAAIuIiD2LiIg9AAAAAAAAAACLiIg97+5uP4uIiD2LiIg97+5uP4uIiD0AAIA/AAAAAI+IiD2LiIg9i4iIPYuIiD0AAIA/AAAAAAAAAAAAAAAAAACAPwAAgD/v7m4/i4iIPe/ubj/v7m4/7+5uP+/ubj8AAAAAAACAPwAAgD8AAIA/7u5uP+/ubj8AAIA/AACAP+7ubj+LiIg97u5uP+/ubj8AAAAAAACAPwAAgD8AAIA/i4iIPYuIiD0AAIA/AAAAAAAAAAAAAAAAAACAPwAAgD/v7m4/i4iIPe/ubj/v7m4/AAAAAAAAAACLiIg97+5uP4uIiD2LiIg97+5uP+/ubj8AAAAAAACAPwAAgD8AAIA/AACAPwAAAADu7m4/i4iIPQAAgD8AAIA/i4iIPe/ubj8AAAAAAACAP+/ubj/v7m4/i4iIPe/ubj8AAAAAAAAAAAAAAAAAAIA/AACAPwAAgD8AAAAAAAAAAAAAAAAAAIA/7u5uP4uIiD0AAIA/AAAAAIeIiD2LiIg9j4iIPYuIiD0AAIA/AAAAAAAAAAAAAAAAAACAPwAAAADv7m4/i4iIPQAAgD8AAIA/AACAPwAAgD/v7m4/i4iIPe/ubj/v7m4/j4iIPYuIiD0AAAAAAAAAAI+IiD3v7m4/7+5uP+/ubj8AAAAAAACAPwAAgD8AAIA/AACAPwAAAAAAAAAAAAAAAAAAgD8AAIA/AAAAAAAAgD+HiIg97+5uPwAAAAAAAAAA7+5uP4uIiD0AAIA/AAAAAIuIiD2LiIg9AAAAAAAAgD+PiIg97+5uPwAAAAAAAAAA7+5uP4uIiD0AAIA/AACAPwAAgD8AAAAAi4iIPe/ubj8AAAAAAACAP+/ubj/v7m4/h4iIPe/ubj8AAAAAAACAP+7ubj/v7m4/j4iIPe/ubj8AAAAAAACAP+/ubj/v7m4/AAAAAAAAAAAAAAAAAACAPwAAgD8AAIA/i4iIPe/ubj8AAAAAAAAAAAAAAAAAAIA/h4iIPYuIiD0AAIA/AAAAAAAAAAAAAAAAAAAAAAAAAACHiIg97+5uP4eIiD2LiIg9AAAAAAAAAAAAAIA/AACAPwAAgD8AAAAAAAAAAAAAYD8AAIA/NTMzPgAAgD8zM1M/AACAPwAAAD4AAAAAMzMzPgAAAAAAAAA+AAAAPgAAAAA1MzM+AAAAADUzMz4AAIA/AAAAAAAAYD8AAIA/MzNTPwAAgD8AAGA/AAAAPgAAAAAzMzM+AAAAADMzMz4AAIA/AAAAAAAAYD8AAIA/MzMzPgAAgD8zM1M/AACAPwAAAD4AAAAAMzNTPwAAAAAzMzM+AACAPwAAAD4AAAAAAABgPwAAAAAzM1M/AAAAPgAAgD8AAAA+AAAAADUzMz4AAIA/MzNTPwAAAAAAAGA/AAAAAAAAYD8AAIA/AACAPwAAAD4AAAAAAABgPwAAAAAzM1M/AAAAAAAAYD8AAIA/MzNTPwAAgD8AAGA/AABgPwAAgD8zM1M/AACAPzMzUz8AAAAAAACAPwAAAD4AAAAAMzNTPwAAAAA1MzM+AABgPwAAgD8zM1M/AACAPzMzUz8AAAAAAAAAPgAAgD8AAAA+AAAAADMzMz4AAIA/AACAPwAAAD4AAAAANTMzPgAAAAAAAAA+AAAAAAAAYD8AAIA/AAAAPgAAgD8zMzM+AABgPwAAAAAAAGA/AACAPzMzUz8AAAAAAAAAAAAAYD8AAIA/AAAAPgAAgD81MzM+AABgPwAAgD8zM1M/AAAAAAAAYD8AAAAAAAAAAAAAAD4AAIA/AAAAPgAAAAA0MzM+NDMzPgAAgD8AAAA+AAAAADQzMz4AAAAAMzNTPwAAgD8zM1M/AAAAAAAAYD8AAIA/AAAAAAAAAD4AAIA/AAAAPgAAAAA0MzM+AAAAPgAAAAA0MzM+AACAPwAAAD4AAIA/AACAPwAAYD8AAAAAAABgPwAAgD8zM1M/MzNTPwAAAAAAAGA/AACAPzMzUz8AAIA/AAAAADMzUz8AAIA/MzNTPwAAAAAAAGA/AACAPzQzMz4AAAAANDMzPgAAgD8AAAA+AABgPwAAAAAAAGA/AACAPzMzUz8AAAAAAAAAPgAAgD8AAAA+AAAAADQzMz4AAIA/AACAPzQzMz4AAAAANDMzPgAAgD8AAAA+AACAPwAAYD8AAAAAAABgPwAAgD8zM1M/NDMzPgAAAAA0MzM+AACAPwAAAD4AAAAAAAAAADMzUz8AAIA/MzNTPwAAAAAAAGA/"),
+"format": 34359738391,
+"material": ExtResource("4_gwold"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 216,
+"vertex_data": PackedByteArray("AADAv2Zmpr9mZqa/AADAvwAAwL8AAMA/AADAvwAAwL8AAMC/AADAv2Zmpr9mZqa/AADAvwAAwL8AAMC/AADAv2Zmpj9mZqa/AADAPwAAwD8AAMA/AADAP2Zmpj9mZqa/AADAP2Zmpj9mZqY/Z2amv2Zmpr8AAMC/AADAvwAAwL8AAMC/ZWamP2Zmpr8AAMC/AADAP2Zmpj9mZqY/AADAPwAAwL8AAMA/AADAPwAAwD8AAMA/AADAvwAAwL8AAMA/AADAv2Zmpr9mZqa/AADAv2Zmpr9mZqY/AADAv2Zmpr9mZqY/AADAvwAAwD8AAMA/AADAvwAAwL8AAMA/ZWamv2Zmpr8AAMA/AADAvwAAwL8AAMA/ZWamv2Zmpj8AAMA/ZWamv2Zmpr8AAMA/AADAPwAAwL8AAMA/AADAvwAAwL8AAMA/AADAv2Zmpj9mZqa/AADAvwAAwL8AAMC/AADAvwAAwD8AAMC/AADAvwAAwD8AAMC/Z2amv2Zmpr8AAMC/Z2amv2Zmpj8AAMC/AADAvwAAwD8AAMC/AADAv2Zmpj9mZqY/AADAv2Zmpj9mZqa/Z2amv2Zmpj8AAMC/AADAPwAAwD8AAMC/AADAvwAAwD8AAMC/AADAvwAAwD8AAMA/ZWamv2Zmpj8AAMA/AADAvwAAwL8AAMA/AADAv2Zmpj9mZqY/AADAvwAAwD8AAMA/AADAv2Zmpr9mZqY/AADAv2Zmpj9mZqY/AADAvwAAwD8AAMC/AADAvwAAwD8AAMA/AADAvwAAwD8AAMC/AADAPwAAwD8AAMA/AADAvwAAwD8AAMA/ZWamv2Zmpj8AAMA/AADAvwAAwD8AAMA/Z2amP2Zmpj8AAMA/ZWamP2Zmpr8AAMC/AADAvwAAwL8AAMC/AADAPwAAwL8AAMC/AADAvwAAwL8AAMC/Z2amv2Zmpr8AAMC/AADAvwAAwD8AAMC/AADAPwAAwL8AAMC/AADAP2Zmpr9mZqY/AADAP2Zmpr9mZqa/ZWamP2Zmpr8AAMC/AADAPwAAwL8AAMC/ZWamP2Zmpj8AAMC/AADAP2Zmpr9mZqa/AADAPwAAwD8AAMC/AADAPwAAwL8AAMC/AADAPwAAwD8AAMC/AADAPwAAwD8AAMA/AADAvwAAwD8AAMC/AADAPwAAwL8AAMA/Z2amP2Zmpr8AAMA/AADAPwAAwD8AAMA/AADAP2Zmpr9mZqY/AADAPwAAwL8AAMA/AADAP2Zmpj9mZqY/AADAPwAAwD8AAMC/ZWamP2Zmpj8AAMC/AADAPwAAwL8AAMC/AADAP2Zmpr9mZqY/AADAPwAAwL8AAMC/AADAPwAAwL8AAMA/AADAP2Zmpj9mZqa/AADAPwAAwD8AAMC/AADAP2Zmpr9mZqa/Z2amP2Zmpr8AAMA/AADAPwAAwL8AAMA/ZWamv2Zmpr8AAMA/ZWamP2Zmpj8AAMC/AADAPwAAwD8AAMC/Z2amv2Zmpj8AAMC/AADAvwAAwL8AAMA/AADAPwAAwL8AAMA/AADAPwAAwL8AAMC/AADAP2Zmpj9mZqa/AADAPwAAwD8AAMA/AADAPwAAwD8AAMC/Z2amP2Zmpj8AAMA/AADAvwAAwD8AAMA/AADAPwAAwD8AAMA/AADAPwAAwD8AAMA/Z2amP2Zmpr8AAMA/Z2amP2Zmpj8AAMA/AADAvwAAwL8AAMA/AADAPwAAwL8AAMC/AADAvwAAwL8AAMC/AADAv2Zmpj9mZqY/ZWamP2Zmpj9mZqa/Z2amv2Zmpj9mZqa/AADAP2Zmpj9mZqa/Z2amP2Zmpj9mZqY/AADAP2Zmpj9mZqY/AADAP2Zmpr9mZqa/ZWamP2Zmpr9mZqa/ZWamP2Zmpj9mZqa/AADAP2Zmpr9mZqY/ZWamP2Zmpr9mZqa/AADAP2Zmpr9mZqa/AADAP2Zmpj9mZqY/Z2amP2Zmpj9mZqY/Z2amP2Zmpr9mZqY/AADAP2Zmpr9mZqY/Z2amv2Zmpr9mZqa/ZWamP2Zmpr9mZqa/AADAP2Zmpj9mZqa/ZWamv2Zmpj9mZqY/Z2amP2Zmpj9mZqY/AADAP2Zmpj9mZqa/AADAv2Zmpj9mZqY/ZWamv2Zmpj9mZqY/AADAP2Zmpj9mZqa/AADAP2Zmpr9mZqa/ZWamP2Zmpj9mZqa/ZWamv2Zmpj9mZqY/AADAv2Zmpj9mZqY/AADAv2Zmpr9mZqY/AADAv2Zmpr9mZqa/AADAP2Zmpr9mZqY/Z2amP2Zmpr9mZqY/AADAv2Zmpj9mZqY/Z2amv2Zmpj9mZqa/AADAv2Zmpj9mZqa/AADAv2Zmpj9mZqa/Z2amv2Zmpj9mZqa/Z2amv2Zmpr9mZqa/AADAv2Zmpr9mZqa/Z2amP2Zmpr9mZqY/ZWamv2Zmpr9mZqY/AADAv2Zmpr9mZqY/ZWamv2Zmpr9mZqY/ZWamv2Zmpj9mZqY/AADAP2Zmpr9mZqY/AADAP2Zmpj9mZqY/Z2amP2Zmpr9mZqY/AADAv2Zmpr9mZqa/ZWamv2Zmpr9mZqY/AADAv2Zmpr9mZqY/AADAP2Zmpr9mZqY/AADAv2Zmpr9mZqa/Z2amv2Zmpr9mZqa/AADAv2Zmpr9mZqa/AADAv2Zmpj9mZqa/Z2amv2Zmpr9mZqa/AADAv2Zmpj9mZqY/AADAP2Zmpj9mZqa/ZWamP2Zmpj9mZqa/ZWamv2Zmpj8AAMA/ZWamv2Zmpr9mZqY/ZWamv2Zmpr8AAMA/ZWamP2Zmpj8AAMC/Z2amv2Zmpj8AAMC/ZWamP2Zmpj9mZqa/ZWamP2Zmpr9mZqa/ZWamP2Zmpj8AAMC/ZWamP2Zmpj9mZqa/Z2amP2Zmpr9mZqY/Z2amP2Zmpj9mZqY/Z2amP2Zmpr8AAMA/Z2amP2Zmpr8AAMA/ZWamv2Zmpr8AAMA/Z2amP2Zmpr9mZqY/ZWamP2Zmpj8AAMC/ZWamP2Zmpr9mZqa/ZWamP2Zmpr8AAMC/ZWamv2Zmpj8AAMA/Z2amP2Zmpj8AAMA/ZWamv2Zmpj9mZqY/ZWamv2Zmpr9mZqY/ZWamv2Zmpj8AAMA/ZWamv2Zmpj9mZqY/Z2amP2Zmpj9mZqY/ZWamv2Zmpj9mZqY/Z2amP2Zmpj8AAMA/Z2amv2Zmpj9mZqa/ZWamP2Zmpj9mZqa/Z2amv2Zmpj8AAMC/Z2amP2Zmpj8AAMA/Z2amP2Zmpr8AAMA/Z2amP2Zmpj9mZqY/Z2amv2Zmpj8AAMC/Z2amv2Zmpr8AAMC/Z2amv2Zmpj9mZqa/ZWamv2Zmpr9mZqY/Z2amP2Zmpr9mZqY/ZWamv2Zmpr8AAMA/Z2amv2Zmpr8AAMC/ZWamP2Zmpr8AAMC/Z2amv2Zmpr9mZqa/Z2amv2Zmpr9mZqa/Z2amv2Zmpj9mZqa/Z2amv2Zmpr8AAMC/ZWamP2Zmpr9mZqa/Z2amv2Zmpr9mZqa/ZWamP2Zmpr8AAMC/AAD/f/9//n8AAP9//3/+fwAA/3//f/5/AAD/f/9//n8AAP9//3/+fwAA/3//f/5/////f/9//n////9//3/+f////3//f/5//////wAA/z//////AAD/P/////8AAP8/////f/9//n////9//3/+f////3//f/5/AAD/f/9//n8AAP9//3/+fwAA/3//f/5/AAD/f/9//n8AAP9//3/+fwAA/3//f/5//3//fwAA/z//f/9/AAD/P/9//38AAP8//3//fwAA/z//f/9/AAD/P/9//38AAP8/AAD/f/9//n8AAP9//3/+fwAA/3//f/5//////wAA/z//////AAD/P/////8AAP8/AAD/f/9//n8AAP9//3/+fwAA/3//f/5//////wAA/z//////AAD/P/////8AAP8//3//fwAA/z//f/9/AAD/P/9//38AAP8/AAD/f/9//n8AAP9//3/+fwAA/3//f/5/AAD/f/9//n8AAP9//3/+fwAA/3//f/5//3//////AAD/f/////8AAP9//////wAA/3//fwAA/z//f/9/AAD/P/9//38AAP8//////wAA/z//////AAD/P/////8AAP8//////wAA/z//////AAD/P/////8AAP8/////f/9//n////9//3/+f////3//f/5//////wAA/z//////AAD/P/////8AAP8/////f/9//n////9//3/+f////3//f/5//3//////AAD/f/////8AAP9//////wAA/3//fwAA/z//f/9/AAD/P/9//38AAP8/////f/9//n////9//3/+f////3//f/5//////wAA/z//////AAD/P/////8AAP8/////f/9//n////9//3/+f////3//f/5/////f/9//n////9//3/+f////3//f/5//3//fwAA/z//f/9/AAD/P/9//38AAP8//////wAA/z//////AAD/P/////8AAP8//38AAP//AAD/fwAA//8AAP9/AAD//wAA////f/9//n////9//3/+f////3//f/5//3//fwAA/z//f/9/AAD/P/9//38AAP8//3//fwAA/z//f/9/AAD/P/9//38AAP8//38AAP//AAD/fwAA//8AAP9/AAD//wAA/38AAP//////fwAA//////9/AAD//////38AAP//////fwAA//////9/AAD//////3//fwAA/7//f/9/AAD/v/9//38AAP+//3///wAA/v//f/////////9//////////////wAA/7//////AAD/v/////8AAP+//3///wAA/v//f///AAD+//9//////////38AAP//////fwAA//////9/AAD//////38AAP//////fwAA//////9/AAD//////3//fwAA/7//f/9/AAD/v/9//38AAP+//////wAA/7//////AAD/v/////8AAP+//3///wAA/v//f///AAD+//9///8AAP7//38AAP//////fwAA//////9/AAD//////3//fwAA/7//f/9/AAD/v/9//38AAP+//3///wAA/v//f///AAD+//9//////////////wAA/7//////AAD/v/////8AAP+//////wAA/7//////AAD/v/////8AAP+//3///wAA/v//f/////////9//////////3///wAA/v//f///AAD+//9///8AAP7//3//fwAA/7//f/9/AAD/v/9//38AAP+//38AAP//////fwAA//////9/AAD/////////f/9//7////9//3//v////3//f/+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+/AAD/f/9//78AAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//vwAA/3//f/+//3///wAA/7//f///AAD/v/9///8AAP+/AAD/f/9//78AAP9//3//vwAA/3//f/+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+/////f/9//7////9//3//v////3//f/+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+/AAD/f/9//78AAP9//3//vwAA/3//f/+/////f/9//7////9//3//v////3//f/+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+/////f/9//7////9//3//v////3//f/+//3///wAA/7//f///AAD/v/9///8AAP+/")
+}]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cwtkw"]
+size = Vector3(3, 3, 3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_15hb3"]
+size = Vector3(2.6, 2.6, 0.05)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1gc01"]
+material = ExtResource("6_1bwv4")
+flip_faces = true
+size = Vector3(2.6, 2.6, 2.6)
+
+[sub_resource type="BoxMesh" id="BoxMesh_i7d02"]
+size = Vector3(2.6, 2.6, 0.05)
+
+[sub_resource type="BoxMesh" id="BoxMesh_8yb2m"]
+material = ExtResource("9_036eg")
+flip_faces = true
+size = Vector3(2.6, 2.6, 2.6)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cwtkw"]
+material = ExtResource("11_15hb3")
+flip_faces = true
+size = Vector3(2.6, 2.6, 2.6)
+
+[sub_resource type="BoxMesh" id="BoxMesh_j7s2b"]
+material = ExtResource("13_cwtkw")
+flip_faces = true
+size = Vector3(2.6, 2.6, 2.6)
+
+[node name="Level_Visuals" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_egjbn")
+
+[node name="Ground" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+cast_shadow = 0
+mesh = SubResource("BoxMesh_gwold")
+metadata/_edit_group_ = true
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Ground"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground/StaticBody3D"]
+visible = false
+shape = SubResource("BoxShape3D_0foui")
+
+[node name="Player" type="CharacterBody3D" parent="." node_paths=PackedStringArray("camera")]
+process_priority = 100
+process_physics_priority = 100
+transform = Transform3D(0.275419, 0, -0.961324, 0, 1, 0, 0.961324, 0, 0.275419, -4.22306, 0.71586, 2.94526)
+script = ExtResource("2_0foui")
+camera = NodePath("PlayerCamera")
+metadata/_edit_group_ = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
+shape = SubResource("CapsuleShape3D_egjbn")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Player"]
+mesh = SubResource("CapsuleMesh_smu88")
+
+[node name="PlayerCamera" type="Camera3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
+current = true
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+visible = false
+size = Vector3(3, 3, 3)
+
+[node name="Cutout" type="CSGBox3D" parent="CSGBox3D"]
+operation = 2
+size = Vector3(4, 2.6, 2.6)
+
+[node name="Cutout2" type="CSGBox3D" parent="CSGBox3D"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, 0)
+operation = 2
+size = Vector3(4, 2.6, 2.6)
+
+[node name="Frame" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.001, 0, 0, 0, 1.001, 0, 0, 0, 1.001, 0, 1.5, 0)
+mesh = SubResource("ArrayMesh_3o01d")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Frame"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Frame/StaticBody3D"]
+visible = false
+shape = SubResource("BoxShape3D_cwtkw")
+
+[node name="RedPortal" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal") groups=["portals"]]
+process_priority = 100
+process_physics_priority = 100
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -1.5, 1.5, 0)
+script = ExtResource("5_i7d02")
+_portal_mesh_path = NodePath("Portal3D_Mesh")
+portal_size = Vector2(2.6, 2.6)
+exit_portal = NodePath("../VisualRooms/RedRoom/Portal3D")
+portal_frame_width = 0.0
+portal_render_layer = 128
+viewport_size_mode = 0
+view_direction = 0
+is_teleport = false
+metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
+metadata/_edit_group_ = true
+
+[node name="Portal3D_Mesh" type="MeshInstance3D" parent="RedPortal"]
+layers = 128
+cast_shadow = 0
+mesh = SubResource("BoxMesh_15hb3")
+
+[node name="GreenPortal" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal") groups=["portals"]]
+process_priority = 100
+process_physics_priority = 100
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0, 1.5, -1.5)
+script = ExtResource("5_i7d02")
+_portal_mesh_path = NodePath("Portal3D_Mesh")
+portal_size = Vector2(2.6, 2.6)
+exit_portal = NodePath("../VisualRooms/GreenRoom/Portal3D")
+portal_frame_width = 0.0
+portal_render_layer = 128
+viewport_size_mode = 0
+view_direction = 0
+is_teleport = false
+metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
+metadata/_edit_group_ = true
+
+[node name="Portal3D_Mesh" type="MeshInstance3D" parent="GreenPortal"]
+layers = 128
+cast_shadow = 0
+mesh = SubResource("BoxMesh_15hb3")
+
+[node name="BluePortal" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal") groups=["portals"]]
+process_priority = 100
+process_physics_priority = 100
+transform = Transform3D(1.31134e-07, 0, 1, 0, 1, 0, -1, 0, 1.31134e-07, 1.5, 1.5, 0)
+script = ExtResource("5_i7d02")
+_portal_mesh_path = NodePath("Portal3D_Mesh")
+portal_size = Vector2(2.6, 2.6)
+exit_portal = NodePath("../VisualRooms/BlueRoom/Portal3D")
+portal_frame_width = 0.0
+portal_render_layer = 128
+viewport_size_mode = 0
+view_direction = 0
+is_teleport = false
+metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
+metadata/_edit_group_ = true
+
+[node name="Portal3D_Mesh" type="MeshInstance3D" parent="BluePortal"]
+layers = 128
+cast_shadow = 0
+mesh = SubResource("BoxMesh_15hb3")
+
+[node name="OrangePortal" type="Node3D" parent="." node_paths=PackedStringArray("exit_portal") groups=["portals"]]
+process_priority = 100
+process_physics_priority = 100
+transform = Transform3D(1, 0, -1.74846e-07, 0, 1, 0, 1.74846e-07, 0, 1, 0, 1.5, 1.5)
+script = ExtResource("5_i7d02")
+_portal_mesh_path = NodePath("Portal3D_Mesh")
+portal_size = Vector2(2.6, 2.6)
+exit_portal = NodePath("../VisualRooms/OrangeRoom/Portal3D")
+portal_frame_width = 0.0
+portal_render_layer = 128
+viewport_size_mode = 0
+view_direction = 0
+is_teleport = false
+metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
+metadata/_edit_group_ = true
+
+[node name="Portal3D_Mesh" type="MeshInstance3D" parent="OrangePortal"]
+layers = 128
+cast_shadow = 0
+mesh = SubResource("BoxMesh_15hb3")
+
+[node name="VisualRooms" type="Node3D" parent="."]
+
+[node name="RedRoom" type="MeshInstance3D" parent="VisualRooms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -6, 0)
+mesh = SubResource("BoxMesh_1gc01")
+skeleton = NodePath("../..")
+
+[node name="PropCube" parent="VisualRooms/RedRoom" instance=ExtResource("7_036eg")]
+script = ExtResource("8_8yb2m")
+
+[node name="Portal3D" type="Node3D" parent="VisualRooms/RedRoom" node_paths=PackedStringArray("exit_portal", "player_camera") groups=["portals"]]
+process_priority = 100
+process_physics_priority = 100
+transform = Transform3D(1.31134e-07, 0, -1, 0, 1, 0, 1, 0, 1.31134e-07, 1.3, 0, 0)
+script = ExtResource("5_i7d02")
+_portal_mesh_path = NodePath("Portal3D_Mesh")
+portal_size = Vector2(2.6, 2.6)
+exit_portal = NodePath("../../../RedPortal")
+portal_frame_width = 0.0
+player_camera = NodePath("../../../Player/PlayerCamera")
+portal_render_layer = 128
+viewport_size_mode = 0
+view_direction = 2
+is_teleport = false
+metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
+metadata/_edit_group_ = true
+
+[node name="Portal3D_Mesh" type="MeshInstance3D" parent="VisualRooms/RedRoom/Portal3D"]
+layers = 128
+cast_shadow = 0
+mesh = SubResource("BoxMesh_i7d02")
+
+[node name="GreenRoom" type="MeshInstance3D" parent="VisualRooms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -6, -3.75)
+mesh = SubResource("BoxMesh_8yb2m")
+skeleton = NodePath("../..")
+
+[node name="PropTorus" parent="VisualRooms/GreenRoom" instance=ExtResource("9_1bwv4")]
+script = ExtResource("8_8yb2m")
+
+[node name="Portal3D" type="Node3D" parent="VisualRooms/GreenRoom" node_paths=PackedStringArray("exit_portal", "player_camera") groups=["portals"]]
+process_priority = 100
+process_physics_priority = 100
+transform = Transform3D(1.31134e-07, 0, -1, 0, 1, 0, 1, 0, 1.31134e-07, 1.3, 0, 0)
+script = ExtResource("5_i7d02")
+_portal_mesh_path = NodePath("Portal3D_Mesh")
+portal_size = Vector2(2.6, 2.6)
+exit_portal = NodePath("../../../RedPortal")
+portal_frame_width = 0.0
+player_camera = NodePath("../../../Player/PlayerCamera")
+portal_render_layer = 128
+viewport_size_mode = 0
+view_direction = 2
+is_teleport = false
+metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
+metadata/_edit_group_ = true
+
+[node name="Portal3D_Mesh" type="MeshInstance3D" parent="VisualRooms/GreenRoom/Portal3D"]
+layers = 128
+cast_shadow = 0
+mesh = SubResource("BoxMesh_i7d02")
+
+[node name="BlueRoom" type="MeshInstance3D" parent="VisualRooms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -6, -7.25)
+mesh = SubResource("BoxMesh_cwtkw")
+skeleton = NodePath("../..")
+
+[node name="Portal3D" type="Node3D" parent="VisualRooms/BlueRoom" node_paths=PackedStringArray("exit_portal", "player_camera") groups=["portals"]]
+process_priority = 100
+process_physics_priority = 100
+transform = Transform3D(1.31134e-07, 0, -1, 0, 1, 0, 1, 0, 1.31134e-07, 1.3, 0, 0)
+script = ExtResource("5_i7d02")
+_portal_mesh_path = NodePath("Portal3D_Mesh")
+portal_size = Vector2(2.6, 2.6)
+exit_portal = NodePath("../../../RedPortal")
+portal_frame_width = 0.0
+player_camera = NodePath("../../../Player/PlayerCamera")
+portal_render_layer = 128
+viewport_size_mode = 0
+view_direction = 2
+is_teleport = false
+metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
+metadata/_edit_group_ = true
+
+[node name="Portal3D_Mesh" type="MeshInstance3D" parent="VisualRooms/BlueRoom/Portal3D"]
+layers = 128
+cast_shadow = 0
+mesh = SubResource("BoxMesh_i7d02")
+
+[node name="PropPrism" parent="VisualRooms/BlueRoom" instance=ExtResource("12_1gc01")]
+script = ExtResource("8_8yb2m")
+
+[node name="OrangeRoom" type="MeshInstance3D" parent="VisualRooms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -6, -10.75)
+mesh = SubResource("BoxMesh_j7s2b")
+skeleton = NodePath("../..")
+
+[node name="Portal3D" type="Node3D" parent="VisualRooms/OrangeRoom" node_paths=PackedStringArray("exit_portal", "player_camera") groups=["portals"]]
+process_priority = 100
+process_physics_priority = 100
+transform = Transform3D(1.31134e-07, 0, -1, 0, 1, 0, 1, 0, 1.31134e-07, 1.3, 0, 0)
+script = ExtResource("5_i7d02")
+_portal_mesh_path = NodePath("Portal3D_Mesh")
+portal_size = Vector2(2.6, 2.6)
+exit_portal = NodePath("../../../RedPortal")
+portal_frame_width = 0.0
+player_camera = NodePath("../../../Player/PlayerCamera")
+portal_render_layer = 128
+viewport_size_mode = 0
+view_direction = 2
+is_teleport = false
+metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
+metadata/_edit_group_ = true
+
+[node name="Portal3D_Mesh" type="MeshInstance3D" parent="VisualRooms/OrangeRoom/Portal3D"]
+layers = 128
+cast_shadow = 0
+mesh = SubResource("BoxMesh_i7d02")
+
+[node name="PropCylinder" parent="VisualRooms/OrangeRoom" instance=ExtResource("14_k6lcj")]
+script = ExtResource("8_8yb2m")

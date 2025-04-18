@@ -102,8 +102,8 @@ var exit_portal: Portal3D:
 		update_configuration_warnings()
 		notify_property_list_changed()
 
-var _tb_pair_portals: Callable = _editor_pair_portals
-var _tb_sync_portal_sizes: Callable = _editor_sync_portal_sizes
+var _tb_pair_portals: Callable = _editor_pair_portals.bind()
+var _tb_sync_portal_sizes: Callable = _editor_sync_portal_sizes.bind()
 
 ## Manually specify the main camera. By default it's inferred as the camera rendering the
 ## parent viewport of the portal. You might have to specify this, if your game uses multiple
@@ -150,6 +150,11 @@ var viewport_size_mode: PortalViewportSizeMode = PortalViewportSizeMode.FULL:
 		notify_property_list_changed()
 var _viewport_size_max_width_absolute: int = ProjectSettings.get_setting("display/window/size/viewport_width")
 var _viewport_size_fractional: float = 0.5
+
+## Expected direction from which you expect the portal to be viewed. Restricting this restricts the
+## way the portal mesh is shifted around when player looks at the portal from different sides. [br]
+## Only really makes sense to restrict for visual-only portals.
+var view_direction: TeleportDirection = TeleportDirection.FRONT_AND_BACK
 
 ## If [code]true[/code], the portal is also a teleport.
 ## [br][br]
@@ -404,8 +409,17 @@ func _process_cameras() -> void:
 		_on_portal_size_changed()
 		
 		var player_in_front_of_portal: bool = forward_distance(player_camera) > 0
+		var portal_shift: float = 0
+		match view_direction:
+			TeleportDirection.FRONT:
+				portal_shift = 0.5
+			TeleportDirection.BACK:
+				portal_shift = -0.5
+			TeleportDirection.FRONT_AND_BACK:
+				portal_shift = 0.5 if player_in_front_of_portal else -0.5
+			
 		portal_mesh.position = (
-			Vector3.FORWARD * near_diagonal * (0.5 if player_in_front_of_portal else -0.5)
+			Vector3.FORWARD * near_diagonal *  portal_shift
 		)
 
 
@@ -738,7 +752,7 @@ func _get_configuration_warnings() -> PackedStringArray:
 	if exit_portal != null:
 		if not portal_size.is_equal_approx(exit_portal.portal_size):
 			warnings.append(
-				"Portal size should be the same as exit portal's (it's %s and %s)" %
+				"Portal size should be the same as exit portal's (it's %s, but should be %s)" %
 				[portal_size, exit_portal.portal_size]
 			)
 	
@@ -770,7 +784,9 @@ func _get_property_list() -> Array[Dictionary]:
 		config.append(AtExport.int_range("_viewport_size_max_width_absolute", 2, 4096))
 	elif viewport_size_mode == PortalViewportSizeMode.FRACTIONAL:
 		config.append(AtExport.float_range("_viewport_size_fractional", 0, 1))
-		
+	
+	config.append(AtExport.enum_("view_direction", &"Portal3D.TeleportDirection", TeleportDirection))
+	
 	config.append(AtExport.group_end())
 	
 	
@@ -797,6 +813,7 @@ func _property_can_revert(property: StringName) -> bool:
 		&"player_camera",
 		&"portal_render_layer",
 		&"_viewport_size_max_width_absolute",
+		&"view_direction",
 		&"teleport_direction",
 		&"rigidbody_boost",
 		&"teleport_collision_mask",
@@ -814,6 +831,8 @@ func _property_get_revert(property: StringName) -> Variant:
 			return PortalSettings.get_setting("default_portal_layer")
 		&"_viewport_size_max_width_absolute":
 			return ProjectSettings.get_setting("display/window/size/viewport_width")
+		&"view_direction":
+			return TeleportDirection.FRONT_AND_BACK
 		&"teleport_direction":
 			return TeleportDirection.FRONT_AND_BACK
 		&"rigidbody_boost":
