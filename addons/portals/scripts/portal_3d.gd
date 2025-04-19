@@ -375,6 +375,8 @@ func _ready() -> void:
 	portal_mesh.material_override = mat
 	portal_mesh.material_override.set_shader_parameter("albedo", portal_viewport.get_texture())
 	
+	get_viewport().size_changed.connect(_on_window_resize)
+	
 	if is_teleport:
 		assert(teleport_area, "Teleport area should be already set up from editor")
 		teleport_area.area_entered.connect(self._on_teleport_area_entered)
@@ -382,8 +384,6 @@ func _ready() -> void:
 		teleport_area.body_entered.connect(self._on_teleport_body_entered)
 		teleport_area.body_exited.connect(self._on_teleport_body_exited)
 		teleport_area.collision_mask = teleport_collision_mask
-	
-	get_viewport().size_changed.connect(_on_window_resize)
 
 
 func _process(delta: float) -> void:
