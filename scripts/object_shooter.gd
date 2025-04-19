@@ -4,10 +4,20 @@ extends Node
 @export var fire_offset: float = 1.5
 @export var fire_force: float = 5
 @export_range(1, 100, 1, "suffix:s") var projectile_lifetime: float = 15
+@export var fire_cooldown: float = 0.2
 @export var projectile_scene: PackedScene
 
+var cooldown: Timer
+
+func _ready() -> void:
+	cooldown = Timer.new()
+	cooldown.one_shot = true
+	add_child(cooldown)
+	cooldown.start(fire_cooldown)
+
 func _process(delta: float) -> void:
-	if Input.is_action_just_pressed("fire"):
+	if Input.is_action_pressed("fire") and cooldown.is_stopped():
+		cooldown.start()
 		var bullet: RigidBody3D = projectile_scene.instantiate()
 		get_tree().current_scene.add_child(bullet)
 		bullet.global_transform = aiming_node.global_transform

@@ -265,16 +265,20 @@ var portal_camera: Camera3D = null
 ## Viewport that supplies the albedo texture to portal mesh. Rendered by [member portal_camera]
 var portal_viewport: SubViewport = null
 
-
+## Metadata kept about the teleportable objects watched by the portal.
 class TeleportableMeta:
+	## Forward distance from the portal
 	var forward: float = 0
+	## Meshes that the object gave for duplication. Retrieved by the 
+	## [constant Portal3D.DUPLICATE_MESHES_METHOD] callback.
 	var meshes: Array[MeshInstance3D] = []
+	## Cloned [member Portal3D.TeleportableMeta.meshes] with [method Node.duplicate]
 	var mesh_clones: Array[MeshInstance3D] = []
 
-# These physics bodies are being watched by the portal. The value in dictionary
-# is their dot product from last frame. As soon as the dot product changes signs,
-# the body crossed the portal and should be teleported.
-var _watchlist_teleportables: Dictionary[Node3D, TeleportableMeta] = {}
+# These physics bodies are being watched by the portal. They are registered under their instance ID
+# as the keys of the dictionary. Registering them by their object references was unreliable when 
+# freeing object for some reason.
+var _watchlist_teleportables: Dictionary[int, TeleportableMeta] = {}
 
 #endregion
 
@@ -424,13 +428,15 @@ func _process_cameras() -> void:
 
 
 func _process_teleports() -> void:
-	for body in _watchlist_teleportables.keys():
-		if not is_instance_valid(body):
-			_erase_tp_metadata(body)
+	for body_id: int in _watchlist_teleportables.keys():
+		if not is_instance_id_valid(body_id):
+			print("Removing invalid body id: ", body_id)
+			print(_watchlist_teleportables)
+			_erase_tp_metadata(body_id)
 			continue
 		
-		body = body as Node3D # Conversion just for type hints
-		var tp_meta: TeleportableMeta = _watchlist_teleportables.get(body)
+		var tp_meta: TeleportableMeta = _watchlist_teleportables.get(body_id)
+		var body = instance_from_id(body_id) as Node3D
 		var last_fw_angle: float = tp_meta.forward
 		var current_fw_angle: float = forward_distance(body)
 		
@@ -563,24 +569,24 @@ func _setup_cameras() -> void:
 #region Event handlers
 
 func _on_teleport_area_entered(area: Area3D) -> void:
-	if _watchlist_teleportables.has(area):
+	if _watchlist_teleportables.has(area.get_instance_id()):
 		# Already on watchlist
 		return
 	
 	_construct_tp_metadata(area)
 
 func _on_teleport_body_entered(body: Node3D) -> void:
-	if _watchlist_teleportables.has(body):
+	if _watchlist_teleportables.has(body.get_instance_id()):
 		# Already on watchlist
 		return
 	
 	_construct_tp_metadata(body)
 
 func _on_teleport_area_exited(area: Area3D) -> void:
-	_erase_tp_metadata(area)
+	_erase_tp_metadata(area.get_instance_id())
 
 func _on_teleport_body_exited(body: Node3D) -> void:
-	_erase_tp_metadata(body)
+	_erase_tp_metadata(body.get_instance_id())
 
 func _on_window_resize() -> void:
 	portal_viewport.size = get_desired_viewport_size()
@@ -603,10 +609,10 @@ func _construct_tp_metadata(node: Node3D) -> void:
 			self.add_child(dupe)
 			enable_mesh_clipping(dupe, exit_portal)
 	
-	_watchlist_teleportables.set(node, meta)
+	_watchlist_teleportables.set(node.get_instance_id(), meta)
 
-func _erase_tp_metadata(node: Node3D) -> void:
-	_watchlist_teleportables.erase(node)
+func _erase_tp_metadata(node_id: int) -> void:
+	_watchlist_teleportables.erase(node_id)
 
 func enable_mesh_clipping(mi: MeshInstance3D, portal: Portal3D) -> void:
 	mi.set_instance_shader_parameter("portal_clip_active", true)
@@ -620,7 +626,8 @@ func _transfer_tp_metadata_to_exit(for_body: Node3D) -> void:
 	if not exit_portal.is_teleport:
 		return # One-way teleport scenario
 	
-	var tp_meta = _watchlist_teleportables[for_body]
+	var body_id = for_body.get_instance_id()
+	var tp_meta = _watchlist_teleportables[body_id]
 	if tp_meta == null:
 		push_error("Attempted to trasfer teleport metadata for a node that is not being watched.")
 		return
@@ -629,8 +636,8 @@ func _transfer_tp_metadata_to_exit(for_body: Node3D) -> void:
 	for m in tp_meta.meshes: enable_mesh_clipping(m, exit_portal) # switch
 	for m in tp_meta.mesh_clones: enable_mesh_clipping(m, self) # switch
 	
-	exit_portal._watchlist_teleportables.set(for_body, tp_meta)
-	_erase_tp_metadata(for_body)
+	exit_portal._watchlist_teleportables.set(body_id, tp_meta)
+	_erase_tp_metadata(body_id)
 
 ## [b]Crucial[/b] piece of a portal - transforming where objects should appear 
 ## on the other side. Used for both cameras and teleports.

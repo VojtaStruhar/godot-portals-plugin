@@ -22,7 +22,11 @@ func _process(delta: float) -> void:
 		var inst = projectile_scene.instantiate()
 		add_child(inst)
 		inst.global_position = self.global_position
-		get_tree().create_timer(projectile_lifetime).timeout.connect(func(): inst.queue_free())
+		var t = Timer.new()
+		t.autostart = true
+		t.wait_time = projectile_lifetime
+		inst.add_child(t)
+		t.timeout.connect(func(): inst.queue_free())
 "
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_xh7pd"]
