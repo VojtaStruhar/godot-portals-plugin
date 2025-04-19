@@ -134,6 +134,7 @@ exit_portal = NodePath(".")
 portal_frame_width = 0.0
 portal_render_layer = 128
 viewport_size_mode = 0
+view_direction = 2
 is_teleport = false
 metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
 metadata/_edit_group_ = true
