@@ -545,22 +545,20 @@ func _process_teleports() -> void:
 		if should_teleport and abs(current_fw_angle) < teleport_tolerance:
 			var teleportable_path = body.get_meta(TELEPORT_ROOT_META, ".")
 			var teleportable: Node3D = body.get_node(teleportable_path)
-			
-			teleportable.global_transform = self.to_exit_transform(teleportable.global_transform)
+
+			# If physics interpolation is enabled, the interpolated "visual" position is the one we need.
+			var destination_transform : Transform3D = teleportable.get_global_transform_interpolated() if teleportable.is_physics_interpolated_and_enabled() else teleportable.global_transform
+			teleportable.global_transform = self.to_exit_transform(destination_transform)
 			
 			if teleportable is RigidBody3D:
 				teleportable.linear_velocity = to_exit_direction(teleportable.linear_velocity)
 				teleportable.apply_central_impulse(
 					teleportable.linear_velocity.normalized() * rigidbody_boost
 				)
-			
-			if teleportable.is_physics_interpolated_and_enabled():
-				teleportable.reset_physics_interpolation()
-				
+								
 			on_teleport.emit(teleportable)
 			exit_portal.on_teleport_receive.emit(teleportable)
-			
-			
+						
 			if tp_meta.is_player:
 				_process_cameras()
 				exit_portal._process_cameras()
@@ -574,14 +572,29 @@ func _process_teleports() -> void:
 				if teleportable.has_method(ON_TELEPORT_CALLBACK):
 					teleportable.call(ON_TELEPORT_CALLBACK, self)
 			
+			
+			# Physics Interpolation handling must be done last, after all changes of transform
+			# BUT it must be done before teleporting the clones
+			if teleportable.is_physics_interpolated_and_enabled():
+				teleportable.reset_physics_interpolation()
+			
 			# transfer the thing to exit portal
 			_transfer_tp_metadata_to_exit(body)
+			
 		else:
 			tp_meta.forward = current_fw_angle
-			for i in tp_meta.mesh_clones.size():
-				var mesh = tp_meta.meshes[i]
-				var clone = tp_meta.mesh_clones[i]
-				clone.global_transform = to_exit_transform(mesh.global_transform)
+			_update_mesh_clones(tp_meta)
+
+func _update_mesh_clones(tp_meta: TeleportableMeta) -> void:
+	for i in tp_meta.mesh_clones.size():
+		var mesh = tp_meta.meshes[i]
+		var clone = tp_meta.mesh_clones[i]
+		# If the original mesh is under physics interpolation we must track the interpolated position
+		# because clones dont interpolate themselves but reflect the interpolated position or the original.
+		# (basically we track the visual position instead of the real physical one)
+		var target_transform : Transform3D = mesh.get_global_transform_interpolated() if mesh.is_physics_interpolated_and_enabled() else mesh.global_transform
+		clone.global_transform = to_exit_transform(target_transform)
+		
 
 func _calculate_near_plane() -> float:
 	# Adjustment for cube portals. This AABB is basically a plane.
@@ -718,12 +731,19 @@ func _construct_tp_metadata(node: Node3D) -> void:
 		for m: MeshInstance3D in meta.meshes:
 			var dupe = m.duplicate(0)
 			dupe.name = m.name + "_Clone"
+			
+			# We deactivate interpolation for clones as we will position the clones
+			# by tracking the interpolated position of the original anyway.
+			dupe.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
+			
 			meta.mesh_clones.append(dupe)
 			self.add_child(dupe, true)
 		
 		_enable_mesh_clipping(meta, self)
 	
 	_watchlist_teleportables.set(node.get_instance_id(), meta)
+	
+	
 
 func _erase_tp_metadata(node_id: int) -> void:
 	var meta = _watchlist_teleportables.get(node_id)
@@ -751,6 +771,7 @@ func _transfer_tp_metadata_to_exit(for_body: Node3D) -> void:
 	_enable_mesh_clipping(tp_meta, exit_portal) # Switch, the main mesh is clipped by exit portal!
 	
 	exit_portal._watchlist_teleportables.set(body_id, tp_meta)
+	exit_portal._update_mesh_clones(tp_meta) # Make sure the clones are up to date in the same frame
 	
 	if tp_meta.is_player and exit_portal.exit_portal != self:
 		# Not a portal pair - the transition isn't seamless anyways. Flip the update 
@@ -812,9 +833,11 @@ func to_exit_position(g_pos: Vector3) -> Vector3:
 ## [br]
 ## The result is positive when the node is in front of the portal. The value measures how far in 
 ## front (or behind) the other node is compared to the portal.
+## If physics interpolation is active, the global position used is the interpolated one.
 func forward_distance(node: Node3D) -> float:
+	var node_transform := node.get_global_transform_interpolated() if node.is_physics_interpolated_and_enabled() else node.global_transform
 	var portal_front: Vector3 = self.global_transform.basis.z.normalized()
-	var node_relative: Vector3 = (node.global_transform.origin - self.global_transform.origin)
+	var node_relative: Vector3 = (node_transform.origin - self.global_transform.origin)
 	return portal_front.dot(node_relative)
 
 # Helper function meant to be used in editor. Adds [param node] as a child to 
