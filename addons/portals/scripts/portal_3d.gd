@@ -497,6 +497,9 @@ func _process_cameras() -> void:
 	portal_camera.near = _calculate_near_plane()
 	portal_camera.fov = player_camera.fov
 	
+	if portal_camera.is_physics_interpolated_and_enabled():
+		portal_camera.reset_physics_interpolation()
+	
 	# Prevent flickering
 	var pv_size: Vector2i = portal_viewport.size
 	var half_height: float = player_camera.near * tan(deg_to_rad(player_camera.fov * 0.5))
@@ -551,7 +554,9 @@ func _process_teleports() -> void:
 					teleportable.linear_velocity.normalized() * rigidbody_boost
 				)
 			
-			
+			if teleportable.is_physics_interpolated_and_enabled():
+				teleportable.reset_physics_interpolation()
+				
 			on_teleport.emit(teleportable)
 			exit_portal.on_teleport_receive.emit(teleportable)
 			
