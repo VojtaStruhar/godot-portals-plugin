@@ -1,6 +1,18 @@
-[gd_scene load_steps=3 format=3 uid="uid://dfuudoym2pnvu"]
+[gd_scene load_steps=15 format=3 uid="uid://dfuudoym2pnvu"]
 
 [ext_resource type="Script" uid="uid://c8my0avh3yv6i" path="res://main.gd" id="1_ig7tw"]
+[ext_resource type="PackedScene" uid="uid://2c7f2asld8tc" path="res://levels/level_3_rooms.tscn" id="2_ycdy4"]
+[ext_resource type="PackedScene" uid="uid://cceqtevdskikh" path="res://levels/level_around.tscn" id="3_w48qg"]
+[ext_resource type="PackedScene" uid="uid://5vo86e4fice3" path="res://levels/level_basics.tscn" id="4_vivmo"]
+[ext_resource type="PackedScene" uid="uid://coqloab7xvqmb" path="res://levels/level_ceiling.tscn" id="5_2cqfq"]
+[ext_resource type="PackedScene" uid="uid://of26pcjgocig" path="res://levels/level_corridor.tscn" id="6_yaehf"]
+[ext_resource type="PackedScene" uid="uid://cey6k8ip6nn8w" path="res://levels/level_forward.tscn" id="7_074og"]
+[ext_resource type="PackedScene" uid="uid://dxe2g23t2qp0j" path="res://levels/level_island.tscn" id="8_cegan"]
+[ext_resource type="PackedScene" uid="uid://ds6ls70m17lw1" path="res://levels/level_maze.tscn" id="9_82xsv"]
+[ext_resource type="PackedScene" uid="uid://ce6hkiqlckosx" path="res://levels/level_mirror.tscn" id="10_getpj"]
+[ext_resource type="PackedScene" uid="uid://dllqiht0np5i8" path="res://levels/level_physics.tscn" id="11_ryguw"]
+[ext_resource type="PackedScene" uid="uid://6fp86e4fice3" path="res://levels/level_smooth.tscn" id="12_d13ii"]
+[ext_resource type="PackedScene" uid="uid://ds222tuqqcsfc" path="res://levels/level_visuals.tscn" id="13_1u8w0"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_ig7tw"]
 font_size = 32
@@ -15,7 +27,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_ig7tw")
-levels_directory = "res://levels"
+levels_scenes = Array[PackedScene]([ExtResource("2_ycdy4"), ExtResource("3_w48qg"), ExtResource("4_vivmo"), ExtResource("5_2cqfq"), ExtResource("6_yaehf"), ExtResource("7_074og"), ExtResource("8_cegan"), ExtResource("9_82xsv"), ExtResource("10_getpj"), ExtResource("11_ryguw"), ExtResource("12_d13ii"), ExtResource("13_1u8w0")])
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
