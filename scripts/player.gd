@@ -54,3 +54,6 @@ func _physics_process(delta: float) -> void:
 		velocity.y = JUMP_VELOCITY
 	
 	move_and_slide()
+
+func get_teleportable_meshes() -> Array[MeshInstance3D]:
+	return [$MeshInstance3D]

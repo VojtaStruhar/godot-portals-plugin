@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://d2crarvkhd45r" path="res://scripts/player.gd" id="3_lff3k"]
 [ext_resource type="PackedScene" uid="uid://0vmntyr615js" path="res://assets/prototyping/prop_cube.tscn" id="4_8bheg"]
 [ext_resource type="PackedScene" uid="uid://dxvxy65pv5hoe" path="res://assets/prototyping/prop_sphere.tscn" id="5_p3b8s"]
+[ext_resource type="Shader" uid="uid://cr7a6ncpec13p" path="res://levels/player_smooth_teleport_material.gdshader" id="6_lbpks"]
 [ext_resource type="PackedScene" uid="uid://caqayjkbvlel5" path="res://assets/prototyping/prop_torus.tscn" id="6_p3b8s"]
 [ext_resource type="Script" uid="uid://cw1r4c1d7beyv" path="res://addons/portals/scripts/portal_3d.gd" id="8_8wh7v"]
 [ext_resource type="Material" uid="uid://dcfkcyddxkglf" path="res://addons/portals/materials/editor-preview-portal-material.tres" id="8_eavfu"]
@@ -74,9 +75,28 @@ _surfaces = [{
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_k2msj"]
 height = 1.75
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_eavfu"]
+render_priority = 0
+shader = ExtResource("6_lbpks")
+shader_parameter/albedo = Color(1, 1, 1, 1)
+shader_parameter/albedo_texture_size = Vector2i(0, 0)
+shader_parameter/point_size = 1.0
+shader_parameter/roughness = 1.0
+shader_parameter/metallic_texture_channel = Vector4(1, 0, 0, 0)
+shader_parameter/specular = 0.5
+shader_parameter/metallic = 0.0
+shader_parameter/uv1_scale = Vector3(1, 1, 1)
+shader_parameter/uv1_offset = Vector3(0, 0, 0)
+shader_parameter/uv2_scale = Vector3(1, 1, 1)
+shader_parameter/uv2_offset = Vector3(0, 0, 0)
+
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_lff3k"]
+material = SubResource("ShaderMaterial_eavfu")
 radius = 0.4
 height = 1.75
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_8wh7v"]
+radius = 0.1
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_8wh7v"]
 size = Vector3(2, 2.5, 1)
@@ -205,7 +225,6 @@ skeleton = NodePath("../..")
 
 [node name="Player" type="CharacterBody3D" parent="." unique_id=1935811316 node_paths=PackedStringArray("camera")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.448394, 0.875832, 4.08334)
-collision_layer = 32769
 script = ExtResource("3_lff3k")
 camera = NodePath("Node3D/PlayerCamera")
 metadata/_edit_group_ = true
@@ -219,8 +238,17 @@ mesh = SubResource("CapsuleMesh_lff3k")
 [node name="Node3D" type="Node3D" parent="Player" unique_id=1542161424]
 
 [node name="PlayerCamera" type="Camera3D" parent="Player/Node3D" unique_id=535784430]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.73624426, 1.1495359, 2.5113273)
 current = true
+
+[node name="PortalTrigger" type="Area3D" parent="Player/Node3D/PlayerCamera" unique_id=1071132041]
+collision_layer = 32768
+collision_mask = 0
+monitoring = false
+metadata/teleport_root = NodePath("../../..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player/Node3D/PlayerCamera/PortalTrigger" unique_id=1443801114]
+shape = SubResource("SphereShape3D_8wh7v")
 
 [node name="CubePortal" type="Node3D" parent="." unique_id=1719650040 node_paths=PackedStringArray("exit_portal") groups=["portals"]]
 process_priority = 100
