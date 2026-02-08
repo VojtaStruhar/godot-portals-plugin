@@ -1,3 +1,4 @@
+class_name LevelMaze
 extends Node3D
 
 const BallScene := preload("uid://cdr0bql7jj43n")

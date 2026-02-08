@@ -105,6 +105,19 @@ func forward_raycast_query(params: PhysicsRayQueryParameters3D) -> Dictionary:
 
 	return get_world_3d().direct_space_state.intersect_ray(query)
 
+## Requests to re-setup the modified environment that we set to the portal's camera.
+## When creating the portal camera we capture a copy of the environment related to the player camera
+## (or the global one if not set in player's camera) and apply some necessary modifications to then
+## use on the portal camera. However, if the original environment changes for some reason, like
+## a change in graphic options enabling/disabling a graphic feature for example, or simply the player
+## camera or global environment changed, we have no way to automatically update the environement
+## attached to the portal's camera if it is necessary to do so.
+## This function is therefore useful to trigger a complete reset of the environment set on the
+## camera when the game decides for a change in environments, tipically through connecting it
+## to a related signal.
+## The change will happen in `_process`.
+func request_environement_reset() -> void:
+	_requested_environement_reset = true
 
 ## This method will be called on a teleported node if [member TeleportInteractions.CALLBACK]
 ## is checked in [member teleport_interactions]. The portal will try to call the method 
@@ -358,6 +371,10 @@ class TeleportableMeta:
 # when the teleport candidate gets freed.
 var _watchlist_teleportables: Dictionary[int, TeleportableMeta] = {}
 
+# If `true`, at next `_process` call we will first re-setup the `Environement` attached to the
+# `portal_camera`.
+var _requested_environement_reset := false
+
 #endregion
 
 #region Editor Configuration
@@ -473,6 +490,9 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
+	
+	if _requested_environement_reset:
+		_update_camera_environment()
 	
 	if is_teleport:
 		_process_teleports()
@@ -625,6 +645,23 @@ func _setup_mesh() -> void:
 	_add_child_in_editor(self, mi)
 	_portal_mesh_path = get_path_to(mi)
 
+
+func _update_camera_environment() -> void:
+	assert(player_camera)
+	assert(portal_camera)
+	
+	var adjusted_env: Environment = player_camera.environment.duplicate() \
+		if player_camera.environment \
+		else player_camera.get_world_3d().environment.duplicate()
+	
+	adjusted_env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
+	adjusted_env.tonemap_exposure = 1
+	
+	portal_camera.environment = adjusted_env
+	
+	_requested_environement_reset = false
+	
+
 func _setup_cameras() -> void:
 	assert(not Engine.is_editor_hint(), "This should never run in editor")
 	assert(portal_camera == null)
@@ -636,17 +673,9 @@ func _setup_cameras() -> void:
 		portal_viewport.size = _calculate_viewport_size()
 		self.add_child(portal_viewport, true)
 		
-		# Disable tonemapping on portal cameras
-		var adjusted_env: Environment = player_camera.environment.duplicate() \
-			if player_camera.environment \
-			else player_camera.get_world_3d().environment.duplicate()
-		
-		adjusted_env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
-		adjusted_env.tonemap_exposure = 1
-		
 		portal_camera = Camera3D.new()
 		portal_camera.name = self.name + "_Camera3D"
-		portal_camera.environment = adjusted_env
+		_update_camera_environment()
 		
 		# Ensure that portals don't see other portals.
 		portal_camera.cull_mask = portal_camera.cull_mask ^ portal_render_layer
