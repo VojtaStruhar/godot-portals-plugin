@@ -700,25 +700,28 @@ func _construct_tp_metadata(node: Node3D) -> void:
 	
 	var meta = TeleportableMeta.new()
 	meta.forward = forward_distance(node)
-	meta.is_player = not str(teleportable.get_path_to(player_camera)).begins_with(".")
-	
+	meta.is_player = (teleportable == player_camera) or teleportable.is_ancestor_of(player_camera)
+
 	## This is a workaround to prevent flickering when traversing portals.
 	## There is a bit of lag when restarting RTT when the exit portal becomes physically visible.
 	## Ensuring both portals are updated regardless of visibility while in the portals prevents flickering.
 	## More info: https://github.com/VojtaStruhar/godot-portals-plugin/pull/4
 	if meta.is_player:
 		_set_portal_pair_update_mode(SubViewport.UPDATE_ALWAYS)
-	
-	if _check_tp_interaction(TeleportInteractions.DUPLICATE_MESHES)\
-			and node.has_method(DUPLICATE_MESHES_CALLBACK):
-		
-		meta.meshes = node.call(DUPLICATE_MESHES_CALLBACK)
+
+	if _check_tp_interaction(TeleportInteractions.DUPLICATE_MESHES) \
+	and teleportable.has_method(DUPLICATE_MESHES_CALLBACK):
+		meta.meshes = teleportable.call(DUPLICATE_MESHES_CALLBACK)
 		for m: MeshInstance3D in meta.meshes:
 			var dupe = m.duplicate(0)
 			dupe.name = m.name + "_Clone"
 			meta.mesh_clones.append(dupe)
 			self.add_child(dupe, true)
-		
+
+			var skeleton_node = m.get_node_or_null(m.skeleton)
+			if skeleton_node:
+				dupe.skeleton = dupe.get_path_to(skeleton_node)
+
 		_enable_mesh_clipping(meta, self)
 	
 	_watchlist_teleportables.set(node.get_instance_id(), meta)
