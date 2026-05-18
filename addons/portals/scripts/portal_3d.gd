@@ -572,10 +572,7 @@ func _process_teleports() -> void:
 			_transfer_tp_metadata_to_exit(body)
 		else:
 			tp_meta.forward = current_fw_angle
-			for i in tp_meta.mesh_clones.size():
-				var mesh = tp_meta.meshes[i]
-				var clone = tp_meta.mesh_clones[i]
-				clone.global_transform = to_exit_transform(mesh.global_transform)
+			_update_tp_clone_transforms(tp_meta, self)
 
 func _calculate_near_plane() -> float:
 	# Adjustment for cube portals. This AABB is basically a plane.
@@ -738,27 +735,43 @@ func _erase_tp_metadata(node_id: int) -> void:
 
 
 func _transfer_tp_metadata_to_exit(for_body: Node3D) -> void:
-	if not exit_portal.is_teleport:
-		return # One-way teleport scenario
-	
 	var body_id = for_body.get_instance_id()
 	var tp_meta = _watchlist_teleportables[body_id]
-	assert(tp_meta != null, "Attempted to trasfer teleport metadata for a node that is not being watched.")
-	
+	assert(tp_meta != null, "Attempted to transfer teleport metadata for a node that is not being watched.")
+
+	if exit_portal == self:
+		# Self-teleport edge case: keep metadata around and refresh clipping state.
+		# This allows teleport-on-self behavior without dropping the watchlist entry.
+		tp_meta.forward = forward_distance(for_body)
+		_enable_mesh_clipping(tp_meta, self)
+		_update_tp_clone_transforms(tp_meta, self)
+		return
+
+	if not exit_portal.is_teleport:
+		return # One-way teleport scenario
+
 	tp_meta.forward = exit_portal.forward_distance(for_body)
 	_enable_mesh_clipping(tp_meta, exit_portal) # Switch, the main mesh is clipped by exit portal!
-	
+	_update_tp_clone_transforms(tp_meta, exit_portal)
+
 	exit_portal._watchlist_teleportables.set(body_id, tp_meta)
-	
+
 	if tp_meta.is_player and exit_portal.exit_portal != self:
-		# Not a portal pair - the transition isn't seamless anyways. Flip the update 
+		# Not a portal pair - the transition isn't seamless anyways. Flip the update
 		# mode of this portal "manually" and enable the next portal pair, since `_construct_tp_metadata`
 		# will not get called there. Usually portals are symmetric, though.
 		portal_viewport.set_update_mode(SubViewport.UPDATE_WHEN_VISIBLE)
 		exit_portal._set_portal_pair_update_mode(SubViewport.UPDATE_ALWAYS)
-	
+
 	# NOTE: Not using '_erase_tp_metadata' here, as it also frees the cloned meshes!
 	_watchlist_teleportables.erase(body_id)
+
+
+func _update_tp_clone_transforms(tp_meta: TeleportableMeta, portal: Portal3D) -> void:
+	for i in tp_meta.mesh_clones.size():
+		var mesh = tp_meta.meshes[i]
+		var clone = tp_meta.mesh_clones[i]
+		clone.global_transform = portal.to_exit_transform(mesh.global_transform)
 
 
 func _enable_mesh_clipping(meta: TeleportableMeta, along_portal: Portal3D) -> void:
