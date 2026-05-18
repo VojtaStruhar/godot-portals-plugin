@@ -572,10 +572,7 @@ func _process_teleports() -> void:
 			_transfer_tp_metadata_to_exit(body)
 		else:
 			tp_meta.forward = current_fw_angle
-			for i in tp_meta.mesh_clones.size():
-				var mesh = tp_meta.meshes[i]
-				var clone = tp_meta.mesh_clones[i]
-				clone.global_transform = to_exit_transform(mesh.global_transform)
+			_update_tp_clone_transforms(tp_meta, self)
 
 func _calculate_near_plane() -> float:
 	# Adjustment for cube portals. This AABB is basically a plane.
