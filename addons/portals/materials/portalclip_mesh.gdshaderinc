@@ -8,4 +8,4 @@ varying vec3 portal_clip_vertex_position;\
 portal_clip_vertex_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;\
 
 #define PORTALCLIP_FRAGMENT \
-if (portal_clip_active && dot(portal_clip_vertex_position - portal_clip_point, portal_clip_normal) < 0.0) ALPHA = 0.0;
+if (portal_clip_active && dot(portal_clip_vertex_position - portal_clip_point, portal_clip_normal) < 0.0) discard;
