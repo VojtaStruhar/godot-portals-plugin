@@ -13,7 +13,7 @@ config_version=5
 config/name="Portals Plugin"
 config/tags=PackedStringArray("addon", "dp")
 run/main_scene="uid://dfuudoym2pnvu"
-config/features=PackedStringArray("4.6", "Forward Plus")
+config/features=PackedStringArray("4.7", "Forward Plus")
 run/max_fps=60
 config/icon="uid://buu38oc58an8l"
 
