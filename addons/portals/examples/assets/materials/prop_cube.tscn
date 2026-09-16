@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://0vmntyr615js"]
 
-[ext_resource type="Material" uid="uid://7to3kb1tisdd" path="res://assets/prototyping/M_prototype_orange.tres" id="1_6fk8e"]
+[ext_resource type="Material" uid="uid://7to3kb1tisdd" path="res://addons/portals/examples/assets/materials/M_prototype_orange.tres" id="1_6fk8e"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_8bheg"]
 material = ExtResource("1_6fk8e")

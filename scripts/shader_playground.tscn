@@ -1,7 +1,7 @@
 [gd_scene format=4 uid="uid://664na4csmqe"]
 
 [ext_resource type="Shader" uid="uid://xoa3hj7pynf" path="res://scripts/clipping_shader.gdshader" id="1_picon"]
-[ext_resource type="PackedScene" uid="uid://dxvxy65pv5hoe" path="res://assets/prototyping/prop_sphere.tscn" id="2_xywcf"]
+[ext_resource type="PackedScene" uid="uid://dxvxy65pv5hoe" path="res://addons/portals/examples/assets/materials/prop_sphere.tscn" id="2_xywcf"]
 [ext_resource type="Script" uid="uid://bxcel82b180o3" path="res://addons/portals/scripts/portal_boxmesh.gd" id="3_efj51"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_picon"]

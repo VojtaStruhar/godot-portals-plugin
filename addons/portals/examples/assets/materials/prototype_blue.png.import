@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ccft22qceqgic"
-path.bptc="res://.godot/imported/skybox.exr-4710b17ca8c72c031b7e159ffe94e145.bptc.ctex"
+uid="uid://dj7d77ksm7a6t"
+path.s3tc="res://.godot/imported/prototype_blue.png-9053b2fad9e9b4926feb0871176254f5.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/skybox.exr"
-dest_files=["res://.godot/imported/skybox.exr-4710b17ca8c72c031b7e159ffe94e145.bptc.ctex"]
+source_file="res://addons/portals/examples/assets/materials/prototype_blue.png"
+dest_files=["res://.godot/imported/prototype_blue.png-9053b2fad9e9b4926feb0871176254f5.s3tc.ctex"]
 
 [params]
 

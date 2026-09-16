@@ -1,9 +1,9 @@
 [gd_scene format=4 uid="uid://of26pcjgocig"]
 
-[ext_resource type="Material" uid="uid://dgjiw8udooecr" path="res://assets/prototyping/M_prototype_dark.tres" id="1_r5s0a"]
-[ext_resource type="Script" uid="uid://d2crarvkhd45r" path="res://scripts/player.gd" id="2_f3hbn"]
-[ext_resource type="PackedScene" uid="uid://0vmntyr615js" path="res://assets/prototyping/prop_cube.tscn" id="3_36whs"]
-[ext_resource type="Material" uid="uid://brj2jayoo0l0d" path="res://assets/prototyping/M_prototype_blue.tres" id="4_12dav"]
+[ext_resource type="Material" uid="uid://dgjiw8udooecr" path="res://addons/portals/examples/assets/materials/M_prototype_dark.tres" id="1_r5s0a"]
+[ext_resource type="Script" uid="uid://d2crarvkhd45r" path="res://addons/portals/examples/assets/player.gd" id="2_f3hbn"]
+[ext_resource type="PackedScene" uid="uid://0vmntyr615js" path="res://addons/portals/examples/assets/materials/prop_cube.tscn" id="3_36whs"]
+[ext_resource type="Material" uid="uid://brj2jayoo0l0d" path="res://addons/portals/examples/assets/materials/M_prototype_blue.tres" id="4_12dav"]
 [ext_resource type="Script" uid="uid://cw1r4c1d7beyv" path="res://addons/portals/scripts/portal_3d.gd" id="4_stfqs"]
 [ext_resource type="Material" uid="uid://dcfkcyddxkglf" path="res://addons/portals/materials/editor-preview-portal-material.tres" id="5_12dav"]
 [ext_resource type="Script" uid="uid://bxcel82b180o3" path="res://addons/portals/scripts/portal_boxmesh.gd" id="6_7galk"]

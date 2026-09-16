@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cdr0bql7jj43n"]
 
-[ext_resource type="Material" uid="uid://7to3kb1tisdd" path="res://assets/prototyping/M_prototype_orange.tres" id="1_dlerm"]
+[ext_resource type="Material" uid="uid://7to3kb1tisdd" path="res://addons/portals/examples/assets/materials/M_prototype_orange.tres" id="1_dlerm"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_dlerm"]
 friction = 0.75

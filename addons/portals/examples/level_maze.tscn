@@ -1,13 +1,13 @@
 [gd_scene format=4 uid="uid://ds6ls70m17lw1"]
 
 [ext_resource type="Script" uid="uid://b3fqit0nxasvs" path="res://addons/portals/examples/level_maze.gd" id="1_3gv5e"]
-[ext_resource type="Script" uid="uid://d2crarvkhd45r" path="res://scripts/player.gd" id="1_ulg0w"]
-[ext_resource type="Material" uid="uid://dgjiw8udooecr" path="res://assets/prototyping/M_prototype_dark.tres" id="2_tefih"]
+[ext_resource type="Script" uid="uid://d2crarvkhd45r" path="res://addons/portals/examples/assets/player.gd" id="1_ulg0w"]
+[ext_resource type="Material" uid="uid://dgjiw8udooecr" path="res://addons/portals/examples/assets/materials/M_prototype_dark.tres" id="2_tefih"]
 [ext_resource type="Script" uid="uid://cw1r4c1d7beyv" path="res://addons/portals/scripts/portal_3d.gd" id="3_ar52t"]
 [ext_resource type="Material" uid="uid://dcfkcyddxkglf" path="res://addons/portals/materials/editor-preview-portal-material.tres" id="4_ogxk6"]
 [ext_resource type="Script" uid="uid://bxcel82b180o3" path="res://addons/portals/scripts/portal_boxmesh.gd" id="5_3gv5e"]
-[ext_resource type="Texture2D" uid="uid://gh0otyh4xcj5" path="res://assets/prototyping/prototype_light.png" id="8_fafvg"]
-[ext_resource type="Material" uid="uid://1nvrnylcajfg" path="res://assets/prototyping/M_prototype_red.tres" id="8_kuyvn"]
+[ext_resource type="Texture2D" uid="uid://gh0otyh4xcj5" path="res://addons/portals/examples/assets/materials/prototype_light.png" id="8_fafvg"]
+[ext_resource type="Material" uid="uid://1nvrnylcajfg" path="res://addons/portals/examples/assets/materials/M_prototype_red.tres" id="8_kuyvn"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_587ki"]
 sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)

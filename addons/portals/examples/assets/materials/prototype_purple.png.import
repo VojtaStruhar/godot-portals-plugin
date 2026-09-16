@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://gh0otyh4xcj5"
-path.s3tc="res://.godot/imported/prototype_light.png-87bdaab79815d5a7aaa71a13d60ded51.s3tc.ctex"
+uid="uid://ih1vfqumfg3p"
+path.s3tc="res://.godot/imported/prototype_purple.png-40889aadeb72053824d3779559eca2cb.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/prototyping/prototype_light.png"
-dest_files=["res://.godot/imported/prototype_light.png-87bdaab79815d5a7aaa71a13d60ded51.s3tc.ctex"]
+source_file="res://addons/portals/examples/assets/materials/prototype_purple.png"
+dest_files=["res://.godot/imported/prototype_purple.png-40889aadeb72053824d3779559eca2cb.s3tc.ctex"]
 
 [params]
 

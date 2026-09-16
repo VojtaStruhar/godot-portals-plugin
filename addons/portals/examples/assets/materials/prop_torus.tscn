@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://caqayjkbvlel5"]
 
-[ext_resource type="Material" uid="uid://cmu4vfp7y5t6b" path="res://assets/prototyping/M_prototype_purple.tres" id="1_yc1nv"]
+[ext_resource type="Material" uid="uid://cmu4vfp7y5t6b" path="res://addons/portals/examples/assets/materials/M_prototype_purple.tres" id="1_yc1nv"]
 
 [sub_resource type="TorusMesh" id="TorusMesh_hc4gn"]
 material = ExtResource("1_yc1nv")

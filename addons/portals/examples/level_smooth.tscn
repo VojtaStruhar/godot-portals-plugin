@@ -1,8 +1,8 @@
 [gd_scene format=4 uid="uid://6fp86e4fice3"]
 
-[ext_resource type="Material" uid="uid://dgjiw8udooecr" path="res://assets/prototyping/M_prototype_dark.tres" id="1_oqg62"]
-[ext_resource type="Script" uid="uid://d2crarvkhd45r" path="res://scripts/player.gd" id="2_wuy7a"]
-[ext_resource type="Texture2D" uid="uid://ih1vfqumfg3p" path="res://assets/prototyping/prototype_purple.png" id="3_o8ab2"]
+[ext_resource type="Material" uid="uid://dgjiw8udooecr" path="res://addons/portals/examples/assets/materials/M_prototype_dark.tres" id="1_oqg62"]
+[ext_resource type="Script" uid="uid://d2crarvkhd45r" path="res://addons/portals/examples/assets/player.gd" id="2_wuy7a"]
+[ext_resource type="Texture2D" uid="uid://ih1vfqumfg3p" path="res://addons/portals/examples/assets/materials/prototype_purple.png" id="3_o8ab2"]
 [ext_resource type="Script" uid="uid://cw1r4c1d7beyv" path="res://addons/portals/scripts/portal_3d.gd" id="4_bm27l"]
 [ext_resource type="Material" uid="uid://dcfkcyddxkglf" path="res://addons/portals/materials/editor-preview-portal-material.tres" id="5_4aur6"]
 [ext_resource type="Script" uid="uid://bxcel82b180o3" path="res://addons/portals/scripts/portal_boxmesh.gd" id="6_pl60g"]

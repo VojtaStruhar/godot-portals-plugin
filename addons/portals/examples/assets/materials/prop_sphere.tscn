@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dxvxy65pv5hoe"]
 
-[ext_resource type="Material" uid="uid://dyx4l6ea0am6f" path="res://assets/prototyping/M_prototype_green.tres" id="1_bpstc"]
+[ext_resource type="Material" uid="uid://dyx4l6ea0am6f" path="res://addons/portals/examples/assets/materials/M_prototype_green.tres" id="1_bpstc"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_xdm36"]
 material = ExtResource("1_bpstc")

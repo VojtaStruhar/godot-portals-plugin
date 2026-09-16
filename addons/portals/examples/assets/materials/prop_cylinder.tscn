@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://c5hkhu8upxsf7"]
 
-[ext_resource type="Material" uid="uid://brj2jayoo0l0d" path="res://assets/prototyping/M_prototype_blue.tres" id="1_we5en"]
+[ext_resource type="Material" uid="uid://brj2jayoo0l0d" path="res://addons/portals/examples/assets/materials/M_prototype_blue.tres" id="1_we5en"]
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_8wh7v"]
 material = ExtResource("1_we5en")
