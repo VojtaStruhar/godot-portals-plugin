@@ -1,7 +1,6 @@
 [gd_scene format=4 uid="uid://cey6k8ip6nn8w"]
 
 [ext_resource type="Material" uid="uid://dgjiw8udooecr" path="res://assets/prototyping/M_prototype_dark.tres" id="1_6hsda"]
-[ext_resource type="Script" uid="uid://bqnap47txp42k" path="res://addons/portals/examples/level_basics.gd" id="1_dqevk"]
 [ext_resource type="Material" uid="uid://dyx4l6ea0am6f" path="res://assets/prototyping/M_prototype_green.tres" id="1_ym1tr"]
 [ext_resource type="Script" uid="uid://bjknytsx2gu0i" path="res://addons/portals/examples/forwarded_raycast.gd" id="3_4lvjw"]
 [ext_resource type="Material" uid="uid://brj2jayoo0l0d" path="res://assets/prototyping/M_prototype_blue.tres" id="3_nrnmy"]
@@ -95,7 +94,6 @@ size = Vector3(5, 3, 1)
 [sub_resource type="BoxMesh" id="BoxMesh_4lvjw"]
 
 [node name="Level_Forward" type="Node3D" unique_id=196602828]
-script = ExtResource("1_dqevk")
 
 [node name="PoorMansCrosshair" parent="." unique_id=2100654611 instance=ExtResource("9_fv6tu")]
 

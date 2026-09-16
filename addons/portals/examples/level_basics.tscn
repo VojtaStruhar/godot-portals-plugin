@@ -1,5 +1,6 @@
 [gd_scene format=4 uid="uid://5vo86e4fice3"]
 
+[ext_resource type="Script" uid="uid://bqnap47txp42k" path="res://addons/portals/examples/level_basics.gd" id="1_buxv6"]
 [ext_resource type="Material" uid="uid://dgjiw8udooecr" path="res://assets/prototyping/M_prototype_dark.tres" id="1_uy66w"]
 [ext_resource type="Script" uid="uid://d2crarvkhd45r" path="res://scripts/player.gd" id="3_lff3k"]
 [ext_resource type="PackedScene" uid="uid://0vmntyr615js" path="res://assets/prototyping/prop_cube.tscn" id="4_8bheg"]
@@ -115,6 +116,7 @@ script = ExtResource("8_lbpks")
 size = Vector3(2, 2.5, 1)
 
 [node name="Level_Basics" type="Node3D" unique_id=1752962668]
+script = ExtResource("1_buxv6")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=2090524436]
 visible = false
