@@ -1,6 +1,6 @@
 [gd_scene format=4 uid="uid://cceqtevdskikh"]
 
-[ext_resource type="Script" uid="uid://dh2f564q4c8g1" path="res://levels/level_around.gd" id="1_u0pli"]
+[ext_resource type="Script" uid="uid://dh2f564q4c8g1" path="res://addons/portals/examples/level_around.gd" id="1_u0pli"]
 [ext_resource type="Material" uid="uid://dgjiw8udooecr" path="res://assets/prototyping/M_prototype_dark.tres" id="2_0dr2q"]
 [ext_resource type="Script" uid="uid://cw1r4c1d7beyv" path="res://addons/portals/scripts/portal_3d.gd" id="3_0qp41"]
 [ext_resource type="Material" uid="uid://7to3kb1tisdd" path="res://assets/prototyping/M_prototype_orange.tres" id="4_u0pli"]

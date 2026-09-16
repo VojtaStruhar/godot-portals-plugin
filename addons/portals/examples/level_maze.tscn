@@ -1,6 +1,6 @@
 [gd_scene format=4 uid="uid://ds6ls70m17lw1"]
 
-[ext_resource type="Script" uid="uid://b3fqit0nxasvs" path="res://levels/level_maze.gd" id="1_3gv5e"]
+[ext_resource type="Script" uid="uid://b3fqit0nxasvs" path="res://addons/portals/examples/level_maze.gd" id="1_3gv5e"]
 [ext_resource type="Script" uid="uid://d2crarvkhd45r" path="res://scripts/player.gd" id="1_ulg0w"]
 [ext_resource type="Material" uid="uid://dgjiw8udooecr" path="res://assets/prototyping/M_prototype_dark.tres" id="2_tefih"]
 [ext_resource type="Script" uid="uid://cw1r4c1d7beyv" path="res://addons/portals/scripts/portal_3d.gd" id="3_ar52t"]
